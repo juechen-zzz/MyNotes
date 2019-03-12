@@ -1,4 +1,4 @@
 # Hello 
 
-In this part, I will learn about deep learning.
+In this part, I will learn about deep learning by watching Andrew Ng's lessons online.
 
