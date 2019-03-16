@@ -257,5 +257,106 @@ isinstance 和 type 的区别在于：
 
 #### 3.2.5. Tuple（元组）
 
+* 元组写在小括号 **()** 里，元素之间用逗号隔开。
 
+  ```python
+  tuple = ( 'abcd', 786 , 2.23, 'runoob', 70.2  )
+  tinytuple = (123, 'runoob')
+   
+  print (tuple)             # 输出完整元组
+  print (tuple[0])          # 输出元组的第一个元素
+  print (tuple[1:3])        # 输出从第二个元素开始到第三个元素
+  print (tuple[2:])         # 输出从第三个元素开始的所有元素
+  print (tinytuple * 2)     # 输出两次元组
+  print (tuple + tinytuple) # 连接元组
+  ```
+
+* 元组与字符串类似，可以被索引且下标索引从0开始，-1 为从末尾开始的位置。也可以进行截取。
+
+* 虽然tuple的元素不可改变，但它可以包含可变的对象，比如list列表。
+
+* 构造包含 0 个或 1 个元素的元组比较特殊，所以有一些额外的语法规则：
+
+  ```python
+  tup1 = ()    # 空元组
+  tup2 = (20,) # 一个元素，需要在元素后添加逗号
+  ```
+
+#### 3.2.6. Set（集合）
+
+* 可以使用大括号 **{ }** 或者 **set()** 函数创建集合。
+
+  创建一个空集合必须用 **set()** 而不是 **{ }**，因为 **{ }** 是用来创建一个空字典。
+
+  ```
+  parame = {value01,value02,...}
+  或者
+  set(value)
+  ```
+
+  ```python
+  student = {'Tom', 'Jim', 'Mary', 'Tom', 'Jack', 'Rose'}
+   
+  print(student)   # 输出集合，重复的元素被自动去掉
+   
+  # 成员测试
+  if 'Rose' in student :
+      print('Rose 在集合中')
+  else :
+      print('Rose 不在集合中')
+   
+  # set可以进行集合运算
+  a = set('abracadabra')
+  b = set('alacazam')
+   
+  print(a)
+  print(a - b)     # a 和 b 的差集
+  print(a | b)     # a 和 b 的并集
+  print(a & b)     # a 和 b 的交集
+  print(a ^ b)     # a 和 b 中不同时存在的元素
+  ```
+
+#### 3.2.7. Dictionary（字典）
+
+* 字典是一种映射类型，字典用 **{ }** 标识，它是一个无序的 **键(key) : 值(value)** 的集合。
+
+* **键**必须使用**不可变类型**，同一个字典中，键必须是唯一的。
+
+  ```python
+  dict = {}
+  dict['one'] = "1 - 菜鸟教程"
+  dict[2]     = "2 - 菜鸟工具"
+   
+  tinydict = {'name': 'runoob','code':1, 'site': 'www.runoob.com'}
+   
+   
+  print (dict['one'])       # 输出键为 'one' 的值
+  print (dict[2])           # 输出键为 2 的值
+  print (tinydict)          # 输出完整的字典
+  print (tinydict.keys())   # 输出所有键
+  print (tinydict.values()) # 输出所有值
+  ```
+
+* 构造函数 dict() 可以直接从键值对序列中构建字典如下：
+
+  ```python
+  >>>dict([('Runoob', 1), ('Google', 2), ('Taobao', 3)])
+  {'Taobao': 3, 'Runoob': 1, 'Google': 2}
+   
+  >>> {x: x**2 for x in (2, 4, 6)}
+  {2: 4, 4: 16, 6: 36}
+   
+  >>> dict(Runoob=1, Google=2, Taobao=3)
+  {'Runoob': 1, 'Google': 2, 'Taobao': 3}
+  ```
+
+
+
+### 3.3. 数据类型转换
+
+​	![1552746683944](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552746683944.png)
+
+
+
+## 4. 解释器
 
