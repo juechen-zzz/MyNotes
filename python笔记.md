@@ -358,5 +358,67 @@ isinstance 和 type 的区别在于：
 
 
 
-## 4. 解释器
+## 4. 解释器、注释
+
+* Python 的编程模式分为两种：**交互式**，**脚本式**。
+
+* 交互式编程，需要我们打开 cmd 窗口（命令提示符窗口），在窗口中键入`python`,回车，这样就进入了交互式编程。
+
+* 脚本式编程，就是我们先把 python 语句写好，保存在后缀为 .py 的文件里，然后从外部调用这个文件。它也可以使用 cmd 窗口进行调用，**与交互式编程不同的是，不要在cmd窗口内输入python加回车来进入交互模式**
+
+  ```python
+  """
+  这是多行注释，用三个双引号
+  这是多行注释，用三个双引号 
+  这是多行注释，用三个双引号
+  """
+  print("Hello, World!") 
+  ```
+
+
+
+## 5. 运算符
+
+### 5.1. 算术运算符
+
+```python
+a = b ** n      #b的n次方
+c = b // n      #整除，向下取整
+```
+
+### 5.2. 比较运算符
+
+* 返回的是**布尔值**
+
+![1552813071640](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552813071640.png)
+
+### 5.3. 赋值运算符
+
+![1552813130891](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552813130891.png)
+
+### 5.3. 位运算符
+
+* 将数字看做二进制进行计算，假设a = 60 ,b = 13。
+
+![1552813224106](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552813224106.png)
+
+### 5.4. 逻辑运算符
+
+![1552813442862](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552813442862.png)
+
+### 5.5. 成员运算符
+
+* Python还支持成员运算符，测试实例中包含了一系列的成员，包括**字符串，列表或元组**。
+
+![1552813530922](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552813530922.png)
+
+### 5.6. 身份运算符
+
+* 身份运算符用于比较两个对象的**存储单元**
+
+![1552813582139](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552813582139.png)
+
+### 5.7. 运算符优先级
+
+![1552814481641](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552814481641.png)
 
