@@ -422,3 +422,25 @@ c = b // n      #整除，向下取整
 
 ![1552814481641](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552814481641.png)
 
+
+
+## 6. Number
+
+* Python 数字数据类型用于存储数值。
+* 数据类型是**不允许**改变的,这就意味着如果改变数字数据类型的值，将**重新分配**内存空间。
+  * **整型(Int)** - 通常被称为是整型或整数，是正或负整数，不带小数点。Python3 整型是没有限制大小的，可以当作 Long 类型使用，所以 Python3 没有 Python2 的 Long 类型。
+  * **浮点型(float)** - 浮点型由整数部分与小数部分组成，浮点型也可以使用科学计数法表示（2.5e2 = 2.5 x 102 = 250）。
+  * **复数( (complex))** - 复数由实数部分和虚数部分构成，可以用a + bj,或者complex(a,b)表示， 复数的实部a和虚部b都是**浮点型**。
+
+```python 
+>>> number = 0xA0F # 十六进制
+>>> number
+2575
+
+>>> number=0o37 # 八进制
+>>> number
+31
+```
+
+![1552921847695](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552921847695.png)
+
