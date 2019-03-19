@@ -424,7 +424,7 @@ c = b // n      #整除，向下取整
 
 
 
-## 6. Number
+## 6. 数字（Number）
 
 * Python 数字数据类型用于存储数值。
 * 数据类型是**不允许**改变的,这就意味着如果改变数字数据类型的值，将**重新分配**内存空间。
@@ -443,4 +443,40 @@ c = b // n      #整除，向下取整
 ```
 
 ![1552921847695](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552921847695.png)
+
+### 6.1. 数字类型转换
+
+* **int(x)** 将x转换为一个整数。
+* **float(x)** 将x转换到一个浮点数。
+* **complex(x)** 将x转换到一个复数，实数部分为 x，虚数部分为 0。
+* **complex(x, y)** 将 x 和 y 转换到一个复数，实数部分为 x，虚数部分为 y。x 和 y 是数字表达式。
+* 在整数除法中，除法 **/** 总是返回一个浮点数，如果只想得到整数的结果，丢弃可能的分数部分，可以使用运算符 **//** 。
+
+### 6.2. 数学函数
+
+![1552985476313](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552985476313.png)
+
+### 6.3. 随机数函数
+
+![1552985507907](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552985507907.png)
+
+* 随机数函数中缺少 **randint,sample**
+
+![1552985741147](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552985741147.png)
+
+### 6.4. 三角函数
+
+![1552985528258](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552985528258.png)
+
+* **4舍6入5看齐,奇进偶不进（round用法）**
+
+### 6.5. 整数比较
+
+* Python中一切都是对象，对象比较可以用 **==** 或者 **is**。
+* **==** 比较的是两个对象的内容是否相等，默认会调用对象的 **__eq__()** 方法。
+* **is** 比较的是两个对象的 id 是否相等，也就是是否是同一个对象，是否指向同一个内存地址。
+
+
+
+## 7. 字符串
 
