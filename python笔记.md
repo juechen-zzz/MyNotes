@@ -480,3 +480,144 @@ c = b // n      #整除，向下取整
 
 ## 7. 字符串
 
+* Python 不支持单字符类型，单字符在 Python 中也是作为一个字符串使用。
+
+* 可以截取字符串的一部分与其他字段拼接。
+
+  ```python
+  var1 =  'hello world'
+  print("新字符串：", var[:6] + 'nihaopeng')
+  ```
+
+### 7.1. 转义字符
+
+![1553052733648](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1553052733648.png)
+
+### 7.2. 字符串运算符
+
+![1553052841972](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1553052841972.png)
+
+### 7.3. 字符串格式化
+
+```python
+print("I'm %s" % 'nihaopeng')
+
+>>> num=18.7254
+>>> print("the price  is  %.2f" %num)
+the price  is  18.73
+```
+
+![1553053086748](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1553053086748.png)
+
+![1553053108978](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1553053108978.png)
+
+### 7.4. 三引号
+
+* python三引号允许一个字符串跨多行，字符串中可以包含换行符、制表符以及其他特殊字符。
+
+```python
+para_str = """这是一个多行字符串的实例
+多行字符串可以使用制表符
+TAB ( \t )。
+也可以使用换行符 [ \n ]。
+"""
+print (para_str)
+```
+
+* 在Python2中，普通字符串是以8位ASCII码进行存储的，而Unicode字符串则存储为16位unicode字符串，这样能够表示更多的字符集。使用的语法是在字符串前面加上前缀 **u**。
+* 在Python3中，所有的字符串都是Unicode字符串。
+
+### 7.5. 内建函数
+
+http://www.runoob.com/python3/python3-string.html
+
+```python
+a = 'Iron man'
+
+a.capitalize()						#首字符大写
+a.center(width,fillchar)			
+#返回一个指定宽度的字符串，fillchar为填充字符	
+a.count(str, beg= 0,end=len(string))
+#返回 str 在 string 里面出现的次数，如果 beg 或者 end 指定则返回指定范围内 str 出现的次数
+```
+
+
+
+
+
+## 8. list（列表）
+
+* 列表是最常用的Python数据类型，它可以作为一个方括号内的逗号分隔值出现。
+
+  ```python
+  list1 = ['Google', 'Runoob', 1997, 2000];	
+  print ("list1[0]: ", list1[0])
+  ```
+
+* 你可以对列表的数据项进行修改或更新，你也可以使用append()方法来添加列表项。
+
+* 可以使用 del 语句来删除列表的的元素。
+
+  ```python
+  list = ['Google', 'Runoob', 1997, 2000]
+   
+  print ("原始列表 : ", list)
+  del list[2]
+  print ("删除第三个元素 : ", list)
+  ```
+
+### 8.1. 列表脚本操作符
+
+![1553216223448](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1553216223448.png)
+
+### 8.2. 列表函数&方法
+
+* **len**：长度	**max,min**：最值	**list(seq)**：将字符串/元组转化为列表
+
+* 方法：
+
+  ```python
+  list.append(obj)		#在列表末尾添加新的对象
+  list.count(obj)			#统计某个元素在列表中出现的次数
+  list.extend(seq)		#在列表末尾追加另一序列的多个值
+  list.index(obj)			#找某一值的索引位置
+  list.insert(index,obj)	#将对象插入列表
+  list.pop(index=-1)		#移除列表中的一个元素（默认最后一个），并返回值
+  list.remove(obj)		#移除列表中某个值的第一个匹配项
+  list.reverse()			#反向列表中元素
+  list.sort(key=None , reverse = False)
+  #对原列表进行排序
+  #reverse = True 降序， reverse = False 升序（默认）
+  #key -- 主要是用来进行比较的元素，只有一个参数，当索引a是序列的时候
+  list.clear()			#清空
+  list.copy()				#复制
+  ```
+
+### 8.3. 笔记
+
+* python 创建二维列表，将需要的参数写入 cols 和 rows 即可
+
+  ```python
+  list_2d = [[0 for col in range(cols)] for row in range(rows)]
+  
+  >>> list_2d = [ [0 for i in range(5)] for i in range(5)]
+  >>> list_2d[0].append(3)
+  >>> list_2d[0].append(5)
+  >>> list_2d[2].append(7)
+  >>> list_2d
+  [[0, 0, 0, 0, 0, 3, 5], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 7], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
+  ```
+
+* 列表复制时如果用**=**，改变一个列表，相同索引值的会一起改变
+
+* 空列表可以简单地通过两个中括号进行表示([])- 一里面什么东西都没有，但是，如果想创建一个占用十个元素空间，却不包括任何有用内容的列表，可以类似于下面的方法，用某一个具体的值代替。
+
+  ```python
+  list_empty = [None]*10
+  ```
+
+
+
+
+
+## 9. tuple（元组）
