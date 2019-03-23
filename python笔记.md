@@ -621,3 +621,37 @@ a.count(str, beg= 0,end=len(string))
 
 
 ## 9. tuple（元组）
+
+* 元组与列表类似，不同点在于元组的元素**不能修改**
+
+* 元组使用（），列表使用【】。
+
+* 元组中只有一个元素时，必须加逗号。
+
+  ```python
+  >>>tup1 = (50)
+  >>> type(tup1)     # 不加逗号，类型为整型
+  <class 'int'>
+   
+  >>> tup1 = (50,)
+  >>> type(tup1)     # 加上逗号，类型为元组
+  <class 'tuple'>
+  ```
+
+### 9.1. 内置函数
+
+```python
+len(tuple)			#长度
+max(tuple)			# max
+min(tuple)
+tuple(seq)			#将列表转化为元组
+```
+
+* tuple的陷阱：当你定义一个tuple时，在定义的时候，tuple的元素就必须被确定下来。
+
+
+
+
+
+## 10. dictionary（字典）
+
