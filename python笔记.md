@@ -655,3 +655,66 @@ tuple(seq)			#将列表转化为元组
 
 ## 10. dictionary（字典）
 
+* 字典是一种可变容器模型，可以存储**任意类型对象**。
+* 每个键值对用：分割，每队之间用，分割，用{}包括。
+* 键必须唯一，值则不必。
+* 键可以取任何数据类型，但键必须是不可变的，如字符串、数字或者元组。
+
+```python
+dict1 = {'a': 456 , 98 : 123}
+```
+
+### 10.1. 访问字典值
+
+```python
+dict = {'Name' : 123 , 'Age' : 456 , 'Class' : 789}
+print("dict['Name']", dict['Name'])
+dict['Age'] = 8
+```
+
+### 10.2. 删除字典元素
+
+```python
+dict = {'Name': 'Runoob', 'Age': 7, 'Class': 'First'}
+
+del dict['Name']		#删除键Name
+dict.clear()			#清空字典
+del dict				#删除字典
+```
+
+* 字典值可以是任何的python 对象
+* 字典键不能出现两次，若创建时有2个相同的键，会记住后一个，且键必须不可变。
+
+### 10.3. 内置函数
+
+* len(dict)	计算字典元素个数，即键的总数
+* str(dict)         输出字典，以字符串表示
+* type(variable)     返回输入的变量类型
+
+### 10.4. 内置方法
+
+```python
+radiansdict.clear()
+#删除所有元素
+radiansdict.copy()
+#返回一个字典的浅复制
+radiansdict.fromkeys()
+#创建一个新字典，以序列seq中元素做字典的键，val为字典所有键对应的初始值
+radiansdict.get(key, default=None)
+#返回指定键的值，如果值不在字典中返回default值
+radiansdict.items()
+#以列表返回可遍历的(键, 值) 元组数组
+radiansdict.keys()
+#返回一个迭代器，可以使用 list() 来转换为列表
+radiansdict.setdefault(key, default=None)
+#和get()类似, 但如果键不存在于字典中，将会添加键并将值设为default
+radiansdict.update(dict2)
+#把字典dict2的键/值对更新到dict里
+radiansdict.values()
+#返回一个迭代器，可以使用 list() 来转换为列表
+pop(key[,default])
+#删除字典给定键 key 所对应的值，返回值为被删除的值。key值必须给出。 否则，返回default值。
+popitem()
+#随机返回并删除字典中的一对键和值(一般删除末尾对)。
+```
+
