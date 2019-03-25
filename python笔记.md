@@ -718,3 +718,53 @@ popitem()
 #随机返回并删除字典中的一对键和值(一般删除末尾对)。
 ```
 
+
+
+
+
+## 11. set（集合）
+
+* set是一个无序的**不重复**元素序列。
+* 使用{}或者set()函数创建集合。创建空集合必须用set函数。
+
+```python
+>>>basket = {'apple', 'orange', 'apple', 'pear', 'orange', 'banana'}
+>>> print(basket)                      # 这里演示的是去重功能
+{'orange', 'banana', 'pear', 'apple'}
+>>> 'orange' in basket                 # 快速判断元素是否在集合内
+True
+>>> 'crabgrass' in basket
+False
+ 
+ # 下面展示两个集合间的运算.
+>>> a = set('abracadabra')
+>>> b = set('alacazam')
+>>> a                                  
+{'a', 'r', 'b', 'c', 'd'}
+>>> a - b                         # 集合a中包含而集合b中不包含的元素
+{'r', 'd', 'b'}
+>>> a | b                         # 集合a或b中包含的所有元素
+{'a', 'c', 'r', 'd', 'b', 'm', 'z', 'l'}
+>>> a & b                         # 集合a和b中都包含了的元素
+{'a', 'c'}
+>>> a ^ b                         # 不同时包含于a和b的元素
+{'r', 'd', 'b', 'm', 'z', 'l'}
+```
+
+### 11.1. 基本操作
+
+#### 11.1.1. 添加、删除元素
+
+```python
+s.add()
+s.update()
+
+s.remove(x)
+s.discard( x )
+s.pop() 	#随机删除集合中的一个元素
+```
+
+#### 11.1.2. 内置方法
+
+![1553522862993](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1553522862993.png)
+
