@@ -311,3 +311,148 @@ def outer():
 >>>outer()
 ```
 
+
+
+## 3. 数据结构
+
+### 3.1 列表
+
+![1554688704791](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1554688704791.png)
+
+```python
+>>> a = [66.25, 333, 333, 1, 1234.5]
+>>> print(a.count(333), a.count(66.25), a.count('x'))
+2 1 0
+>>> a.insert(2, -1)
+>>> a.append(333)
+>>> a
+[66.25, 333, -1, 333, 1, 1234.5, 333]
+>>> a.index(333)
+1
+>>> a.remove(333)
+>>> a
+[66.25, -1, 333, 1, 1234.5, 333]
+>>> a.reverse()
+>>> a
+[333, 1234.5, 1, 333, -1, 66.25]
+>>> a.sort()
+>>> a
+[-1, 1, 66.25, 333, 333, 1234.5]
+```
+
+* 列表推导式：可以使用复杂表达式或嵌套函数
+
+```python
+>>> vec = [2, 4, 6]
+>>> [3*x for x in vec]
+[6, 12, 18]
+
+>>> [[x, x**2] for x in vec]
+[[2, 4], [4, 16], [6, 36]]
+
+>>> [str(round(355/113, i)) for i in range(1, 6)]
+['3.1', '3.14', '3.142', '3.1416', '3.14159']
+```
+
+### 3.2 元组和序列
+
+```python
+>>> t = 12345, 54321, 'hello!'
+>>> t[0]
+12345
+>>> t
+(12345, 54321, 'hello!')
+>>> # Tuples may be nested:
+... u = t, (1, 2, 3, 4, 5)
+>>> u
+((12345, 54321, 'hello!'), (1, 2, 3, 4, 5))
+```
+
+### 3.3 集合
+
+* 集合是一个无序不重复元素的集。基本功能包括关系测试和消除重复元素。
+
+```python
+>>> basket = {'apple', 'orange', 'apple', 'pear', 'orange', 'banana'}
+>>> print(basket)                      # 删除重复的
+{'orange', 'banana', 'pear', 'apple'}
+>>> 'orange' in basket                 # 检测成员
+True
+>>> 'crabgrass' in basket
+False
+
+>>> # 以下演示了两个集合的操作
+...
+>>> a = set('abracadabra')
+>>> b = set('alacazam')
+>>> a                                  # a 中唯一的字母
+{'a', 'r', 'b', 'c', 'd'}
+>>> a - b                              # 在 a 中的字母，但不在 b 中
+{'r', 'd', 'b'}
+>>> a | b                              # 在 a 或 b 中的字母
+{'a', 'c', 'r', 'd', 'b', 'm', 'z', 'l'}
+>>> a & b                              # 在 a 和 b 中都有的字母
+{'a', 'c'}
+>>> a ^ b                              # 在 a 或 b 中的字母，但不同时在 a 和 b 中
+{'r', 'd', 'b', 'm', 'z', 'l'}
+```
+
+### 3.4 字典
+
+* 序列是以**连续的整数**为索引，与此不同的是，字典以关键字为索引，关键字可以是任意不可变类型，通常用字符串或数值。
+
+  ```python
+  >>> tel = {'jack': 4098, 'sape': 4139}
+  >>> tel['guido'] = 4127
+  >>> tel
+  {'sape': 4139, 'guido': 4127, 'jack': 4098}
+  >>> tel['jack']
+  4098
+  >>> del tel['sape']
+  >>> tel['irv'] = 4127
+  >>> tel
+  {'guido': 4127, 'irv': 4127, 'jack': 4098}
+  >>> list(tel.keys())
+  ['irv', 'guido', 'jack']
+  >>> sorted(tel.keys())
+  ['guido', 'irv', 'jack']
+  >>> 'guido' in tel
+  True
+  >>> 'jack' not in tel
+  False
+  ```
+
+### 3.5 遍历
+
+* 字典遍历
+
+```python
+>>> knights = {'gallahad': 'the pure', 'robin': 'the brave'}
+>>> for k, v in knights.items():
+...     print(k, v)
+...
+gallahad the pure
+robin the brave
+```
+
+* 序列遍历
+
+```python
+>>> for i, v in enumerate(['tic', 'tac', 'toe']):
+...     print(i, v)
+...
+0 tic
+1 tac
+2 toe
+
+# 遍历多个列表时
+>>> questions = ['name', 'quest', 'favorite color']
+>>> answers = ['lancelot', 'the holy grail', 'blue']
+>>> for q, a in zip(questions, answers):
+...     print('What is your {0}?  It is {1}.'.format(q, a))
+...
+What is your name?  It is lancelot.
+What is your quest?  It is the holy grail.
+What is your favorite color?  It is blue.
+```
+
