@@ -456,3 +456,38 @@ What is your quest?  It is the holy grail.
 What is your favorite color?  It is blue.
 ```
 
+
+
+## 4. 模块
+
+![1554775015629](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1554775015629.png)
+
+* 一个模块只会被导入一次
+* from ... import ...（从模块中指定一个部分导入）
+* from ... import *（导入模块整个）
+
+### 4.1 __name__属性
+
+* 一个模块被另一个程序第一次引入时，其主程序将运行。如果我们想在模块被引入时，模块中的某一程序块不执行，我们可以用__name__属性来使该程序块仅在该模块自身运行时执行。
+* 每个模块都有一个__name__属性，当其值是'__main__'时，表明该模块自身在运行，否则是被引入。
+
+```python
+# Filename: using_name.py
+
+if __name__ == '__main__':
+   print('程序自身在运行')
+else:
+   print('我来自另一模块')
+
+$ python using_name.py
+程序自身在运行
+
+$ python
+>>> import using_name
+我来自另一模块
+>>>
+```
+
+### 4.2 dir()函数
+
+* 内置的函数 dir() 可以找到模块内定义的所有名称。以一个**字符串列表**的形式返回。
