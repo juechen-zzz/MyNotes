@@ -491,3 +491,43 @@ $ python
 ### 4.2 dir()函数
 
 * 内置的函数 dir() 可以找到模块内定义的所有名称。以一个**字符串列表**的形式返回。
+
+### 4.3 输入和文件读写
+
+```python
+str = input("请输入：");
+print ("你输入的内容是: ", str)
+```
+
+* 文件读写open(filename, mode)
+
+  * filename：访问文件的字符串值
+  * mode：决定打开文件的模式，默认为只读（r）
+
+  ![1554948041738](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1554948041738.png)
+
+  ![1554948086691](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1554948086691.png)
+
+
+
+* 文件对象的方法（**http://www.runoob.com/python3/python3-file-methods.html**）
+
+```python
+#f.read(size)读取一定数目的数据
+str = f.read()
+print(str)
+
+
+#f.readline从文件中读取单独的一行。换行符为 '\n'。如果返回一个空字符串, 说明已经读取到最后一行。
+str = f.readline()
+print(str)
+
+f.readlines()	# 将返回该文件中包含的所有行。
+
+# f.write(string) 将 string 写入到文件中, 然后返回写入的字符数。
+num = f.write( "Python 是一个非常好的语言。\n是的，的确非常好!!\n" )
+print(num)
+
+f.tell() 		#返回文件对象当前所处的位置, 它是从文件开头开始算起的字节数。
+```
+
