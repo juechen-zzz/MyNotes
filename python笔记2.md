@@ -549,3 +549,201 @@ f.tell() 		#返回文件对象当前所处的位置, 它是从文件开头开始
 * **继承**：一个派生类继承基类的字段和方法。
 * **实例化**：创建一个类的实例，类的具体对象。
 * **对象**：通过类定义的数据结构实例。对象包括两个数据成员（类变量和实例变量）和方法。
+
+### 5.1 类定义
+
+```python
+class ClassName:
+	<statement - 1>
+	.
+	.
+	.
+	<statement - N>
+```
+
+ 类实例化后，可以使用其属性，实际上，创建一个类之后，可以通过类名访问其属性。
+
+### 5.2 类对象
+
+* 支持2种操作：**属性引用**和**实例化**
+
+```python
+class MyClass:
+	'''一个简单的类实例'''
+	i = 12345
+	def f(self):
+		return 'hello world'
+
+# 实例化类
+x = MyClass()
+
+# 访问类的属性和方法
+print('MyClass类的i值为：', x.i)
+print(x.f())
+```
+
+* 类有一个名为 __init__() 的特殊方法（**构造方法**），该方法在类实例化时会自动调用，像下面这样：
+
+  ```python
+  class Complex:
+      def __init__(self, realpart, imagpart):
+          self.r = realpart
+          self.i = imagpart
+  x = Complex(3.0, -4.5)
+  print(x.r, x.i)   # 输出结果：3.0 -4.5
+  ```
+
+* self代表类的实例，而非类
+
+```python
+class Test:
+    def prt(self):
+        print(self)
+        print(self.__class__)
+ 
+t = Test()
+t.prt()
+```
+
+### 5.3 类的方法
+
+* 在类的内部，使用 **def** 关键字来定义一个方法，与一般函数定义不同，类方法**必须包含**参数 self, 且为第一个参数，self 代表的是类的实例。
+
+  ```python
+  #!/usr/bin/python3
+  #类定义
+  class people:
+      #定义基本属性
+      name = ''
+      age = 0
+      #定义私有属性,私有属性在类外部无法直接进行访问
+      __weight = 0
+      #定义构造方法
+      def __init__(self,n,a,w):
+          self.name = n
+          self.age = a
+          self.__weight = w
+      def speak(self):
+          print("%s 说: 我 %d 岁。" %(self.name,self.age))
+   
+  # 实例化类
+  p = people('runoob',10,30)
+  p.speak()
+  ```
+
+### 5.4 继承
+
+* python 支持类的继承
+
+* ```python
+  #!/usr/bin/python3
+   
+  #类定义
+  class people:
+      #定义基本属性
+      name = ''
+      age = 0
+      #定义私有属性,私有属性在类外部无法直接进行访问
+      __weight = 0
+      #定义构造方法
+      def __init__(self,n,a,w):
+          self.name = n
+          self.age = a
+          self.__weight = w
+      def speak(self):
+          print("%s 说: 我 %d 岁。" %(self.name,self.age))
+   
+  #单继承示例
+  class student(people):
+      grade = ''
+      def __init__(self,n,a,w,g):
+          #调用父类的构函
+          people.__init__(self,n,a,w)
+          self.grade = g
+      #覆写父类的方法
+      def speak(self):
+          print("%s 说: 我 %d 岁了，我在读 %d 年级"%(self.name,self.age,self.grade))
+   
+   
+   
+  s = student('ken',10,60,3)
+  s.speak()
+  ```
+
+* 多继承
+
+```python
+#!/usr/bin/python3
+ 
+#类定义
+class people:
+    #定义基本属性
+    name = ''
+    age = 0
+    #定义私有属性,私有属性在类外部无法直接进行访问
+    __weight = 0
+    #定义构造方法
+    def __init__(self,n,a,w):
+        self.name = n
+        self.age = a
+        self.__weight = w
+    def speak(self):
+        print("%s 说: 我 %d 岁。" %(self.name,self.age))
+ 
+#单继承示例
+class student(people):
+    grade = ''
+    def __init__(self,n,a,w,g):
+        #调用父类的构函
+        people.__init__(self,n,a,w)
+        self.grade = g
+    #覆写父类的方法
+    def speak(self):
+        print("%s 说: 我 %d 岁了，我在读 %d 年级"%(self.name,self.age,self.grade))
+ 
+#另一个类，多重继承之前的准备
+class speaker():
+    topic = ''
+    name = ''
+    def __init__(self,n,t):
+        self.name = n
+        self.topic = t
+    def speak(self):
+        print("我叫 %s，我是一个演说家，我演讲的主题是 %s"%(self.name,self.topic))
+ 
+#多重继承
+class sample(speaker,student):
+    a =''
+    def __init__(self,n,a,w,g,t):
+        student.__init__(self,n,a,w,g)
+        speaker.__init__(self,n,t)
+ 
+test = sample("Tim",25,80,4,"Python")
+test.speak()   #方法名同，默认调用的是在括号中排前地父类的方法
+```
+
+### 5.5 类属性和方法
+
+* **类的私有属性**：**__private_attrs**：两个下划线开头，声明该属性为私有，不能在类的外部被使用或直接访问。在类内部的方法中使用时 **self.__private_attrs**。
+* **类的方法**：在类的内部，使用 def 关键字来定义一个方法，与一般函数定义不同，类方法必须包含参数 **self**，且为第一个参数，**self** 代表的是类的实例。**self** 的名字并不是规定死的，也可以使用 **this**，但是最好还是按照约定是用 **self**。
+* **类的私有方法**：**__private_method**：两个下划线开头，声明该方法为私有方法，只能在类的内部调用 ，不能在类的外部调用。**self.__private_methods**。
+
+```python
+class JustCounter:
+    __secretCount = 0  # 私有变量
+    publicCount = 0    # 公开变量
+ 
+    def count(self):
+        self.__secretCount += 1
+        self.publicCount += 1
+        print (self.__secretCount)
+ 
+counter = JustCounter()
+counter.count()
+counter.count()
+print (counter.publicCount)
+print (counter.__secretCount)  # 报错，实例不能访问私有变量
+```
+
+* ![1555124967141](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1555124967141.png)
+
