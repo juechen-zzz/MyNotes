@@ -1,4 +1,4 @@
-# python笔记2
+# [python笔记2]()
 
 ## 1. 迭代器和生成器
 
@@ -746,4 +746,91 @@ print (counter.__secretCount)  # 报错，实例不能访问私有变量
 ```
 
 * ![1555124967141](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1555124967141.png)
+
+
+
+## 6. 标准库
+
+### 6.1 os
+
+```python
+>>> import os
+>>> os.getcwd()      # 返回当前的工作目录
+'C:\\Python34'
+>>> os.chdir('/server/accesslogs')   # 修改当前的工作目录
+>>> os.system('mkdir today')   # 执行系统命令 mkdir 
+0
+```
+
+### 6.2 文件通配符
+
+* glob模块提供了一个函数用于从目录通配符搜索中生成文件列表:
+
+```python
+>>> import glob
+>>> glob.glob('*.py')
+['primes.py', 'random.py', 'quote.py']
+```
+
+### 6.3 命令行参数
+
+* 通用工具脚本经常调用命令行参数。这些命令行参数以链表形式存储于 sys 模块的 argv 变量。例如在命令行中执行 "python demo.py one two three" 后可以得到以下输出结果:
+
+```python
+>>> import sys
+>>> print(sys.argv)
+['demo.py', 'one', 'two', 'three']
+```
+
+### 6.4 字符串正则匹配
+
+* re模块为高级字符串处理提供了正则表达式工具
+
+```python
+>>> import re
+>>> re.findall(r'\bf[a-z]*', 'which foot or hand fell fastest')
+['foot', 'fell', 'fastest']
+>>> re.sub(r'(\b[a-z]+) \1', r'\1', 'cat in the the hat')
+'cat in the hat'
+```
+
+### 6.5 互联网
+
+```python
+>>> from urllib.request import urlopen
+>>> for line in urlopen('http://tycho.usno.navy.mil/cgi-bin/timer.pl'):
+...     line = line.decode('utf-8')  # Decoding the binary data to text.
+...     if 'EST' in line or 'EDT' in line:  # look for Eastern Time
+...         print(line)
+
+<BR>Nov. 25, 09:43:32 PM EST
+
+>>> import smtplib
+>>> server = smtplib.SMTP('localhost')
+>>> server.sendmail('soothsayer@example.org', 'jcaesar@example.org',
+... """To: jcaesar@example.org
+... From: soothsayer@example.org
+...
+... Beware the Ides of March.
+... """)
+>>> server.quit()
+```
+
+### 6.6 时间和日期
+
+```python
+>>> # dates are easily constructed and formatted
+>>> from datetime import date
+>>> now = date.today()
+>>> now
+datetime.date(2003, 12, 2)
+>>> now.strftime("%m-%d-%y. %d %b %Y is a %A on the %d day of %B.")
+'12-02-03. 02 Dec 2003 is a Tuesday on the 02 day of December.'
+
+>>> # dates support calendar arithmetic
+>>> birthday = date(1964, 7, 31)
+>>> age = now - birthday
+>>> age.days
+14368
+```
 
