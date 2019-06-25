@@ -54,3 +54,8 @@ high没有填写时，默认生成随机数的范围是[0，low）
 ```
 
 ![1561260800884](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561260800884.png)
+
+## np.random.normal()正态分布
+
+![1561427542419](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561427542419.png)
+

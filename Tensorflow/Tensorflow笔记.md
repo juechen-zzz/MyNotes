@@ -98,3 +98,17 @@ tf.shape(Tensor)
 | tf.cholesky(input, name=None)                                | 对输入方阵cholesky分解，<br />即把一个对称正定的矩阵表示成一个下三角<br />矩阵**L**和其转置的乘积的分解A=LL^T |
 | tf.matrix_solve(matrix, rhs, adjoint=None, name=None)        | 求解，matrix为方阵，shape=[M,M]<br />rhs的shape为[M, K]<br />output为[M, K] |
 
+
+
+## tf.placeholder
+
+![1561428119284](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561428119284.png)
+
+![1561428133740](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561428133740.png)
+
+
+
+## tf.reduce_sum
+
+![1561428252693](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561428252693.png)
+
