@@ -59,3 +59,25 @@ high没有填写时，默认生成随机数的范围是[0，low）
 
 ![1561427542419](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561427542419.png)
 
+
+
+## np.dot 和np.multiply
+
+![1561517360188](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561517360188.png)
+
+
+
+## **np.linalg.inv**
+
+![1561517397516](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561517397516.png)
+
+
+
+## np.linspace
+
+![1561517478313](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561517478313.png)
+
+![1561517501014](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561517501014.png)
+
+
+
