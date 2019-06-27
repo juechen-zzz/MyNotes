@@ -112,3 +112,30 @@ tf.shape(Tensor)
 
 ![1561428252693](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561428252693.png)
 
+
+
+## 队列常用方法
+
+| 操作                             | 描述                                                         |
+| -------------------------------- | ------------------------------------------------------------ |
+| class.tf.QueueBase               | 基本的队列应用类，通过多个步骤存储tensors，进行入列和出列操作 |
+| tf.enqueue(vals, name=None)      | 将一个元素编入该队列中，若已满，则会堵塞                     |
+| tf.enqueue_many(vals, name=None) | 将零个或者多个元素编入该队列中                               |
+| tf.dequeue(name=None)            | 将元素从队列中移除                                           |
+| tf.dequeue_many(n, name=None)    | 将一个或者多个元素从队列中移除                               |
+| tf.size(name=None)               | 计算队列中的元素个数                                         |
+| tf.close                         | 关闭该队列                                                   |
+| f.dequeue_up_to(n, name=None)    | 从该队列中移除n个元素并将之连接                              |
+| tf.dtypes                        | 列出组成元素的数据类型                                       |
+| tf.from_list(index, queues)      | 根据queue[index]的参考队列创建一个队列                       |
+| tf.name                          | 返回队列最下面元素的名称                                     |
+| tf.names                         | 返回队列每一个组成部分的名称                                 |
+| class.tf.PaddingFIFOQueue        | 一个FIFOQueue                                                |
+| class.tf.FIFOQueue               | 出列时按照先入先出顺序                                       |
+| class.tf.RandomShuffleQueue      | 出列时按照随机元素出列                                       |
+
+
+
+## 线程协调
+
+​		**Coordinator**和**QueueRunner**函数对线程进行控制和协调。在使用上，两个类必须同时工作，共同协作来停止会话中所有线程，并向在等待所有工作线程终止的程序报告
