@@ -139,3 +139,20 @@ tf.shape(Tensor)
 ## 线程协调
 
 ​		**Coordinator**和**QueueRunner**函数对线程进行控制和协调。在使用上，两个类必须同时工作，共同协作来停止会话中所有线程，并向在等待所有工作线程终止的程序报告
+
+
+
+## 卷积函数
+
+```python
+tf.nn.conv2d(input, filter, strides, padding, use_cudnn_on_gpu=None, name=None)
+```
+
+* **input**：指需要做卷积的输入图像，要求是一个**Tensor**，具有**[batch, in_height, in_width, in_channels]**这样的shape，分别代表一个batch的图片数量，图片高、宽，图像通道数，要求类型为float32或者float64
+* **filter**：相当于CNN中的卷积核，要求是一个Tensor，具有**[filter_height, filter_width, in_channels, out_channels]**这样的shape
+* **strides**:卷积时在图像每一维的步长，是一个一维的向量，第一维和第四维默认为1，而第三维和第四维分别是平行和竖直滑行的步长距离
+* **padding**:String类型的量，只能是**SAME**、**VALID**其中之一，这个值决定了不同的卷积方式
+* **use_cudnn_on_gpu**:bool类型，是否使用cudnn加速，默认为true
+
+
+
