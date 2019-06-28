@@ -68,6 +68,24 @@
 
 
 
+## 公式
+
+* 行内公式
+  * 当需要进行一个行内的公式的时候，比如说**sin**
+  * ![1561702018138](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561702018138.png)
+* 行间公式
+  * ![1561702505642](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561702505642.png)
+
+
+
+## 交叉引用
+
+* 在caption后加上**\label{}**，指明名称
+* 在需要引用的位置写**\ref{名称}**
+* **![1561702960654](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561702960654.png)**
+
+
+
 ## 结尾
 
 google
