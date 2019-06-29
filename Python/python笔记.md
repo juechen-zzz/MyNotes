@@ -222,7 +222,7 @@ isinstance 和 type 的区别在于：
   变量[头下标:尾下标]
   ```
 
-  ![1552740757828](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552740757828.png)
+  ![1552740757828](../images/1552740757828.png)
 
   加号 **+** 是列表连接运算符，星号 ***** 是重复操作。如下实例：
 
@@ -253,7 +253,7 @@ isinstance 和 type 的区别在于：
 
 * Python 列表截取可以接收第三个参数，参数作用是截取的步长。
 
-  ![1552741738435](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552741738435.png)
+  ![1552741738435](../images/1552741738435.png)
 
 #### 3.2.5. Tuple（元组）
 
@@ -354,7 +354,7 @@ isinstance 和 type 的区别在于：
 
 ### 3.3. 数据类型转换
 
-​	![1552746683944](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552746683944.png)
+​	![1552746683944](../images/1552746683944.png)
 
 
 
@@ -390,37 +390,37 @@ c = b // n      #整除，向下取整
 
 * 返回的是**布尔值**
 
-![1552813071640](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552813071640.png)
+![1552813071640](../images/1552813071640.png)
 
 ### 5.3. 赋值运算符
 
-![1552813130891](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552813130891.png)
+![1552813130891](../images/1552813130891.png)
 
 ### 5.3. 位运算符
 
 * 将数字看做二进制进行计算，假设a = 60 ,b = 13。
 
-![1552813224106](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552813224106.png)
+![1552813224106](../images/1552813224106.png)
 
 ### 5.4. 逻辑运算符
 
-![1552813442862](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552813442862.png)
+![1552813442862](../images/1552813442862.png)
 
 ### 5.5. 成员运算符
 
 * Python还支持成员运算符，测试实例中包含了一系列的成员，包括**字符串，列表或元组**。
 
-![1552813530922](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552813530922.png)
+![1552813530922](../images/1552813530922.png)
 
 ### 5.6. 身份运算符
 
 * 身份运算符用于比较两个对象的**存储单元**
 
-![1552813582139](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552813582139.png)
+![1552813582139](../images/1552813582139.png)
 
 ### 5.7. 运算符优先级
 
-![1552814481641](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552814481641.png)
+![1552814481641](../images/1552814481641.png)
 
 
 
@@ -442,7 +442,7 @@ c = b // n      #整除，向下取整
 31
 ```
 
-![1552921847695](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552921847695.png)
+![1552921847695](../images/1552921847695.png)
 
 ### 6.1. 数字类型转换
 
@@ -454,19 +454,19 @@ c = b // n      #整除，向下取整
 
 ### 6.2. 数学函数
 
-![1552985476313](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552985476313.png)
+![1552985476313](../images/1552985476313.png)
 
 ### 6.3. 随机数函数
 
-![1552985507907](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552985507907.png)
+![1552985507907](../images/1552985507907.png)
 
 * 随机数函数中缺少 **randint,sample**
 
-![1552985741147](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552985741147.png)
+![1552985741147](../images/1552985741147.png)
 
 ### 6.4. 三角函数
 
-![1552985528258](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1552985528258.png)
+![1552985528258](../images/1552985528258.png)
 
 * **4舍6入5看齐,奇进偶不进（round用法）**
 
@@ -491,11 +491,11 @@ c = b // n      #整除，向下取整
 
 ### 7.1. 转义字符
 
-![1553052733648](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1553052733648.png)
+![1553052733648](../images/1553052733648.png)
 
 ### 7.2. 字符串运算符
 
-![1553052841972](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1553052841972.png)
+![1553052841972](../images/1553052841972.png)
 
 ### 7.3. 字符串格式化
 
@@ -507,9 +507,9 @@ print("I'm %s" % 'nihaopeng')
 the price  is  18.73
 ```
 
-![1553053086748](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1553053086748.png)
+![1553053086748](../images/1553053086748.png)
 
-![1553053108978](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1553053108978.png)
+![1553053108978](../images/1553053108978.png)
 
 ### 7.4. 三引号
 
@@ -568,7 +568,7 @@ a.count(str, beg= 0,end=len(string))
 
 ### 8.1. 列表脚本操作符
 
-![1553216223448](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1553216223448.png)
+![1553216223448](../images/1553216223448.png)
 
 ### 8.2. 列表函数&方法
 
@@ -766,5 +766,5 @@ s.pop() 	#随机删除集合中的一个元素
 
 #### 11.1.2. 内置方法
 
-![1553522862993](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1553522862993.png)
+![1553522862993](../images/1553522862993.png)
 

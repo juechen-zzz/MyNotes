@@ -13,9 +13,9 @@ np.random.randn(d0,d1,d2……dn)
 
 ```
 
-![1561260539911](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561260539911.png)
+![1561260539911](../images/1561260539911.png)
 
-![1561260753172](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561260753172.png)
+![1561260753172](../images/1561260753172.png)
 
 
 
@@ -32,7 +32,7 @@ np.random.rand(d0,d1,d2……dn)
 
 ```
 
-![1561260622110](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561260622110.png)
+![1561260622110](../images/1561260622110.png)
 
 
 
@@ -53,31 +53,31 @@ high没有填写时，默认生成随机数的范围是[0，low）
 
 ```
 
-![1561260800884](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561260800884.png)
+![1561260800884](../images/1561260800884.png)
 
 ## np.random.normal()正态分布
 
-![1561427542419](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561427542419.png)
+![1561427542419](../images/1561427542419.png)
 
 
 
 ## np.dot 和np.multiply
 
-![1561517360188](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561517360188.png)
+![1561517360188](../images/1561517360188.png)
 
 
 
 ## **np.linalg.inv**
 
-![1561517397516](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561517397516.png)
+![1561517397516](../images/1561517397516.png)
 
 
 
 ## np.linspace
 
-![1561517478313](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561517478313.png)
+![1561517478313](../images/1561517478313.png)
 
-![1561517501014](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561517501014.png)
+![1561517501014](../images/1561517501014.png)
 
 
 

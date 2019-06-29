@@ -102,15 +102,15 @@ tf.shape(Tensor)
 
 ## tf.placeholder
 
-![1561428119284](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561428119284.png)
+![1561428119284](../images/1561428119284.png)
 
-![1561428133740](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561428133740.png)
+![1561428133740](../images/1561428133740.png)
 
 
 
 ## tf.reduce_sum
 
-![1561428252693](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561428252693.png)
+![1561428252693](../images/1561428252693.png)
 
 
 

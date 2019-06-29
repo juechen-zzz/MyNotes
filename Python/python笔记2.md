@@ -317,7 +317,7 @@ def outer():
 
 ### 3.1 列表
 
-![1554688704791](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1554688704791.png)
+![1554688704791](../images/1554688704791.png)
 
 ```python
 >>> a = [66.25, 333, 333, 1, 1234.5]
@@ -460,7 +460,7 @@ What is your favorite color?  It is blue.
 
 ## 4. 模块
 
-![1554775015629](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1554775015629.png)
+![1554775015629](../images/1554775015629.png)
 
 * 一个模块只会被导入一次
 * from ... import ...（从模块中指定一个部分导入）
@@ -504,9 +504,9 @@ print ("你输入的内容是: ", str)
   * filename：访问文件的字符串值
   * mode：决定打开文件的模式，默认为只读（r）
 
-  ![1554948041738](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1554948041738.png)
+  ![1554948041738](../images/1554948041738.png)
 
-  ![1554948086691](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1554948086691.png)
+  ![1554948086691](../images/1554948086691.png)
 
 
 
@@ -745,7 +745,7 @@ print (counter.publicCount)
 print (counter.__secretCount)  # 报错，实例不能访问私有变量
 ```
 
-* ![1555124967141](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1555124967141.png)
+* ![1555124967141](../images/1555124967141.png)
 
 
 
@@ -849,18 +849,18 @@ datetime.date(2003, 12, 2)
 
 * **普通字符**：包括没有显式指定为元字符的所有可打印和不可打印字符。这包括所有大小写字母、数字、标点和一些其他符合
 
-* **非打印字符**：![1555295141907](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1555295141907.png)
+* **非打印字符**：![1555295141907](../images/1555295141907.png)
 
-* **特殊字符**：![1555295235208](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1555295235208.png)
+* **特殊字符**：![1555295235208](../images/1555295235208.png)
 
 * **限定符**：用来指定正则表达式的一个给定组件必须出现多少次才能满足匹配。
 
   * 有 ***   +   ？   {n}   {n,}   {n,m}**  6种
-  * ![1555295358418](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1555295358418.png)
+  * ![1555295358418](../images/1555295358418.png)
 
 * **定位符**：将正则表达式固定到行首或行尾
 
-  * ![1555295766069](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1555295766069.png)
+  * ![1555295766069](../images/1555295766069.png)
   * 不能将限定符与定位符一起使用。由于在紧靠换行或者单词边界的前面或后面不能有一个以上位置，因此不允许诸如 **^\*** 之类的表达式。
   * **实例**
 

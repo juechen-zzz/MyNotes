@@ -20,7 +20,7 @@
 
 ## launchpad
 
-![1561616686251](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561616686251.png)
+![1561616686251](../images/1561616686251.png)
 
 * 长按类似于手机卸载软件
 * 拖动可以将两个软件合并到一个文件夹中
@@ -37,7 +37,7 @@
 
 * 类似于**我的电脑**
 * 个人收藏里面的桌面、下载、应用程序都是常规
-* ![1561617223113](C:\Users\nihaopeng\AppData\Roaming\Typora\typora-user-images\1561617223113.png)用来改变文件呈现形式
+* ![1561617223113](../images/1561617223113.png)用来改变文件呈现形式
 * 标记：
   * 将每种颜色标记右键可以重命名
   * 找到自己想标记的文件夹或者文件，右键标记
@@ -60,4 +60,6 @@
 * **新建**： command + N
 * **最小化窗口**： command + M
 * **退格**：fn + delete
+
+
 
