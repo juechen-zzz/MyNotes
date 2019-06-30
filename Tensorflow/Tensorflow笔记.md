@@ -156,3 +156,17 @@ tf.nn.conv2d(input, filter, strides, padding, use_cudnn_on_gpu=None, name=None)
 
 
 
+## 池化运算
+
+```python
+tf.nn.max_pool(value, ksize, strides, padding, name=None)
+```
+
+* **value**：需要池化的输入，一般池化层接在卷积层后面，所以输入通常是**featuremap**，依然是**[batch, height, width, channels]**这样的shape
+* **ksize**：池化窗口的大小，取一个四维向量，一般是**[1, height, width, 1]**，因为不需要在batch和channel上做池化，所以这两个维度设为1
+* **strides**：与卷积类似，窗口在每一个维度上滑动的步长，一般也是**[1, stride, stride, 1]**
+* **padding**：与卷积类似，可以去**VALID**或者**SAME**，返回一个Tensor
+
+
+
+​		池化最重要的作用就是帮助输入的数据表示近似不变性，对于平移不变性指的是对输入的数据进行少量平移时，经过池化后的输出结果并不会发生改变。局部平移不变性是一个很有用的性质，尤其是当关心某个特征是否出现而不关心它出现的具体位置时。
