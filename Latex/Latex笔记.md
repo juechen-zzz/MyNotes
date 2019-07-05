@@ -1,5 +1,16 @@
 # Latex笔记
 
+## IEEE模板
+
+* **bare_conf.tex：conference**
+* **bare_jrnl.tex： journal**
+* **bare_jrnl_comsoc.tex：IEEE Communications Society journal**
+* **bare_conf_compsoc.tex： IEEE Computer Society conference**
+* **bare_jrnl_compsoc.tex：IEEE Computer Society journal**
+* **bare_jrnl_transmag.tex： IEEE Transaction on Magnetics paper**
+
+
+
 ## 建立文档
 
 ![1560695775860](../images/1560695775860.png)
@@ -53,6 +64,9 @@
 ![1560696266560](../images/1560696266560.png)
 
 * 最开始要引入包，**usepackage{graphicx}**
+* ![1562138707726](C:\Users\nihaopeng\Deep Learning\images\1562138707726.png)
+* ![1562139321595](C:\Users\nihaopeng\Deep Learning\images\1562139321595.png)
+* 
 
 ![1561628355255](../images/1561628355255.png)
 
@@ -65,6 +79,16 @@
 * 每两个数据之间用**&**隔开
 
 ![1561629022896](../images/1561629022896.png)
+
+
+
+
+
+## 有序列表
+
+![1562222655380](C:\Users\nihaopeng\Deep Learning\images\1562222655380.png)
+
+![1562222667160](C:\Users\nihaopeng\Deep Learning\images\1562222667160.png)
 
 
 
