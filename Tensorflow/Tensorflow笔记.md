@@ -175,16 +175,16 @@ tf.nn.max_pool(value, ksize, strides, padding, name=None)
 
 # tf.nn.softmax
 
-![1562034706920](C:\Users\nihaopeng\Deep Learning\images\1562034706920.png)
+![1562034706920](../images/1562034706920.png)
 
-![1562034750822](C:\Users\nihaopeng\Deep Learning\images\1562034750822.png)
+![1562034750822](../images/1562034750822.png)
 
 
 
 # tf.argmax
 
 * 返回的是vector中的最大值的索引号，如果vector是一个向量，那就返回一个值，如果是一个矩阵，那就返回一个向量，这个向量的每一个维度都是相对应矩阵行的最大值元素的索引号。
-* ![1562035122036](C:\Users\nihaopeng\Deep Learning\images\1562035122036.png)
+* ![1562035122036](../images/1562035122036.png)
 
 
 
