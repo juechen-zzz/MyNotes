@@ -63,3 +63,19 @@
 
 
 
+##  iCloud
+
+* 系统偏好设置-图标-输入ID-选择自己想同步的资料
+
+
+
+## App Store
+
+* 软件安装包后缀名：dmg  pkg  zip  tar
+* ![1562847827101](C:\Users\nihaopeng\Deep Learning\images\1562847827101.png)
+* ![1562847840513](C:\Users\nihaopeng\Deep Learning\images\1562847840513.png)
+
+
+
+
+
