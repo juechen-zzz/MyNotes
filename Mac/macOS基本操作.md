@@ -79,3 +79,35 @@
 
 
 
+## 自带软件
+
+* 选中pdf--预览--可以编辑
+* 浏览器：
+  * 谷歌
+  * 自带
+* 视频播放软件![1562921863141](C:\Users\nihaopeng\Deep Learning\images\1562921863141.png)
+* unarchiver（压缩文件软件）
+  * 只能解压缩，压缩操作则依旧是原来的zip
+* Tuxera
+  * NTFS硬盘格式属于微软
+  * 格式化硬盘为MS-DOS(FAT)格式
+* iStat Menus
+  * 状态栏显示温度、上网速度等
+* cleanMyMac 3
+* Moom
+  * 分屏，需要常驻后台才行
+
+
+
+
+
+
+
+
+
+
+
+
+
+![1562914847540](C:\Users\nihaopeng\Deep Learning\images\1562914847540.png)
+
