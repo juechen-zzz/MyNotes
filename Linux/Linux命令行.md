@@ -1,25 +1,25 @@
 # Linux命令行
 
-* 退出命令行：exit
+* 退出命令行：**exit**
 
-* 显示日期和时间：date
+* 显示日期和时间：**date**
 
 ![1562586587699](C:\Users\nihaopeng\Deep Learning\images\1562586587699.png)
 
-* 显示日历的命令：cal [month] [year]
+* 显示日历的命令：**cal [month] [year]**
 
 ![1562586699496](C:\Users\nihaopeng\Deep Learning\images\1562586699496.png)
 
 ![1562586625530](C:\Users\nihaopeng\Deep Learning\images\1562586625530.png)
 
-* 简单计算器：bc		退出计算器：quit
+* 简单计算器：**bc**		退出计算器：**quit**
 
 ![1562586862432](C:\Users\nihaopeng\Deep Learning\images\1562586862432.png)
 
 * tab具有命令补全与文件补齐的功能，避免打错命令或者文件名
   * 接在一串命令的第一个字段后面，则为**命令补全**
   * 接在一串命令的第二个字段后面，则为**文件补齐**
-* 中断目前程序： ctrl + C
+* 中断目前程序： **ctrl + C**
 * 上下翻页：shift + 上/下
 * 求助：
   * 命令 + —help
@@ -49,4 +49,13 @@
 * 第六栏表示这个文件的**创建日期或是最近的修改日期**
 
 
+
+## 修改文件属性与权限（P157）
+
+* **chgrp**：修改文件所属用户组（change group）
+* **chown**：修改文件拥有者
+* **chmod**：修改文件的权限，SUID、SGID、SBIT等的特性
+  * 文件基本权限有9个：owner、group、others，每种对应的read、write、execute
+  * 权限数字对照表：r, 4; w, 2; x, 1，即[-rwxrwx—]对应为770
+  * 符号类型修改文件权限
 
