@@ -72,8 +72,8 @@
 ## App Store
 
 * 软件安装包后缀名：dmg  pkg  zip  tar
-* ![1562847827101](C:\Users\nihaopeng\Deep Learning\images\1562847827101.png)
-* ![1562847840513](C:\Users\nihaopeng\Deep Learning\images\1562847840513.png)
+* ![1562847827101](../images/1562847827101.png)
+* ![1562847840513](../images/1562847840513.png)
 
 
 
@@ -85,7 +85,7 @@
 * 浏览器：
   * 谷歌
   * 自带
-* 视频播放软件![1562921863141](C:\Users\nihaopeng\Deep Learning\images\1562921863141.png)
+* 视频播放软件![1562921863141](../images/1562921863141.png)
 * unarchiver（压缩文件软件）
   * 只能解压缩，压缩操作则依旧是原来的zip
 * Tuxera
@@ -109,5 +109,5 @@
 
 
 
-![1562914847540](C:\Users\nihaopeng\Deep Learning\images\1562914847540.png)
+![1562914847540](../images/1562914847540.png)
 

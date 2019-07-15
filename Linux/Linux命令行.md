@@ -4,17 +4,17 @@
 
 * 显示日期和时间：**date**
 
-![1562586587699](C:\Users\nihaopeng\Deep Learning\images\1562586587699.png)
+![1562586587699](../images/1562586587699.png)
 
 * 显示日历的命令：**cal [month] [year]**
 
-![1562586699496](C:\Users\nihaopeng\Deep Learning\images\1562586699496.png)
+![1562586699496](../images/1562586699496.png)
 
-![1562586625530](C:\Users\nihaopeng\Deep Learning\images\1562586625530.png)
+![1562586625530](../images/1562586625530.png)
 
 * 简单计算器：**bc**		退出计算器：**quit**
 
-![1562586862432](C:\Users\nihaopeng\Deep Learning\images\1562586862432.png)
+![1562586862432](../images/1562586862432.png)
 
 * tab具有命令补全与文件补齐的功能，避免打错命令或者文件名
   * 接在一串命令的第一个字段后面，则为**命令补全**
@@ -29,7 +29,7 @@
 
 ## 文件权限（ls -al）
 
-![1563007096936](C:\Users\nihaopeng\Deep Learning\images\1563007096936.png)
+![1563007096936](../images/1563007096936.png)
 
 * 第一栏代表文件的**类型和权限**
   * 第一个字符代表这个文件是**目录、文件或者链接文件**等
