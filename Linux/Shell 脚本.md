@@ -2,7 +2,7 @@
 
 ## Vim基本使用
 
-![image-20190726100319122](/Users/nihaopeng/个人/Git/Deep-learning/images/image-20190726100319122.png)
+![image-20190726100319122](../images/image-20190726100319122.png)
 
 
 
@@ -16,7 +16,7 @@
   * q          退出程序
   * w          保存文件
 
-![image-20190726100817182](/Users/nihaopeng/个人/Git/Deep-learning/images/image-20190726100817182.png)
+![image-20190726100817182](../images/image-20190726100817182.png)
 
 
 
@@ -37,5 +37,5 @@
 
 ## Shell脚本
 
-![image-20190726103742319](/Users/nihaopeng/个人/Git/Deep-learning/images/image-20190726103742319.png)
+![image-20190726103742319](../images/image-20190726103742319.png)
 

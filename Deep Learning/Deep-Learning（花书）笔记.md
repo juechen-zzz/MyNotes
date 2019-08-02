@@ -68,7 +68,7 @@
 *  一个重要创新点在于：核技巧
 * 不输出概率，只输出类别
 
-![image-20190726145544950](/Users/nihaopeng/个人/Git/Deep-learning/images/image-20190726145544950.png)
+![image-20190726145544950](../images/image-20190726145544950.png)
 
 
 
