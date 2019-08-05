@@ -132,3 +132,24 @@
   * -i   若目标文件已经存在时，就会询问是否覆盖
 
   * -u  若目标文件已经存在，且source比较新，才会更新
+
+
+
+
+
+## 服务器
+
+* 挂后台训练代码：
+
+  ```shell
+  nohup 你的命令 > run.log &
+  tail -f run.log
+  ```
+
+* 进程
+
+```shell
+nvidia-smi
+kill -9
+```
+
