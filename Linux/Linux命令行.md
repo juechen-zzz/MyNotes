@@ -153,3 +153,10 @@ nvidia-smi
 kill -9
 ```
 
+* 创建
+
+```shell
+mkdir	创建文件夹
+touch 创建文件
+```
+
