@@ -160,3 +160,16 @@ mkdir	创建文件夹
 touch 创建文件
 ```
 
+* 创建虚拟环境
+
+```shell
+virtualenv -p /usr/local/bin/python2.7 venv1			
+source venv1/bin/activate
+deactivate
+
+conda create -n your_env_name python=X.X（2.7、3.6等）
+coda activate your_env_name
+conda install -n your_env_name [package]
+conda deactivate
+```
+
