@@ -144,13 +144,14 @@
   ```shell
   nohup 你的命令 > run.log &
   tail -f run.log
+  ps -fe | grep train_mle
   ```
 
 * 进程
 
 ```shell
-nvidia-smi
-kill -9
+nvidia-smi	 查看显卡
+kill -9 进程号
 ```
 
 * 创建
