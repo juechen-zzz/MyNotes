@@ -60,6 +60,7 @@
 * **新建**： command + N
 * **最小化窗口**： command + M
 * **退格**：fn + delete
+* **显示隐藏文件**：command + shift + .
 
 
 
