@@ -69,7 +69,9 @@
 
 * mkdir：**建立**一个新目录
 
-* rmdir：**删除**一个空目录
+* rmdir：**删除**一个**空目录**
+
+* Touch：建立一个新的文件，格式自行指定
 
 * 目录含义
 
@@ -152,6 +154,7 @@
 ```shell
 nvidia-smi	 查看显卡
 kill -9 进程号
+CUDA_VISIBLE_DEVICES=0,1,3,4
 ```
 
 * 创建
@@ -164,13 +167,42 @@ touch 创建文件
 * 创建虚拟环境
 
 ```shell
+# 要确保电脑里本来有2的版本才行
 virtualenv -p /usr/local/bin/python2.7 venv1			
 source venv1/bin/activate
 deactivate
 
+# 用conda可以指定任何版本
 conda create -n your_env_name python=X.X（2.7、3.6等）
-coda activate your_env_name
+conda activate your_env_name
 conda install -n your_env_name [package]
 conda deactivate
+```
+
+* 内存饱满（tap失效）
+
+```
+df -h
+du -h -x --max-depth=1
+按目录查看
+rm -rf file
+```
+
+* python换国内镜像
+	* 指定全局安装源
+		* 在unix和macos，配置文件为：$HOME/.pip/pip.conf
+		* 在windows上，配置文件为：%APPDATA%\pip\pip.ini
+
+```shell
+[global]
+index-url = http://pypi.douban.com/simple
+[install]
+trusted-host=pypi.douban.com
+```
+
+* 查看IP
+
+```shell
+ifconfig
 ```
 
