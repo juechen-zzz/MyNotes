@@ -146,6 +146,7 @@ source venv1/bin/activate
 deactivate
 
 # 用conda可以指定任何版本
+conda info -e		    查看目前所有虚拟环境
 conda create -n your_env_name python=X.X（2.7、3.6等）
 conda activate your_env_name
 conda install -n your_env_name [package]

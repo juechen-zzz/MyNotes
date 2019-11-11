@@ -40,3 +40,4 @@ sudo ln -s /usr/local/cuda-9.1 /usr/local/cuda
 ### 安装CUDNN
 
 * 下载地址 https://developer.nvidia.com/rdp/cudnn-archive
+
