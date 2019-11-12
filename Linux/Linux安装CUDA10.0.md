@@ -20,6 +20,18 @@ nvidia-smi
 cat /proc/driver/nvidia/version
 ```
 
+* 查看CUDA版本
+
+```shell
+cat /usr/local/cuda/version.txt
+```
+
+* 查看CUDNN版本
+
+```shell
+cat /usr/local/cuda/include/cudnn.h | grep CUDNN_MAJOR -A 2
+```
+
 ![image-20191110123518410](../images/image-20191110123518410.png)
 
 
@@ -37,7 +49,39 @@ sudo rm -rf cuda
 sudo ln -s /usr/local/cuda-9.1 /usr/local/cuda  
 ```
 
+* 安装
+
+	* **sudo sh cuda-123123.run**
+	* ![image-20191112145809978](../images/image-20191112145809978.png)
+	* 环境变量：**vim ~/.bashrc**
+
+	```shell
+	export PATH=/usr/local/cuda/bin${PATH:+:${PATH}}
+	export LD_LIBRARY_PATH=/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+	export CUDA_HOME=/usr/local/cuda
+	```
+
+	* **source ~/.bashrc**
+
 ### 安装CUDNN
 
 * 下载地址 https://developer.nvidia.com/rdp/cudnn-archive
+
+* 解压cudnn-10.0-linux-x64-v7.5.0.56.tgz：tar -xzvf  cudnn-10.0-linux-x64-v7.5.0.56.tgz
+
+	```shell
+	tar -xzvf  cudnn-10.0-linux-x64-v7.5.0.56.tgz
+	```
+
+	* ```shell
+		    $ sudo cp cuda/include/cudnn.h /usr/local/cuda/include
+		    $ sudo cp cuda/lib64/libcudnn* /usr/local/cuda/lib64
+		    $ sudo chmod a+r /usr/local/cuda/include/cudnn.h /usr/local/cuda/lib64/libcudnn*
+		```
+
+* 验证
+
+```shell
+cat /usr/local/cuda/include/cudnn.h | grep CUDNN_MAJOR -A 2
+```
 
