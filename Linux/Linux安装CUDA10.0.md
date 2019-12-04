@@ -58,7 +58,7 @@ sudo ln -s /usr/local/cuda-9.1 /usr/local/cuda
 	```shell
 	export PATH=/usr/local/cuda/bin${PATH:+:${PATH}}
 	export LD_LIBRARY_PATH=/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-	export CUDA_HOME=/usr/local/cuda
+	export CUDA_HOME=/usr/local/cuda¡
 	```
 
 	* **source ~/.bashrc**
