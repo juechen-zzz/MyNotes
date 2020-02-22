@@ -22,3 +22,4 @@
 * **sqrt(double x)**：取算数平方根
 * **log(double x)**：取以自然对数为底的对数
 * **round(double x)**：将x四舍五入
+

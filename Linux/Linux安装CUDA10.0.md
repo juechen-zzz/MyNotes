@@ -32,7 +32,7 @@ cat /usr/local/cuda/version.txt
 cat /usr/local/cuda/include/cudnn.h | grep CUDNN_MAJOR -A 2
 ```
 
-![image-20191110123518410](../images/image-20191110123518410.png)
+![image-20200222221230661](../images/image-20200222221230661.png)
 
 
 
