@@ -64,8 +64,8 @@
 ![1560696266560](../images/1560696266560.png)
 
 * 最开始要引入包，**usepackage{graphicx}**
-* ![1562138707726](C:\Users\nihaopeng\Deep Learning\images\1562138707726.png)
-* ![1562139321595](C:\Users\nihaopeng\Deep Learning\images\1562139321595.png)
+* ![1562138707726](../images/1562138707726.png)
+* ![1562139321595](../images/1562139321595.png)
 * 
 
 ![1561628355255](../images/1561628355255.png)
@@ -86,9 +86,9 @@
 
 ## 有序列表
 
-![1562222655380](C:\Users\nihaopeng\Deep Learning\images\1562222655380.png)
+![1562222655380](../images/1562222655380.png)
 
-![1562222667160](C:\Users\nihaopeng\Deep Learning\images\1562222667160.png)
+![1562222667160](../images/1562222667160.png)
 
 
 
