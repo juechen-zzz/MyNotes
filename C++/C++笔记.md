@@ -14,7 +14,7 @@
 |  Char  |     8bit     |                         |
 |  Bool  |              |                         |
 
-## 常用函数
+## 1 常用函数
 
 * **fabs(double x)**：取绝对值
 * **floor(double x)  ceil(double x)**：向下、向上取整
@@ -23,19 +23,38 @@
 * **log(double x)**：取以自然对数为底的对数
 * **round(double x)**：将x四舍五入
 
-## Vector容器
+## 2 顺序容器
+
+![image-20200313120506641](../images/image-20200313120506641.png)
+
+### Vector容器
 
 ![image-20200303213354028](../images/image-20200303213354028.png)
 
-## deque容器
+### deque容器
 
 ![image-20200303221548959](../images/image-20200303221548959.png)
 
-## list容器
+### list容器
 
 ![image-20200305000638254](../images/image-20200305000638254.png)
 
-## 容器使用时机
+### string容器
+
+![image-20200315141309106](../images/image-20200315141309106.png)
+
+![image-20200315141530469](../images/image-20200315141530469.png)
+
+### 容器使用时机
 
 ![image-20200308193515898](../images/image-20200308193515898.png)
+
+## 3 IO库
+
+* istream：输入流类型，提供输入条件
+* ostream：输出流类型，提供输出条件
+
+![image-20200313115213658](../images/image-20200313115213658.png)
+
+* IO对象无拷贝和赋值
 
