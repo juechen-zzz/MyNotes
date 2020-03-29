@@ -114,4 +114,33 @@
 
 ## 6 动态内存
 
-* 除了静态内存和栈内存，每个程序还拥有一个内存池，这部分称为自由空间或者堆
+* 除了静态内存和栈内存，每个程序还拥有一个内存池，这部分称为自由空间或者**堆**
+* 两种智能指针的区别在于管理底层指针的方式：**shared_pt**r允许多个指针指向同一个对象，**unique_ptr**则独占所指向的对象
+
+### Shared_ptr
+
+```c++
+// 初始化
+shared_ptr<string> p1;
+shared_ptr<vector<int>> p2;
+
+// 内置函数
+p.unique()		// 是否是唯一指向当前值的智能指针，true/false
+p.use_count() 
+```
+
+![image-20200329203014098](../images/image-20200329203014098.png)
+
+#### make_shared函数
+
+* 调用函数在动态内存中分配一个对象并初始化，返回指向此对象的**shared_ptr**
+
+```c++
+shared_ptr<int> p = make_shared<int>(42);
+shared_ptr<string> p2 = make_shared<string>(10,'9');
+shared_ptr<int> p3 = make_shared<int>();
+auto p4 = make_shared<vector<string>>();
+```
+
+![image-20200329212054161](../images/image-20200329212054161.png)
+
