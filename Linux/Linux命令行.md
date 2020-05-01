@@ -1,6 +1,6 @@
-# .Linux命令行
+# Linux基础
 
-## 文件权限（ls -al）
+## 1 文件权限（ls -al）
 
 ![1563007096936](../images/1563007096936.png)
 
@@ -23,18 +23,19 @@
 
 
 
-## 修改文件属性与权限（P157）
+## 2 修改文件属性与权限（P157）
 
 * **chgrp**：修改文件所属用户组（change group）
 * **chown**：修改文件拥有者
 * **chmod**：修改文件的权限，SUID、SGID、SBIT等的特性
-  * 文件基本权限有9个：owner、group、others，每种对应的read、write、execute
+  * 文件基本权限有9个：**owner、group、others**，每种对应的**read、write、execute**
   * 权限数字对照表：r, 4; w, 2; x, 1，即[-rwxrwx—]对应为770
   * 符号类型修改文件权限
+  * Chmod 777 filename
 
 
 
-## 目录与路径
+## 3 目录与路径
 
 * cd ：切换路径
 
@@ -112,7 +113,7 @@
 
 
 
-## 服务器
+## 4 服务器
 
 * 挂后台训练代码：
 
@@ -164,8 +165,8 @@ rm -rf file
 
 * python换国内镜像
 	* 指定全局安装源
-		* 在unix和macos，配置文件为：$HOME/.pip/pip.conf
-		* 在windows上，配置文件为：%APPDATA%\pip\pip.ini
+		* 在unix和macos，配置文件为：**$HOME/.pip/pip.conf**
+		* 在windows上，配置文件为：**%APPDATA%\pip\pip.ini**
 
 ```shell
 [global]
@@ -183,4 +184,48 @@ ifconfig
 * scp
 
 ![image-20191109160004687](../images/image-20191109160004687.png)
+
+## 5 基础知识
+
+<img src="../images/image-20200430162701846.png" alt="image-20200430162701846" style="zoom: 33%;" />
+
+#### 5.1 文件目录类
+
+##### **ls**：显示目录![image-20200501135456626](../images/image-20200501135456626.png)
+
+##### **cat** :查看文件内容![image-20200501141648666](../images/image-20200501141648666.png)
+
+##### **more**:显示过一页的文件![image-20200501143204741](../images/image-20200501143204741.png)
+
+##### **head tail**：显示头尾![image-20200501143324433](../images/image-20200501143324433.png)
+
+##### **cp:**复制
+
+![image-20200501143622060](../images/image-20200501143622060.png)
+
+![image-20200501145555544](../images/image-20200501145555544.png)
+
+##### **rm**:删除
+
+![image-20200501145810067](../images/image-20200501145810067.png)
+
+![image-20200501145900146](../images/image-20200501145900146.png)
+
+##### **find**:查找
+
+![image-20200501145949168](../images/image-20200501145949168.png)
+
+##### **grep:搜索匹配字符**
+
+![image-20200501150236385](../images/image-20200501150236385.png)
+
+
+
+##### **tar**:压缩
+
+![image-20200501150654880](../images/image-20200501150654880.png)
+
+![image-20200501150836980](../images/image-20200501150836980.png)
+
+
 
