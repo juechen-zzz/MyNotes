@@ -13,6 +13,7 @@ grep -n ^f 123.txt  /  grep -n ke$ 123.txt
 echo XXX > 123.txt  /  echo XXX >> 123.txt # >会覆盖，>>是追加 
 scp -P port user@XXX:Desktop/123.txt 123.txt # 远程复制，-r可以复制文件夹
 scp -r demp user@XXX:Desktop
+ps au	# a查看全部进程，u显示进程详细状态
 ```
 
 * 重定向：**>** / **>>**  搭配各种指令将本应该显示在终端的字符输入到文件中去
@@ -90,6 +91,8 @@ scp -r demp user@XXX:Desktop
   * -d     仅列出目录本身，而不是列出目录内的文件数据
 
   * -l      详细信息显示，包含文件的属性与权限等数据
+
+  * ![image-20200611084341668](../images/image-20200611084341668.png)
 
 * **复制（cp）、删除（rm）与移动（mv）** ： **P183**
 
