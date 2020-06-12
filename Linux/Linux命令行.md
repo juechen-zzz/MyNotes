@@ -1,23 +1,33 @@
 # Linux基础
 
 ```shell
-ls -lh	# 列表形式，h可以将占用空间更好的表示
-rm -rf  # 删库跑路
-cd      # 回到家目录
-cd -		# 在最近的两个目录切换
+ls -lh							# 列表形式，h可以将占用空间更好的表示
+rm -rf  						# 删库跑路
+cd      						# 回到家目录
+cd -								# 在最近的两个目录切换
 cp ~./Desktop/a.txt ./	# 文件名不改变，后面只需要写目录
 mv -i a.txt b.txt		# 重命名
-cat -n/ more # 都用来查看文件，cat看小文件，全部显示，more看大文件，分屏显示
+#########################################################################
+cat -n/ more 				# 都用来查看文件，cat看小文件，全部显示，more看大文件，分屏显示
 grep -n XXX 123.txt
-grep -n ^f 123.txt  /  grep -n ke$ 123.txt
-echo XXX > 123.txt  /  echo XXX >> 123.txt # >会覆盖，>>是追加 
-scp -P port user@XXX:Desktop/123.txt 123.txt # 远程复制，-r可以复制文件夹
+grep -n ^f 123.txt  /  grep -n ke$ 123.txt 		# 查找头尾
+echo XXX > 123.txt  /  echo XXX >> 123.txt 		# >会覆盖，>>是追加 
+scp -P port user@XXX:Desktop/123.txt 123.txt 	# 远程复制，-r可以复制文件夹
 scp -r demp user@XXX:Desktop
-ps au	# a查看全部进程，u显示进程详细状态
+#########################################################################
+ps au												# a查看全部进程，u显示进程详细状态
+top 												# 动态查看进程，退出需要按q
+kill -9 进程号
+find [路径] -name "*.py"
+ln -s 被链接的源文件 链接文件	 # 源文件要用绝对目录
+#########################################################################
+tar -zcvf 打包文件.tar.gz 被打包的文件、目录   # z换成j，则为.tar.bz2
+tar -zxvf 打包文件.tar.gz -C 目标路径
 ```
 
 * 重定向：**>** / **>>**  搭配各种指令将本应该显示在终端的字符输入到文件中去
 * 管道： **|** 需要两个命令，将第一个命令的输出作为第二个命令的输入  ls -lha / | more
+* <img src="../images/image-20200612101137433.png" alt="image-20200612101137433" style="zoom: 50%;" />
 
 ## 1 文件权限（ls -al）
 
