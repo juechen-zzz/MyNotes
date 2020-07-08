@@ -1,5 +1,10 @@
 # python学习笔记
 
+```python
+print("XXXX %06d" % 100)		# 6位显示整数，不足前面补0
+print("XXXX %.2f" % 3.145)	# 小数点后保留2位	if / elif / else
+```
+
 
 
 ## 1. 中文编码
