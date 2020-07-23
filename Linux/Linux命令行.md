@@ -158,6 +158,7 @@ tar -zxvf 打包文件.tar.gz -C 目标路径
 
 ```shell
 nvidia-smi	 查看显卡
+watch -n1 nvidia-smi  动态查看显卡
 kill -9 进程号
 CUDA_VISIBLE_DEVICES=0,1,3,4
 ```
