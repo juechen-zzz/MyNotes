@@ -71,7 +71,7 @@ array([1,  2,  3])
 torch.from_numpy(ndarray) → Tensor
 ```
 
-从numpy.ndarray转化为Tensor，共享存储空间，张量改变，数组也会改变
+从numpy.ndarray转化为Tensor，**共享存储空间**，张量改变，数组也会改变
 
 
 
@@ -408,9 +408,12 @@ torch.reshape(input, shape) → Tensor
 
 ```shell
 torch.squeeze(input, dim=None, out=None) → Tensor
+torch.unsqueeze(input, dim) → Tensor
 ```
 
 将输入张量收缩，所有一维的维度删除
+
+返回在指定位置插入的尺寸为1的新张量
 
 ```python
 >>> x = torch.zeros(2, 1, 2, 1, 2)
@@ -425,6 +428,15 @@ torch.Size([2, 1, 2, 1, 2])
 >>> y = torch.squeeze(x, 1)
 >>> y.size()
 torch.Size([2, 2, 1, 2])
+
+>>> x = torch.tensor([1, 2, 3, 4])
+>>> torch.unsqueeze(x, 0)
+tensor([[ 1,  2,  3,  4]])
+>>> torch.unsqueeze(x, 1)
+tensor([[ 1],
+        [ 2],
+        [ 3],
+        [ 4]])
 ```
 
 
@@ -435,7 +447,7 @@ torch.Size([2, 2, 1, 2])
 torch.stack(tensors, dim=0, out=None) → Tensor
 ```
 
-将两个张量序列在一个新的维度cat，输入的所有张量必须统一尺寸
+将两个张量序列在一个**新的维度**cat，输入的所有张量必须统一尺寸
 
 ```python
 >>> b = torch.ones(3,4)
@@ -455,4 +467,134 @@ tensor([[[-0.0622,  1.4364, -2.2190,  0.7706],
 >>> print(c.size())
 torch.Size([2, 3, 4])
 ```
+
+
+
+## torch.t
+
+```shell
+torch.t(input) → Tensor
+```
+
+输入为零维/一维/二维张量，0/1时直接返回自身，2时返回转置
+
+```python
+>>> x = torch.randn(3)
+>>> x
+tensor([ 2.4320, -0.4608,  0.7702])
+>>> torch.t(x)
+tensor([ 2.4320, -0.4608,  0.7702])
+>>> x = torch.randn(2, 3)
+>>> x
+tensor([[ 0.4875,  0.9158, -0.5872],
+        [ 0.3938, -0.6929,  0.6932]])
+>>> torch.t(x)
+tensor([[ 0.4875,  0.3938],
+        [ 0.9158, -0.6929],
+        [-0.5872,  0.6932]])
+```
+
+
+
+## torch.take
+
+```shell
+torch.take(input, index) → Tensor
+```
+
+将输入的张量看做一维，取其中指定index的项
+
+```python
+>>> src = torch.tensor([[4, 3, 5],
+                        [6, 7, 8]])
+>>> torch.take(src, torch.tensor([0, 2, 5]))
+tensor([ 4,  5,  8])
+```
+
+
+
+## torch.transpose
+
+```shell
+torch.transpose(input, dim0, dim1) → Tensor
+```
+
+张量转置，dim0和dim1转置
+
+
+
+## torch.unbind
+
+```shell
+torch.unbind(input, dim=0) → seq
+```
+
+将张量删除其中一维，默认为0，对于二维数组而言，就是返回3个行张量
+
+```python
+>>> torch.unbind(torch.tensor([[1,2,3],[4,5,6],[7,8,9]]))
+(tensor([1, 2, 3]), tensor([4, 5, 6]), tensor([7, 8, 9]))
+```
+
+
+
+## torch.where
+
+```shell
+torch.where(condition, x, y) → Tensor
+```
+
+类似于if-else
+
+```python
+>>> x = torch.randn(3, 2)
+>>> y = torch.ones(3, 2)
+>>> x
+tensor([[-0.4620,  0.3139],
+        [ 0.3898, -0.7197],
+        [ 0.0478, -0.1657]])
+>>> torch.where(x > 0, x, y)
+tensor([[ 1.0000,  0.3139],
+        [ 0.3898,  1.0000],
+        [ 0.0478,  1.0000]])
+```
+
+
+
+## torch.normal
+
+```shell
+torch.normal(mean, std, *, generator=None, out=None) → Tensor
+torch.normal(mean=0.0, std, out=None) → Tensor
+torch.normal(mean, std=1.0, out=None) → Tensor
+torch.normal(mean, std, size, *, out=None) → Tensor
+```
+
+```python
+>>> torch.normal(mean=torch.arange(1., 11.), std=torch.arange(1, 0, -0.1))
+tensor([  1.0425,   3.5672,   2.7969,   4.2925,   4.7229,   6.2134,
+          8.0505,   8.1408,   9.0563,  10.0566])
+>>> torch.normal(mean=0.5, std=torch.arange(1., 6.))
+tensor([-1.2793, -1.0732, -2.0687,  5.1177, -1.2303])
+>>> torch.normal(mean=torch.arange(1., 6.))
+tensor([ 1.1552,  2.6148,  2.6535,  5.8318,  4.2361])
+>>> torch.normal(2, 3, size=(1, 4))
+tensor([[-1.3987, -1.9544,  3.6048,  0.7909]])
+```
+
+
+
+## torch.rand
+
+```shell
+torch.rand(*size, out=None, dtype=None, layout=torch.strided, device=None, requires_grad=False) → Tensor
+torch.randint(low=0, high, size, *, generator=None, out=None)
+torch.randn(*size, out=None, dtype=None, layout=torch.strided, device=None, requires_grad=False) → Tensor
+```
+
+* 返回[0, 1]内的随机数
+* 返回指定区间的随机整数
+* 返回指定尺寸的正态分布
+
+
 
