@@ -1,5 +1,7 @@
 # Docker
 
+[安装教程](https://blog.csdn.net/BigData_Mining/article/details/99681168)：注意要用显卡就必须装nvidia-docker
+
 ## 1 创建容器
 
 * **查看**
@@ -24,7 +26,7 @@
 	* nvidia/cuda:10.0：image名（若不是latest则需要制定版本）
 
 ```shell
-nvidia-docker run -itd --net host --shm-size 31G -w /mnt/ --name [容器名] -v /home/lihaopeng:/mnt/ nvidia/cuda:10.0 /bin/bash
+nvidia-docker run -itd --net host --shm-size 31G -w /home/ --name [容器名] -v /home/:/mnt/ nvidia/cuda:10.0 /bin/bash
 ```
 
 * **执行**

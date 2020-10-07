@@ -102,7 +102,7 @@ tar -zxvf 打包文件.tar.gz -C 目标路径
 
   * -l      详细信息显示，包含文件的属性与权限等数据
 
-  * ![image-20200611084341668](../images/image-20200611084341668.png)
+  * <img src="../images/image-20200611084341668.png" alt="image-20200611084341668" style="zoom: 50%;" />
 
 * **复制（cp）、删除（rm）与移动（mv）** ： **P183**
 
@@ -153,6 +153,8 @@ tar -zxvf 打包文件.tar.gz -C 目标路径
   tail -f run.log
   ps -fe | grep train_mle
   ```
+
+<img src="../images/image-20200818160307109.png" alt="image-20200818160307109" style="zoom:50%;" />
 
 * 进程
 

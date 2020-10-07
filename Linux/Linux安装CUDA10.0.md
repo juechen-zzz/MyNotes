@@ -1,4 +1,7 @@
-### Linux安装CUDA10.0
+### Linux安装CUDA+CUDNN
+
+* [安装CUDA和CUDNN网站教程](https://blog.csdn.net/qq_33200967/article/details/80689543)
+* [安装NVIDIA驱动教程](https://blog.csdn.net/zuo232100/article/details/87863069)
 
 #### 查看设备信息
 
