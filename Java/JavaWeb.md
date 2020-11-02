@@ -8,6 +8,7 @@
             <artifactId>junit</artifactId>
             <version>4.12</version>
         </dependency>
+        
       	<!--Servlet+JSP-->
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -15,10 +16,17 @@
             <version>2.5</version>
         </dependency>
         <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>javax.servlet.jsp</groupId>
             <artifactId>javax.servlet.jsp-api</artifactId>
             <version>2.3.3</version>
         </dependency>
+        
         <!--JSTL表达式依赖-->
         <dependency>
             <groupId>javax.servlet.jsp.jstl</groupId>
@@ -30,12 +38,14 @@
             <artifactId>jstl</artifactId>
             <version>1.2</version>
         </dependency>
+        
         <!--standard标签库-->
         <dependency>
             <groupId>taglibs</groupId>
             <artifactId>standard</artifactId>
             <version>1.0.6</version>
         </dependency>
+        
         <!--MySQL-->
         <dependency>
             <groupId>mysql</groupId>
@@ -129,7 +139,7 @@
 
 	* sun公司主推的B/S架构（B/S：浏览和服务器，C/S：客户端和服务器）
 	* 基于Java，语法像ASP
-	* 可以承载三高（高并发、高可用、高性能）问题
+	* 可以承载三高（**高并发、高可用、高性能**）问题
 
 
 
@@ -139,7 +149,7 @@
 * **IIS**：
 	* 微软；ASP；Windows中自带
 * **Tomcat**：
-	* Tomcat是Apache 软件基金会（Apache Software Foundation）的Jakarta 项目中的一个核心项目，由Apache、Sun 和其他一些公司及个人共同开发而成。由于有了Sun 的参与和支持，最新的Servlet 和JSP 规范总是能在Tomcat 中得到体现，Tomcat 5支持最新的Servlet 2.4 和JSP 2.0 规范。因为Tomcat 技术先进、性能稳定，而且免费，因而深受Java 爱好者的喜爱并得到了部分软件开发商的认可，成为目前比较流行的Web 应用服务器。
+	* Tomcat是Apache 软件基金会（Apache Software Foundation）的Jakarta 项目中的一个核心项目，由Apache、Sun 和其他一些公司及个人共同开发而成。因为Tomcat 技术先进、性能稳定，而且免费，因而深受Java 爱好者的喜爱并得到了部分软件开发商的认可，成为目前比较流行的**Web 应用服务器**。
 
 
 
@@ -804,9 +814,9 @@ public class HelloServlet extends HttpServlet {
 
 <img src="../images/image-20201009094502631.png" alt="image-20201009094502631" style="zoom:50%;" />
 
-* 服务器会给每一个用户（浏览器）创建一个Session对象
+* 服务器会给**每一个用户（浏览器）**创建一个Session对象
 
-* 一个Session独占一个浏览器，只要浏览器没有关闭，这个Session就存在
+* 一个Session独占一个浏览器，**只要浏览器没有关闭，这个Session就存在**
 
 * 用户登录之后，整个网站它都可以访问 -->**保存用户的信息**
 
@@ -2354,8 +2364,115 @@ public class TestJdbc3 {
 
 ## 16. 邮件发送
 
+### 16.1 普通邮件
+
+* 依赖：普通邮件的两个依赖包：activation 和mail，下载好拷入lib目标并添加即可
+
 <img src="../images/image-20201020093435735.png" alt="image-20201020093435735" style="zoom: 50%;" />
 
 ![image-20201020101023689](../images/image-20201020101023689.png)
 
 EETBDIXTIBOQXYYA
+
+* 5个步骤
+
+```Java
+    public static void main(String[] args) throws Exception {
+        Properties prop = new Properties();
+        prop.setProperty("mail.host", "smtp.126.com");  // 设置126邮箱服务器
+        prop.setProperty("mail.transport.protocol", "smtp");    // 设置邮件发送协议
+        prop.setProperty("mail.smtp.auth", "true");     // 需要验证用户名密码
+
+        // 使用JavaMail发送邮件的5个步骤
+        // 1. 创建定义整个应用程序所需的环境信息的Session对象
+        Session session = Session.getDefaultInstance(prop, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                // 发件人邮件用户名和授权码
+                return new PasswordAuthentication("nihaopeng1997@126.com", "EETBDIXTIBOQXYYA");
+            }
+        });
+        session.setDebug(true);         // 开启Session的debug模式
+
+        // 2. 通过Session得到transport对象
+        Transport ts = session.getTransport();
+
+        // 3. 使用邮箱的用户名和授权码连接服务器
+        ts.connect("smtp.126.com", "nihaopeng1997@126.com", "EETBDIXTIBOQXYYA");
+
+        // 4. 创建邮件
+        MimeMessage message = new MimeMessage(session);
+
+        message.setFrom(new InternetAddress("nihaopeng1997@126.com"));
+        message.setRecipient(Message.RecipientType.TO, new InternetAddress("240553516@qq.com"));
+        message.setSubject("只包含文本的简单邮件");
+        message.setContent("你好!", "text/html;charset=UTF-8");
+
+
+        // 5. 发送邮件
+        ts.sendMessage(message, message.getAllRecipients());
+        ts.close();
+    }
+```
+
+### 16.2 带附件的邮件
+
+* 只修改上面的第4部分：创建邮件
+
+![image-20201102094034861](../images/image-20201102094034861.png)
+
+```java
+public static MimeMessage imageMail(Session session) throws MessagingException{
+        // 消息的固定信息
+        MimeMessage mimeMessage = new MimeMessage(session);
+
+        // 邮件发送人
+        mimeMessage.setFrom(new InternetAddress("nihaopeng1997@126.com"));
+        mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress("240553516@qq.com"));
+        mimeMessage.setSubject("附件带图片的正常邮件");
+
+        /*
+            编写邮件内容
+                1 图片
+                2 附件
+                3 文本
+         */
+
+        // 图片
+        MimeBodyPart image = new MimeBodyPart();
+        image.setDataHandler(new DataHandler(new FileDataSource("/Users/nihaopeng/个人/Git/JavaWeb/javaweb-file/mail-java/src/resources/dog_and_cat.jpeg")));                   // 在body中放入这个处理的图片数据
+        image.setContentID("dog_and_cat.jpeg");     // 给图片设置一个ID，这样在后面可以使用
+
+        // 文本
+        MimeBodyPart text = new MimeBodyPart();
+        text.setContent("这不是广告<img src='cid:dog_and_cat.jpeg'>", "text/html;charset=UTF-8");
+
+        // 附件
+        MimeBodyPart file = new MimeBodyPart();
+        file.setDataHandler(new DataHandler(new FileDataSource("/Users/nihaopeng/个人/Git/JavaWeb/javaweb-file/mail-java/src/resources/hello.txt")));
+        file.setFileName("hello.txt");
+
+        // 拼装邮件正文内容
+        MimeMultipart multipart1 = new MimeMultipart();
+        multipart1.addBodyPart(image);
+        multipart1.addBodyPart(text);
+        multipart1.setSubType("related");
+
+        // 将拼装好的正文内容设置为主体
+        MimeBodyPart contentText = new MimeBodyPart();
+        contentText.setContent(multipart1);
+
+        // 拼接附件
+        MimeMultipart allFile = new MimeMultipart();
+        allFile.addBodyPart(file);              // 附件
+        allFile.addBodyPart(contentText);       // 正文
+        allFile.setSubType("mixed");
+
+        // 放到Message消息中
+        mimeMessage.setContent(allFile);
+        mimeMessage.saveChanges();
+
+        return mimeMessage;
+    }
+```
+
