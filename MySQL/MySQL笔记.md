@@ -40,35 +40,32 @@
 
 * 命令行指令：
 
-	```sql
-	(base)  mysql -u root -p					--连接数据库
-	Enter password:
-	Welcome to the MySQL monitor.  Commands end with ; or \g.
-	Your MySQL connection id is 60
-	Server version: 5.7.19 MySQL Community Server (GPL)
-	
-	show databases;							--查询所有的数据库
-	
-	use school;									--切换数据库
-	
-	show tables;								--查看所有的表
-	
-	describe student;						--显示表中的所有信息
-	
-	create database school;			--创建一个数据库
-	
-	exit;												--退出连接
-	```
+  ```sql
+  (base)  mysql -u root -p					--连接数据库
+  exit;										--退出连接
+  
+  show databases;								--查询所有的数据库
+  use school;									--切换数据库
+  show tables;								--查看所有的表
+  describe student;							--显示表中的所有信息
+  
+  create database school;						--创建一个数据库
+  
+  SHOW CREATE DATABASE school					--查看创建数据库的语句
+  SHOW CREATE TABLE student					--查看创建表的语句
+  
+  DESC student								--显示表的结构
+  ```
 
 * 创建表并添加数据
 
 	```sql
 	CREATE TABLE users(
 			id INT PRIMARY KEY,
-	  	`name` VARCHAR(40),
-	  	`password` VARCHAR(40),
-	  	email VARCHAR(60),
-	  	birthday DATE
+	        `name` VARCHAR(40),
+	        `password` VARCHAR(40),
+	        email VARCHAR(60),
+	        birthday DATE
 	);
 	
 	INSERT INTO users(id, `name`, `password`, email, birthday)
@@ -100,13 +97,13 @@
 * **使用**数据库
 
 	```sql
-	USE school
+	USE `school`;
 	```
 
 * **查看**数据库
 
 	```sql
-	SHOW databases
+	SHOW databases;
 	```
 
 ### 2.2 数据库数据类型
@@ -146,12 +143,7 @@
 
 ### 2.3 数据库字段属性（重点）
 
-* 每个表必须存在的字段
-	* id                         主键
-	* version              乐观锁
-	* is_delete           伪删除
-	* gmt_create      创建时间
-	* gmt_update     修改时间
+* 每个表必须存在的字段<img src="../images/image-20201103102615017.png" alt="image-20201103102615017" style="zoom: 50%;" />
 
 * **Unsigned（无符号）**:
 	* 无符号的整数
@@ -161,7 +153,7 @@
 	* 不足的位数用0填充    int(3)    5 --> 005
 * **自增**：
 	* 自动在上一条记录的基础上+1
-	* 通常用来设计唯一的主键 index，必须是整数类型
+	* 通常用来设计**唯一的主键 index**，必须是整数类型
 	* 可以自定义设计主键自增的起始值和步长
 * **非空**：
 	* 假设设置为not null，如果不给赋值，就会报错
@@ -172,10 +164,12 @@
 
 ### 2.4 创建表
 
+<img src="../images/image-20201103103811176.png" alt="image-20201103103811176" style="zoom:50%;" />
+
 ```sql
 CREATE TABLE IF NOT EXISTS `student`(
 	`id` INT(4) NOT NULL AUTO_INCREMENT COMMENT '学号',
-	`name` VARCHAR(30) NOT NULL DEFAULT '姓名' COMMENT '姓名',
+	`name` VARCHAR(30) NOT NULL DEFAULT '姓名' COMMENT '姓名', 
 	`pwd` VARCHAR(20) NOT NULL DEFAULT '123456' COMMENT '密码',
 	`sex` VARCHAR(2) NOT NULL DEFAULT '女' COMMENT '性别',
 	`birthday` DATETIME DEFAULT NULL COMMENT '出生日期',
@@ -185,14 +179,14 @@ CREATE TABLE IF NOT EXISTS `student`(
 )ENGINE=INNODB DEFAULT CHARACTER SET=utf8
 ```
 
-* 查看创建的语句
+* **查看创建数据库和表的语句**
 
 	```sql
 	SHOW CREATE DATABASE school
 	SHOW CREATE TABLE student
 	
 	--显示表的结构
-	DESC student						
+	DESC student				
 	```
 
 ### 2.5 数据表的类型
@@ -210,6 +204,10 @@ CREATE TABLE IF NOT EXISTS `student`(
 
 <img src="../images/image-20201015211106793.png" alt="image-20201015211106793" style="zoom:50%;" />
 
+* DELETE删除的问题，重启数据库，现象
+	* InnoDB  自增列会从1开始（存在内存中的，断电即失）
+	* MYISAM  继续从上一个自增量开始（存在文件中，不会丢失）
+
 ### 2.6 数据表修改与删除
 
 * **change**用来字段重命名，不能修改字段类型和约束
@@ -221,11 +219,11 @@ ALTER TABLE teacher RENAME AS teacher1
 --增加表的字段   ALTER TABLE 表名 ADD 字段名 列属性
 ALTER TABLE teacher ADD age INT(11)
 
---修改表的字段（重命名，修改约束！）
+--修改表的字段（重命名，修改约束）
 --ALTER TABLE 表名 MODIFY 字段名 列属性[]
-ALTER TABLE teacher MODIFY age VARCHAR(11)    --修改约束
+ALTER TABLE teacher MODIFY age VARCHAR(11)    --修改约束（只修改列属性）
 --ALTER TABLE 表名 CHANGE 旧名字 新名字 列属性[]
-ALTER TABLE teacher CHANGE age age1 INT(1)	 	--字段重命名
+ALTER TABLE teacher CHANGE age age1 INT(1)	  --字段重命名
 
 --删除表的字段
 ALTER TABLE teacher DROP age
@@ -248,7 +246,7 @@ DROP TABLE IF EXISTS teacher
 
 <img src="../images/image-20201016184756515.png" alt="image-20201016184756515"  />
 
-物理外键，数据库级别的外键，不建议使用
+* 物理外键，数据库级别的外键，**不建议使用**
 
 * **法一**
 
@@ -261,8 +259,8 @@ CREATE TABLE IF NOT EXISTS `student`(
 	`name` VARCHAR(30) NOT NULL DEFAULT '姓名' COMMENT '姓名',
 	`gradeid` INT(10) NOT NULL COMMENT '年纪',
 	PRIMARY KEY(`id`),
-  KEY `FK_gradeid` (`gradeid`),
-  CONSTRAINT `FK_gradeid` FOREIGN KEY(`gradeid`) REFERENCES `grade`(`gradeid`)
+    KEY `FK_gradeid` (`gradeid`),
+    CONSTRAINT `FK_gradeid` FOREIGN KEY(`gradeid`) REFERENCES `grade`(`gradeid`)
 )ENGINE=INNODB DEFAULT CHARACTER SET=utf8
 ```
 
@@ -270,8 +268,8 @@ CREATE TABLE IF NOT EXISTS `student`(
 
 ```SQL
 --先正常创建表
-ALTER TABLE `student`
-ADD CONSTRAINT `FK_gradeid` FOREIGN KEY(`gradeid`) REFERENCES `grade`(`gradeid`)
+ALTER TABLE `student` 
+ADD CONSTRAINT `FK_gradeid` FOREIGN KEY(`gradeid`) REFERENCES `grade`(`gradeid`);
 ```
 
 ### 3.2 DML语言（熟记）
@@ -281,20 +279,88 @@ ADD CONSTRAINT `FK_gradeid` FOREIGN KEY(`gradeid`) REFERENCES `grade`(`gradeid`)
 	* update
 	* delete
 
-#### 3.2.1 添加
+#### 3.2.1 添加 INSERT
 
 * 数据和字段必须一一对应
-	* 字段和字段直接用英文逗号
-	* 字段可以省略，但必须和所有的字段一一对应
-	* 可以同时插入多条数据，VALUES后的值要用逗号隔开
+	* 字段和字段直接用英文逗号隔开
+	* 字段可以省略，但必须和所有的字段**一一对应**
+	* 可以同时插入多条数据，VALUES后的值要用**逗号**隔开
 
 ```sql
---INSERT INTO 表名([字段1, 字段2, 字段3]) VALUES('值1'), ('值2'), ('值3')
+--INSERT INTO 表名(字段1, 字段2, 字段3) VALUES('值1'), ('值2'), ('值3')
 INSERT INTO `teacher`(`gradeid`) VALUES('大一')
 
 INSERT INTO `student`(`name`, `pwd`, `sex`) VALUES ('李四', 123, '男'),('王五', 123, '男')
 ```
 
-#### 3.2.2 修改
+#### 3.2.2 修改 UPDATE
 
-#### 3.2.3 删除
+```sql
+--UPDATE 表名 SET column_name=value WHERE [字段名=X] 
+UPDATE `student` SET `name`= 'ABC' WHERE id = 1;
+
+--修改多个属性
+UPDATE `student` SET `name`= 'ABC', `email` = '123456@qq.com' WHERE id = 1;
+
+--多个条件下设置，并且value是一个变量
+UPDATE `student` SET `birthday`= CURRENT_TIME WHERE `name`='ABC3' AND `sex`='男';
+```
+
+* 条件：where子句 运算符 id等于、大于某个值，在某个区间内修改
+	* Column_name是数据库的列，尽量带``
+	* 条件：筛选的条件，如果没指定，则会修改所有
+	* value，是一个具体的值，也可以是一个变量
+	* 多个设置的属性之间用逗号隔开
+
+|      操作符      |  含义  |   范围   |  结果  |
+| :--------------: | :----: | :------: | :----: |
+|        =         |  等于  |   5=6    | false  |
+|     <> 或 !=     | 不等于 |   5<>6   |  true  |
+|        >         |  大于  |          |        |
+|        <         |  小于  |          |        |
+|        >=        |        |          |        |
+|        <=        |        |          |        |
+| between  A and B |  包含  | 闭合区间 | [A, B] |
+|       AND        |   与   |          |        |
+|        OR        |   或   |          |        |
+
+#### 3.2.3 删除 
+
+* DELETE
+
+```sql
+--删除指定数据
+DELETE FROM `student` WHERE `name`='ABC3' AND `sex`='男';
+```
+
+* TRUNCATE：完全清空一张表，表的结构和索引结构不会变
+
+```sql
+TRUNCATE `student`
+```
+
+* 区别
+	* TRUNCATE会**重置自增列**，计数器会归零
+	* TRUNCATE不会影响事务
+
+### 3.3 DQL查询数据（最重点）
+
+#### 3.3.1 DQL
+
+* data query language：数据查询语言
+* 所有的查询操作都用它
+* 数据库中最核心的语言，使用频率最高
+
+#### 3.3.2 指定查询字段
+
+```SQL
+SELECT 字段 FROM 表
+SELECT * from student
+
+-- 取别名，给字段，也可以给表起
+SELECT `studentno` AS 学号, `studentname` AS 姓名 FROM `student`
+
+--函数 Concat
+SELECT CONCAT('姓名：', `studentname`) FROM `student`
+```
+

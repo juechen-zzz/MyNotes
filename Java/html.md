@@ -91,7 +91,7 @@ Hello, world
 
 * herf：必填，表示要跳转到哪个页面
 
-* target：表示窗口在哪里打开
+* target：表示窗口**在哪里打开**
 
 	* _blank：在新标签中打开
 	* _self：在自己的网页中打开
