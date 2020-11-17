@@ -44,6 +44,7 @@
   (base)  mysql -u root -p					--连接数据库
   exit;										--退出连接
   
+  select version();							--查看MySQL版本
   show databases;								--查询所有的数据库
   use school;									--切换数据库
   show tables;								--查看所有的表
@@ -363,4 +364,31 @@ SELECT `studentno` AS 学号, `studentname` AS 姓名 FROM `student`
 --函数 Concat
 SELECT CONCAT('姓名：', `studentname`) FROM `student`
 ```
+
+#### 3.3.3 distinct(去重)
+
+* 去除select查询出来的结果中重复的数据，只显示一条
+
+```SQL
+SELECT * FROM result;
+SELECT studentno from result;		-- 发现重复数据（同一个人参加多门考试）
+
+SELECT DISTINCT studentno from result; 		-- 去重
+```
+
+* 数据库的列（表达式）
+
+```SQL
+SELECT 100*3-1 AS 计算结果;							 --计算表达式
+SELECT @@auto_increment_increment;				    --查询自增的步长
+
+--学员的考试成绩+1分查看
+SELECT studentno, studentresult+1 AS 提分后 FROM result;
+```
+
+* 数据库中的表达式：文本值，列，Null，函数，计算表达式，系统变量... 
+
+#### 3.3.4 where条件
+
+作用：检索数据中符合条件的值  and  or  not
 

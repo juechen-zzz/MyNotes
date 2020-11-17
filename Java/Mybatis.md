@@ -69,7 +69,7 @@
 	        </environment>
 	    </environments>
 	    <mappers>
-	        <mapper resource="com/komorebi/dao/UserMapper.xml"/>
+	        <mapper resource="com/komorebi/dao/UserMapper.xml"/>	<!--注意这里是/-->
 	    </mappers>
 	</configuration>
 	```
@@ -157,7 +157,7 @@
 	<!--命名空间 绑定一个对应的Mapper接口-->
 	<mapper namespace="com.komorebi.dao.UserDao">
 	    <!--查询语句-->
-	    <select id="getUserList" resultType="com.komorebi.pojo.User">
+	    <select id="getUserList" resultType="com.komorebi.pojo.User">		<!--这里是. 但可以用别名简化-->
 	        secect * from mybatis.user
 	    </select>
 	</mapper>
@@ -424,7 +424,7 @@ MapperRegistry：注册绑定我们的Mapper文件
 
 * 注意：接口和Mapper配置文件**必须同名**，必须在用一个包下
 
-方式三：使用扫描包进行注入绑定（不推荐）
+方式三：使用扫描包进行注入绑定
 
 ```xml
 <!-- 将包内的映射器接口实现全部注册为映射器 -->
@@ -473,7 +473,7 @@ MapperRegistry：注册绑定我们的Mapper文件
 		select id, name, pwd as password from mybatis.user where id = #{id}
 		```
 
-	* 2 ResultMap
+	* 2 **ResultMap**
 
 		* 结果集映射
 
@@ -493,4 +493,515 @@ MapperRegistry：注册绑定我们的Mapper文件
 		* `resultMap` 元素是 MyBatis 中最重要最强大的元素
 
 		* ResultMap 的**设计思想**：对简单的语句做到零配置，对于复杂一点的语句，只需要描述语句之间的关系就行了。
+
+
+
+## 6 日志
+
+### 6.1 日志工厂
+
+```xml
+<!--设置-->
+<settings>
+    <setting name="logImpl" value="STDOUT_LOGGING"/>
+</settings>
+```
+
+如果一个数据库操作出现了异常，需要排错，日志就是最好的助手![image-20201115090233826](../images/image-20201115090233826.png)
+
+* SLF4J
+
+* **LOG4J**（掌握）
+
+* LOG4J2
+
+* JDK_LOGGING
+
+* COMMONS_LOGGING
+
+* **STDOUT_LOGGING**（掌握）：标准日志输出
+
+	```xml
+	<!--设置-->
+	<settings>
+	    <!--标准的日志工厂实现-->
+	    <setting name="logImpl" value="STDOUT_LOGGING"/>
+	</settings>
+	```
+
+* NO_LOGGING
+
+具体使用哪一个，在设置中设定
+
+![image-20201115092504530](../images/image-20201115092504530.png)
+
+### 6.2 LOG4J
+
+* Log4j是[Apache](https://baike.baidu.com/item/Apache/8512995)的一个开源项目，通过使用Log4j，我们可以控制日志信息输送的目的地是[控制台](https://baike.baidu.com/item/控制台/2438626)、文件、[GUI](https://baike.baidu.com/item/GUI)组件
+* 可以控制每一条日志的输出格式
+* 通过定义每一条日志信息的级别，我们能够更加细致地控制日志的生成过程
+* 通过一个[配置文件](https://baike.baidu.com/item/配置文件/286550)来灵活地进行配置，而不需要修改应用的代码。
+
+* 使用方法：
+
+	* 1 导入LOG4J的包
+
+		```xml
+		<!-- https://mvnrepository.com/artifact/log4j/log4j -->
+		<dependency>
+		    <groupId>log4j</groupId>
+		    <artifactId>log4j</artifactId>
+		    <version>1.2.17</version>
+		</dependency>
+		```
+
+	* 2 log4j.properties
+
+		```properties
+		#将等级为DEBUG的日志信息输出到console和file这两个目的地，console和file的定义在下面的代码
+		log4j.rootLogger=DEBUG,console,file
+		
+		#控制台输出的相关设置
+		log4j.appender.console = org.apache.log4j.ConsoleAppender
+		log4j.appender.console.Target = System.out
+		log4j.appender.console.Threshold=DEBUG
+		log4j.appender.console.layout = org.apache.log4j.PatternLayout
+		log4j.appender.console.layout.ConversionPattern=[%]-%m%n
+		
+		#文件输出的相关设置
+		log4j.appender.file = org.apache.log4j.RollingFileAppender
+		log4j.appender.file.File=./log/komorebi.log
+		log4j.appender.file.MaxFileSize=10mb
+		log4j.appender.file.Threshold=DEBUG
+		log4j.appender.file.layout=org.apache.log4j.PatternLayout
+		log4j.appender.file.layout.ConversionPattern=[%p][%d{yy-MM-dd}][%c]%m%n
+		
+		#日志输出级别
+		log4j.logger.org.mybatis=DEBUG
+		log4j.logger.java.sql=DEBUG
+		log4j.logger.java.sql.Statement=DEBUG
+		log4j.logger.java.sql.ResultSet=DEBUG
+		log4j.logger.java.sql.PreparedStatement=DEBUG
+		```
+
+	* 3 配置log4j为日志的实现
+
+		```xml
+		<!--设置-->
+		<settings>
+		    <!--LOG4J实现-->
+		    <setting name="logImpl" value="LOG4J"/>
+		</settings>
+		```
+
+	* 4 Log4j的使用，直接测试运行
+
+		* （1）导包
+
+			```Java
+			import org.apache.log4j.Logger;
+			```
+
+		* （2）日志对象，参数为当前类的class
+
+			```java
+			static Logger logger = Logger.getLogger(UserDaoTest.class);
+			```
+
+		* （3）日志级别：info debug error
+
+		* （4）查看.log文件
+
+
+
+## 7 分页
+
+### 7.1 使用limit分页
+
+```sql
+SELECT * from user limit startIndex, pageSize;
+SELECT * from user limit 3; #[0, n]
+```
+
+### 7.2 使用mybatis实现分页
+
+* 1 接口
+
+	```java
+	// 分页查询
+	List<User> getUserByLimit(Map<String, Integer> map);
+	```
+
+* 2 Mapper.xml
+
+	```xml
+	<!--分页实现查询，结果集映射-->
+	<!--resultMap之前写过，属性名和数据库字段名不一致-->
+	<select id="getUserByLimit" parameterType="map" resultMap="UserMap"> 
+	    select * from mybatis.user limit #{startIndex}, #{pageSize};
+	</select>
+	```
+
+* 3 测试
+
+	```java
+	@Test
+	public void testGetUserByLimit(){
+	    SqlSession sqlSession = MybatisUtils.getSqlSession();
+	
+	    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+	
+	    HashMap<String, Integer> map = new HashMap<String, Integer>();
+	    map.put("startIndex", 1);
+	    map.put("pageSize", 2);
+	
+	    List<User> userList = mapper.getUserByLimit(map);
+	    for (User user : userList) {
+	        System.out.println(user);
+	    }
+	
+	    sqlSession.close();
+	}
+	```
+
+### 7.3 使用RowBounds分页
+
+* 1 接口
+
+	```java
+	// RowBounds分页
+	List<User> getUserByRowBounds();
+	```
+
+* 2 Mapper.xml
+
+	```xml
+	<!--分页2-->
+	<select id="getUserByRowBounds" resultMap="UserMap">
+	    select * from mybatis.user;
+	</select>
+	```
+
+* 3 测试
+
+	```java
+	@Test
+	public void testGetUserByRowBounds(){
+	    SqlSession sqlSession = MybatisUtils.getSqlSession();
+	
+	    // RowBounds实现
+	    RowBounds rowBounds = new RowBounds(1, 2);
+	
+	    // 通过Java代码层面实现分页
+	    List<User> userList = sqlSession.selectList("com.komorebi.dao.UserMapper.getUserByRowBounds", null, rowBounds);
+	    for (User user : userList) {
+	        System.out.println(user);
+	    }
+	
+	    sqlSession.close();
+	}
+	```
+
+### 7.4 分页插件
+
+* PageHelper：https://pagehelper.github.io/docs/howtouse/
+
+
+
+## 8 使用注解开发
+
+### 8.1 面向接口编程
+
+* **根本原因：解耦，可拓展，提高复用，分层开发中，上层不用管具体的实现，大家都遵守共同的标准，使得开发变得容易，规范性更好。**
+
+### 8.2 使用注解开发
+
+* 底层实现机制：**主要应用反射，动态代理**
+* 注解在接口上实现
+
+```java
+public interface UserMapper {
+    @Select("select * from User")
+    List<User> getUsers();
+}
+```
+
+**Mybatis详细流程**：
+
+![image-20201116100843664](../images/image-20201116100843664.png)
+
+### 8.3 注解CRUD
+
+* 可以在工具类创建的时候实现自动提交事务
+
+	* 1 MybatisUtils工具类中添加![image-20201116141043410](../images/image-20201116141043410.png)
+
+	* 2 接口
+
+		```java
+		@Insert("insert into user(id, name, pwd) values (#{id}, #{name}, #{password})")
+		int addUser(User user);
+		```
+
+	* 3 测试
+
+		```java
+		@Test
+		public void testAddUser(){
+		    SqlSession sqlSession = MybatisUtils.getSqlSession();
+		
+		    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+		    mapper.addUser(new User(6, "sun_six", "12345678"));
+		
+		    sqlSession.close();
+		}
+		```
+
+* CRUD
+
+	```java
+	// 方法存在多个参数，所有的参数前面必须加上@Param注解
+	@Select("select id, name, pwd as password from User where id = #{id}")
+	User getUserByID(@Param("id") int id);
+	
+	@Insert("insert into user(id, name, pwd) values (#{id}, #{name}, #{password})")
+	int addUser(User user);
+	
+	@Update("update user set name = #{name}, pwd = #{password} where id = #{id}")
+	int updateUser(User user);
+	
+	@Delete("delete from user where id = #{id}")
+	int deleteUser(@Param("id") int id);
+	```
+
+* **关于@Param注解**
+
+	* **基本类型的参数需要加上**
+	* 引用类型不需要加
+	* 如果只有一个基本类型的话，可以忽略，但是建议加上
+	* 在SQL中引用的就是@Param中设定的属性名
+
+
+
+## 9 Lombok
+
+1 优缺点
+
+* 优点
+	* 能通过注解的形式自动生成构造器、getter/setter、equals、hashcode、toString等方法
+	* 让代码变得简洁，不用过多关注相应的方法
+	* 属性做修改时，也简化了维护为这些属性所生成的getter/setter方法
+* 缺点
+	* 不支持多种参数构造器的重载
+	* 虽然省去了手动创建getter/setter方法的麻烦，但大大降低了源码的可读性和完整性，降低了阅读源码的舒适感
+
+2 使用步骤：
+
+* 1 IDEA中安装![image-20201116160108603](../images/image-20201116160108603.png)
+
+* 2 在项目中导入lombok的jar包
+
+	```xml
+	<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+	<dependency>
+	    <groupId>org.projectlombok</groupId>
+	    <artifactId>lombok</artifactId>
+	    <version>1.18.12</version>
+	    <scope>provided</scope>
+	</dependency>
+	```
+
+* ```java
+	@Data：无参  get  set  toString hashCode equals
+	```
+
+	```java
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public class User {
+	    private int id;
+	    private String name;
+	    private String password;
+	}
+	```
+
+	
+
+## 10 多对一处理
+
+* 多个学生，对应一个老师；对于学生而言，**关联**（多个学生关联一个老师）；对于老师而言，**集合**（一个老师有多个学生）<img src="../images/image-20201117081235575.png" alt="image-20201117081235575" style="zoom: 50%;" />
+
+* ```sql
+	CREATE TABLE `teacher` (
+	  `id` INT(10) NOT NULL,
+	  `name` VARCHAR(30) DEFAULT NULL,
+	  PRIMARY KEY (`id`)
+	) ENGINE=INNODB DEFAULT CHARACTER SET=utf8;
+	
+	INSERT INTO teacher(`id`, `name`) VALUES (1, '秦老师'); 
+	
+	CREATE TABLE `student` (
+	  `id` INT(10) NOT NULL,
+	  `name` VARCHAR(30) DEFAULT NULL,
+	  `tid` INT(10) DEFAULT NULL,
+	  PRIMARY KEY (`id`),
+	  KEY `fktid` (`tid`),
+	  CONSTRAINT `fktid` FOREIGN KEY (`tid`) REFERENCES `teacher` (`id`)
+	) ENGINE=INNODB DEFAULT CHARACTER SET=utf8;
+	
+	INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('1', '小明', '1'); 
+	INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('2', '小红', '1'); 
+	INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('3', '小张', '1'); 
+	INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('4', '小李', '1'); 
+	INSERT INTO `student` (`id`, `name`, `tid`) VALUES ('5', '小王', '1');
+	```
+
+* 测试环境搭建
+
+	* 1 导入lombok
+
+	* 2 新建实体类 Teacher Student
+
+		```java
+		@Data
+		@NoArgsConstructor
+		@AllArgsConstructor
+		public class Student {
+		    private int id;
+		    private String name;
+		
+		    // 学生需要关联一个老师
+		    private Teacher teacher;
+		}
+		
+		@Data
+		@NoArgsConstructor
+		@AllArgsConstructor
+		public class Teacher {
+		    private int id;
+		    private String name;
+		}
+		
+		```
+
+	* 3 建立 Mapper接口
+
+	* 4 建立Mapper.xml文件
+
+	* 5 测试查询是否成功
+
+### 10.1 按照查询嵌套处理(子查询)
+
+```xml
+<select id="getStudent" resultMap="studentTeacher">
+    select * from mybatis.student;
+</select>
+<resultMap id="studentTeacher" type="Student">
+    <!--复杂属性需要单独处理，对象：association，集合：collection-->
+    <association property="teacher" column="tid" javaType="Teacher" select="getTeacher"/>
+</resultMap>
+<select id="getTeacher" resultType="Teacher">
+    select * from mybatis.teacher where id = #{id};
+</select>
+```
+
+### 10.2 按照结果嵌套处理(联表查询)
+
+```xml
+<!--按照结果嵌套处理-->
+<select id="getStudent2" resultMap="studentTeacher2">
+    select s.id sid, s.name sname, t.name tname from student s, teacher t where s.tid = t.id;
+</select>
+<resultMap id="studentTeacher2" type="Student">
+    <result property="id" column="sid"/>
+    <result property="name" column="sname"/>
+    <association property="teacher" javaType="Teacher">
+        <result property="name" column="tname"/>
+    </association>
+</resultMap>
+```
+
+
+
+## 11 一对多处理
+
+* 新实体类
+
+	```java
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public class Student {
+	    private int id;
+	    private String name;
+	    private int tid;
+	}
+	
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public class Teacher {
+	    private int id;
+	    private String name;
+	
+	    // 一个老师对应多个学生
+	    private List<Student> students;
+	}
+	```
+
+### 11.1 按照结果嵌套处理（联表查询）
+
+```xml
+<!--按结果嵌套查询-->
+<select id="getTeacher2" resultMap="TeacherStudent">
+    select s.id sid, s.name sname, t.name tname, t.id tid
+    from student s, teacher t where s.tid = t.id and t.id = #{id};
+</select>
+<resultMap id="TeacherStudent" type="Teacher">
+    <result property="id" column="tid"/>
+    <result property="name" column="tname"/>
+    <collection property="students" ofType="Student">			<!--ofType-->
+        <result property="id" column="sid"/>
+        <result property="name" column="sname"/>
+        <result property="tid" column="tid"/>
+    </collection>
+</resultMap>
+```
+
+### 11.2 按照查询嵌套处理(子查询)
+
+```xml
+<!--按查询嵌套处理-->
+<select id="getTeacher3" resultMap="TeacherStudent2">
+    select * from mybatis.teacher where id = #{id};
+</select>
+<resultMap id="TeacherStudent2" type="Teacher">
+    <result property="id" column="id"/>
+    <result property="name" column="name"/>
+    <collection property="students" column="id" javaType="ArrayList" ofType="Student" select="getStudenByTeacherID"/>
+</resultMap>
+<select id="getStudenByTeacherID" resultType="Student">
+    select * from mybatis.student where tid = #{id};
+</select>
+```
+
+### 11.3 小结
+
+* 关联：多对一
+* 集合：一对多
+* javaType   &    ofType
+	* javaType用来指定实体类中属性的类型
+	* ofType用来指定映射到list或者集合中的pojo类型，泛型中的约束类型
+* 注意点
+	* 保证SQL的可读性，尽量保证通俗易懂
+	* 注意一对多和多对一中，属性名和字段的问题
+	* 如果问题不好排查错误，可以使用日志，建议使用Log4j
+* 面试
+	* MySQL引擎
+	* InnoDB底层原理
+	* 索引
+	* 索引优化
+
+
 
