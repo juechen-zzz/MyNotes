@@ -392,3 +392,83 @@ SELECT studentno, studentresult+1 AS 提分后 FROM result;
 
 作用：检索数据中符合条件的值  and  or  not
 
+#### 3.3.5 模糊查询
+
+|   运算符    |       语法        |                 描述                  |
+| :---------: | :---------------: | :-----------------------------------: |
+|   IS NULL   |     a is null     |      如果操作符为null，结果为真       |
+| IS NOT NULL |                   |                                       |
+| BETWEEN AND | a between b and c |       若a在b和c之间，则结果为真       |
+|  **LIKE**   |     a like b      | SQL匹配，如果a能够匹配到b，则结果为真 |
+|   **IN**    | a in (a1, a2, a3) |     假设a在这个范围里，那结果为真     |
+
+```sql
+-- like结合 % （代表0到任意个字符）  _ （一个字符）
+SELECT studentno, studentname from student 
+where studentname like '刘%'
+
+-- In 具体的一个或者多个值，%在这里没用
+select studentno, studentname from student
+where studentno in (1000, 1100);
+```
+
+#### 3.3.6 联表查询
+
+<img src="../images/image-20201118204416693.png" alt="image-20201118204416693" style="zoom: 25%;" />
+
+![image-20201118204518846](../images/image-20201118204518846.png)
+
+```sql
+-- Inner join
+SELECT s.studentno, studentname, subjectno, studentresult
+FROM student AS s INNER JOIN result AS r
+ON s.studentno = r.studentno;
+
+-- 3张表
+SELECT s.studentno, studentname, subjectname, studentresult
+FROM student s 
+RIGHT JOIN result r
+ON r.studentno = s.studentno
+INNER JOIN subject sub
+ON r.subjectno = sub.subjectno
+```
+
+| 操作       | 描述                                         |
+| ---------- | -------------------------------------------- |
+| Inner join | 如果表中至少有一个匹配，就返回行             |
+| Left join  | 即使右表中没有匹配，也会从左表中返回所有的行 |
+| Right join | 即使左表中没有匹配，也会从左表中返回所有的行 |
+
+* join on 连接查询     where  等值查询，join on用在多表，查完的结果是一张表，再用where筛选
+
+#### 3.3.7 自连接
+
+* 自己的表和自己的表连接，**核心：一张表拆成两张一样的表即可**![image-20201118214407650](../images/image-20201118214407650.png)
+
+父类：
+
+| categoryid | categoryName |
+| ---------- | ------------ |
+| 2          | 信息技术     |
+| 3          | 软件设计     |
+| 5          | 美术设计     |
+
+子类：
+
+| categoryid | categoryName | pid  |
+| ---------- | ------------ | ---- |
+| 4          | 数据库       | 3    |
+| 8          | 办公信息     | 2    |
+| 6          | web开发      | 3    |
+| 7          | ps技术       | 5    |
+
+操作：查询父类对应的子类关系
+
+<img src="../images/image-20201118214607623.png" alt="image-20201118214607623" style="zoom: 50%;" />
+
+```sql
+SELECT a.categoryname as 'father', b.categoryname as 'son'
+FROM category AS a, category AS b
+WHERE a.categoryid = b.pid;
+```
+

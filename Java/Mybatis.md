@@ -1005,3 +1005,389 @@ public interface UserMapper {
 
 
 
+## 12 动态SQL
+
+* 解释：**指根据不同的条件生成不同的SQL语句**
+
+### 12.1 搭建环境
+
+```sql
+CREATE TABLE `blog`(
+	`id` VARCHAR(50) NOT NULL COMMENT '博客ID',
+	`title` VARCHAR(100) NOT NULL COMMENT '博客标题',
+	`author` VARCHAR(30) NOT NULL COMMENT '博客作者',
+	`create_time` DATETIME DEFAULT NULL COMMENT '创建时间',
+	`views` INT(30) NOT NULL COMMENT '浏览量'
+) ENGINE=INNODB DEFAULT CHARACTER SET=utf8
+```
+
+创建一个基础工程
+
+* 1 导包
+
+* 2 编写配置文件(新增一个IDutils文件用来生成随机ID)
+
+	```java
+	public static String getId(){
+	    return UUID.randomUUID().toString().replace("-", "");
+	}
+	```
+
+* 3 编写实体类
+
+	```java
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public class Blog {
+	    private String id;
+	    private String title;
+	    private String author;
+	    private Date createTime;
+	    private int views;
+	}
+	```
+
+* 4 编写实体类对应Mapper接口和Mapper.xml文件
+
+	```java
+	// 插入数据
+	int addBlog(Blog blog);
+	```
+
+	```xml
+	<insert id="addBlog" parameterType="Blog">
+	    insert into mybatis.blog(id, title, author, create_time, views)
+	    values (#{id}, #{title}, #{author}, #{createTime}, #{views})
+	</insert>
+	```
+
+### 12.2 if
+
+* **xml**
+
+```xml
+<!--选择查询博客 if -->
+<select id="queryBlogIF" parameterType="map" resultType="Blog">
+    select * from mybatis.blog
+    <where>
+        <if test="title != null">
+            and title = #{title}
+        </if>
+        <if test="author != null">
+            and author = #{author}
+        </if>
+    </where>
+</select>
+```
+
+* **test**
+
+```java
+@Test
+public void testQueryBlogIF(){
+    SqlSession sqlSession = MybatisUtils.getSqlSession();
+
+    BlogMapper mapper = sqlSession.getMapper(BlogMapper.class);
+
+    HashMap map = new HashMap();
+    map.put("title", "Mybatis");
+    map.put("author", "狂神说");
+    List<Blog> blogs = mapper.queryBlogIF(map);
+    for (Blog blog : blogs) {
+        System.out.println(blog);
+    }
+
+    sqlSession.close();
+}
+```
+
+### 12.3 choose (when, otherwise)
+
+```xml
+<!--选择查询博客 choose -->
+<select id="queryBlogChoose" parameterType="map" resultType="Blog">
+    select * from mybatis.blog
+    <where>
+        <choose>
+            <when test="title != null">
+                title = #{title}
+            </when>
+            <when test="author != null">
+                and author = #{author}
+            </when>
+            <otherwise>
+                and views = #{views}
+            </otherwise>
+        </choose>
+    </where>
+</select>
+```
+
+### 12.4 trim (where, set)
+
+* 如果匹配的只是第二个条件，需要用where标签
+* *where* 元素只会在子元素返回任何内容的情况下才**插入 “WHERE” 子句**。而且，若子句的开头为 “AND” 或 “OR”，*where* 元素也会将它们去除。
+
+```xml
+<!--选择查询博客 if -->
+<select id="queryBlogIF" parameterType="map" resultType="Blog">
+    select * from mybatis.blog
+    <where>
+        <if test="title != null">
+            and title = #{title}
+        </if>
+        <if test="author != null">
+            and author = #{author}
+        </if>
+    </where>
+</select>
+```
+
+* *set* 元素会动态地在**行首插入 SET 关键字**，并会**删掉额外的逗号**（这些逗号是在使用条件语句给列赋值时引入的）。
+
+```xml
+<!--更新博客-->
+<update id="updateBlog" parameterType="map">
+    update mybatis.blog
+    <set>
+        <if test="title != null">
+            title = #{title},
+        </if>
+        <if test="author != null">
+            author = #{author}
+        </if>
+    </set>
+    where id = #{id}
+</update>
+```
+
+* trim
+
+```xml
+<trim prefix="WHERE" prefixOverrides="AND |OR ">
+  ...
+</trim>
+
+<trim prefix="SET" suffixOverrides=",">
+  ...
+</trim>
+```
+
+* **所谓的动态SQL，本质还是SQL语句，只是我们可以在SQL层面去执行一些逻辑代码**
+
+### 12.5 SQL片段
+
+* 有的时候，会将SQL中的公用片段抽出来
+* 注意：
+	* 最好基于单表来定义SQL片段，最好就是if判断
+	* 不要存在where标签
+
+```xml
+<!--SQL片段，抽取公共部分-->
+<sql id="if-title-author">
+    <if test="title != null">
+        title = #{title},
+    </if>
+    <if test="author != null">
+        author = #{author}
+    </if>
+</sql>
+<!--选择查询博客 if -->
+<select id="queryBlogIF" parameterType="map" resultType="Blog">
+    select * from mybatis.blog
+    <where>
+        <include refid="if-title-author"></include>
+    </where>
+</select>
+```
+
+### 12.5 foreach
+
+![image-20201118135440503](../images/image-20201118135440503.png)
+
+* **Xml**
+
+```xml
+<!--查询指定ID列表的博客-->
+<select id="queryBlogForEach" parameterType="map" resultType="Blog">
+    select * from mybatis.blog
+    <where>
+        <foreach collection="ids" item="id" open="(" separator="or" close=")">
+            id = #{id}
+        </foreach>
+    </where>
+</select>
+```
+
+* test
+
+```java
+@Test
+public void testQueryBlogForEach(){
+    SqlSession sqlSession = MybatisUtils.getSqlSession();
+
+    BlogMapper mapper = sqlSession.getMapper(BlogMapper.class);
+    HashMap map = new HashMap();
+    ArrayList ids = new ArrayList();
+    ids.add("14dca7f2846e4ec6909a3abe8344ba0e");
+    ids.add("4f558e3362fc410ab5910bbe20324492");
+    map.put("ids", ids);
+    List<Blog> blogs = mapper.queryBlogForEach(map);
+    for (Blog blog : blogs) {
+        System.out.println(blog);
+    }
+
+    sqlSession.close();
+}
+
+// ==>  Preparing: select * from mybatis.blog WHERE ( id = ? or id = ? ) 
+```
+
+* **总结：动态SQL就是在拼接SQL语句，只需要保证SQL的正确性，按照SQL的格式，去排列组合即可**
+
+
+
+## 13 缓存
+
+![image-20201119081646531](../images/image-20201119081646531.png)
+
+### 13.1 Mybatis缓存
+
+* mybatis包含一个非常强大的查询缓存特性，可以非常方便的定制和配置缓存，缓存可以极大的提升查询效率
+* mybatis系统中默认定义了两级缓存：**一级缓存**和**二级缓存**
+	* 默认情况下，只有一级缓存开启（SqlSession级别的缓存，也称为本地缓存）
+	* 二级缓存需要手动开启和配置，是基于namespace级别的缓存
+	* 为了提高拓展性，Mybatis定义了缓存接口Cache，可以通过实现Cache接口来自定义二级缓存
+
+![image-20201119161720103](../images/image-20201119161720103.png)
+
+### 13.2 一级缓存
+
+* 一级缓存也叫本地缓存：SqlSession
+	* 与数据库同一次会话期间查询到的数据会放在本地缓存中
+	* 以后如果需要获取相同的数据，直接从缓存中拿，不需要再去查询数据库
+* 测试步骤
+	* 1 开启日志
+	* 2 测试在一个Session中查询两次相同记录
+	* ![image-20201119085638192](../images/image-20201119085638192.png)
+* **缓存失效的情况**
+	* 1 增删改操作可能会改变原来的数据，所以必定会刷新缓存
+	* 2 查询不同的东西
+	* 3 查询不同的Mapper.xml
+	* 4 手动清除缓存    sqlSession.clearCache()
+* **小结：一级缓存默认开启，只在一次sqlSession中有效，也就是拿到连接到关闭连接这个区间段**
+
+### 13.3 二级缓存
+
+* 二级缓存也叫全局缓存，一级缓存作用域太低了，所以诞生了二级缓存
+* 基于namespacea级别的缓存，一个名称空间，对应一个二级缓存
+* 工作机制
+	* 一个会话查询一条数据，这个数据就会被放在当前会话的一级缓存中
+	* 如果当前会话关闭了，这个会话对应的一级缓存就没了；但我们想要的是，会话关闭了，一级缓存中的数据被保存到二级缓存中
+	* 新的会话查询信息，就可以从二级缓存中获取内容
+	* 不同的mapper查出的数据会放在自己对应的缓存(map)中
+
+**步骤**：
+
+* 1 开启全局缓存
+
+	```xml
+	<!--设置-->
+	<settings>
+	    <!--标准的日志工厂实现-->
+	    <setting name="logImpl" value="STDOUT_LOGGING"/>
+	    <!--显式开启全局缓存-->
+	    <setting name="cacheEnabled" value="true"/>
+	</settings>
+	```
+
+* 2 在要使用二级缓存的Mapper中开启
+
+	```xml
+	<!--在当前mapper中使用二级缓存-->
+	<cache
+	   eviction="FIFO"
+	   flushInterval="60000"
+	   size="512"
+	   readOnly="true"/>
+	```
+
+* 3 测试
+
+	* 需要将实体类序列化
+
+		```java
+		Caused by: java.io.NotSerializableException: com.komorebi.pojo.User
+		```
+
+* 小结：
+
+	* 只要开启了二级缓存，在同一个Mapper下有效
+	* 所有的数据都会先放在一级缓存中
+	* 只有当会话提交，或者关闭的时候，才会提交到二级缓存
+
+### 13.4 ehcache
+
+Ehcache是一种广泛使用的开源Java分布式缓存。主要面向通用缓存,Java EE和轻量级容器
+
+* 1 在程序中使用，导包！
+
+	```xml
+	<!-- https://mvnrepository.com/artifact/org.mybatis.caches/mybatis-ehcache -->
+	<dependency>
+	    <groupId>org.mybatis.caches</groupId>
+	    <artifactId>mybatis-ehcache</artifactId>
+	    <version>1.1.0</version>
+	</dependency>
+	```
+
+* 2 在Mapper中开启
+
+	```xml
+	<cache type="org.mybatis.caches.ehcache.EhcacheCache"/>
+	```
+
+* 3 ehcache.xml
+
+	```xml
+	<?xml version="1.0" encoding="UTF-8"?>
+	<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	         xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd"
+	         updateCheck="false">
+	
+	    <diskStore path="./tmpdir/Tmp_EhCache"/>
+	
+	    <defaultCache
+	            eternal="false"
+	            maxElementsInMemory="10000"
+	            overflowToDisk="false"
+	            diskPersistent="false"
+	            timeToIdleSeconds="1800"
+	            timeToLiveSeconds="259200"
+	            memoryStoreEvictionPolicy="LRU"/>
+	
+	    <cache
+	            name="cloud_user"
+	            eternal="false"
+	            maxElementsInMemory="5000"
+	            overflowToDisk="false"
+	            diskPersistent="false"
+	            timeToIdleSeconds="1800"
+	            timeToLiveSeconds="1800"
+	            memoryStoreEvictionPolicy="LRU"/>
+	</ehcache>
+	```
+
+	
+
+## 14 练习
+
+![image-20201119202759998](../images/image-20201119202759998.png)
+
+![image-20201119203041082](../images/image-20201119203041082.png)
+
+![image-20201119203051470](../images/image-20201119203051470.png)
+
+![image-20201119203058949](../images/image-20201119203058949.png)
+
