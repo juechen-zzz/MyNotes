@@ -411,7 +411,7 @@ MapperRegistry：注册绑定我们的Mapper文件
 </mappers>
 ```
 
-方式二：使用class文件绑定注册（不推荐）
+方式二：使用class文件绑定注册
 
 ```xml
 <!-- 使用映射器接口实现类的完全限定类名 -->
