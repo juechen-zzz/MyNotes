@@ -91,7 +91,7 @@ public class MyTest {
 * **控制反转（IOC）是一种设计思想，DI（依赖注入）是实现IOC的一种方法**。没有IOC的程序中，我们使用面向对象编程，对象的创建与对象间的依赖关系完全硬编码在程序中，对象的创建由程序自己控制，控制反转后将对象的创建转移给第三方，个人认为所谓控制反转就是：**获得依赖对象的方式反转了**<img src="../images/image-20201120112624772.png" alt="image-20201120112624772" style="zoom: 50%;" />
 * Spring容器在初始化时先读取配置文件，根据配置文件或元数据创建与组织对象存入容器中，程序使用时再从IOC容器中取出需要的对象<img src="../images/image-20201120112842349.png" alt="image-20201120112842349" style="zoom: 25%;" />
 * 采用XML方式配置Bean的时候，Bean的定义信息是和实现分离的，而采用注解的方式可以把两者合为一体，Bean的定义信息直接以注解的形式定义在实现类中，从而达到了零配置的目的
-* **控制反转是一种通过描述（XML或注解）并通过第三方去生产或获取特定对象的方式。在Spring中实现控制反转的是IOC容器，其实现方法是依赖注入（Dependency Injection, DI）**
+* **控制反转是一种通过描述（XML或注解）并通过第三方去生产或获取特定对象的方式。在Spring中实现控制反转的是IOC容器，其实现方法是依赖注入（Dependency Injection, DI）。**
 
 
 
@@ -266,7 +266,7 @@ public class MyTest {
 	      <!--第四种，List注入-->
 	      <property name="hobbies">
 	          <list>
-              <value>a</value>
+                <value>a</value>
 	              <value>b</value>
 	              <value>c</value>
 	          </list>
@@ -592,7 +592,7 @@ JavaConfig是Spring的子项目，在Spring4之后成为了一个核心功能
 
 
 
-## 10 AOP
+## 10 代理模式
 
 代理模式就是SpringAOP的底层[SpringAOP 和 SpringMVC]
 
@@ -754,7 +754,7 @@ JavaConfig是Spring的子项目，在Spring4之后成为了一个核心功能
 
 
 
-## 11 AOP
+## 11 AOP(重点)
 
 ### 11.1 什么是AOP
 
@@ -906,4 +906,321 @@ public class AnnotationPointCut {
 <bean id="annotationPointCut" class="com.komorebi.diy.AnnotationPointCut"/>
 <aop:aspectj-autoproxy/>
 ```
+
+
+
+## 12 整合Mybatis
+
+步骤：
+
+1. 导入相关jar包
+	* junit mybatis mysql spring aop织入 
+	* mybatis-spring ( new )
+2. 编写配置文件
+3. 测试
+
+### 12.1 复习
+
+流程：
+
+1. 编写实体类
+
+	```java
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public class User {
+	    private int id;
+	    private String name;
+	    private String pwd;
+	}
+	```
+
+2. 编写核心配置文件
+
+	```xml
+	<?xml version="1.0" encoding="UTF-8" ?>
+	<!DOCTYPE configuration
+	        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+	        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+	<!--configuration核心配置文件-->
+	<configuration>
+	    <typeAliases>
+	        <package name="com.komorebi.pojo"/>
+	    </typeAliases>
+	
+	    <environments default="development">
+	        <environment id="development">
+	            <transactionManager type="JDBC"/>
+	            <dataSource type="POOLED">
+	                <property name="driver" value="com.mysql.jdbc.Driver"/>
+	                <property name="url" value="jdbc:mysql://localhost:3306/mybatis?useSSL=true&amp;useUnicode=true&amp;characterEncoding=UTF-8"/>
+	                <property name="username" value="root"/>
+	                <property name="password" value="123456"/>
+	            </dataSource>
+	        </environment>
+	    </environments>
+	
+	    <mappers>
+	        <mapper class="com.komorebi.mapper.UserMapper"/>
+	    </mappers>
+	
+	</configuration>
+	```
+
+3. 编写接口
+
+	```java
+	public interface UserMapper {
+	    public List<User> selectUser();
+	}
+	```
+
+4. 编写Mapper
+
+	```xml
+	<?xml version="1.0" encoding="UTF-8" ?>
+	<!DOCTYPE mapper
+	        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+	        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+	<mapper namespace="com.komorebi.mapper.UserMapper">
+	    <select id="selectUser" resultType="user">
+	        select * from mybatis.user;
+	    </select>
+	</mapper>
+	```
+
+5. 测试
+
+	```java
+	@Test
+	public void testSelectUser() throws IOException {
+	    String resource = "mybatis-config.xml";
+	    InputStream inputStream = Resources.getResourceAsStream(resource);
+	    SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+	    SqlSession sqlSession = sqlSessionFactory.openSession(true);
+	
+	    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+	    List<User> users = mapper.selectUser();
+	    for (User user : users) {
+	        System.out.println(user);
+	    }
+	}
+	```
+
+### 12.2 mybatis-spring
+
+步骤：![image-20201124110852641](../images/image-20201124110852641.png)
+
+1. 编写数据源
+2. 编写sqlSessionFactory
+3. 编写SqlSessionTemplate
+4. 编写实现类
+5. 将自己的实现类，注入到Spring中
+
+![image-20201124110822147](../images/image-20201124110822147.png)
+
+* Spring-dao.xml
+
+	```xml
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+	       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	       xmlns:aop="http://www.springframework.org/schema/aop"
+	       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	       https://www.springframework.org/schema/beans/spring-beans.xsd
+	       http://www.springframework.org/schema/aop
+	       https://www.springframework.org/schema/aop/spring-aop.xsd">
+	
+	    <!--DataSource:使用Spring的数据源替换Mybatis的配置-->
+	    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+	        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+	        <property name="url" value="jdbc:mysql://localhost:3306/mybatis?useSSL=true&amp;useUnicode=true&amp;characterEncoding=UTF-8"/>
+	        <property name="username" value="root"/>
+	        <property name="password" value="123456"/>
+	    </bean>
+	
+	    <!--SqlSessionFactory-->
+	    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	        <property name="dataSource" ref="dataSource" />
+	        <!--绑定Mybatis配置文件-->
+	        <property name="configLocation" value="classpath:mybatis-config.xml"/>
+	        <property name="mapperLocations" value="classpath:com/komorebi/mapper/*.xml"/>
+	    </bean>
+	
+	    <!--SqlSessionTemplate: 就是使用的SqlSession-->
+	    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+	        <!--只能使用构造器注入，因为没有Set方法-->
+	        <constructor-arg index="0" ref="sqlSessionFactory"/>
+	    </bean>
+	</beans>
+	```
+
+* Mybatis-config.xml
+
+	```xml
+	<?xml version="1.0" encoding="UTF-8" ?>
+	<!DOCTYPE configuration
+	        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+	        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+	
+	<configuration>
+	    <typeAliases>
+	        <package name="com.komorebi.pojo"/>
+	    </typeAliases>
+	    
+	<!--    <settings>-->
+	<!--        <setting name="" value=""/>-->
+	<!--    </settings>-->
+	</configuration>
+	```
+
+* applicationContext.xml
+
+	```xml
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+	       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	       xmlns:aop="http://www.springframework.org/schema/aop"
+	       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	       https://www.springframework.org/schema/beans/spring-beans.xsd
+	       http://www.springframework.org/schema/aop
+	       https://www.springframework.org/schema/aop/spring-aop.xsd">
+	
+	    <import resource="spring-dao.xml"/>
+	    
+	    <!--需要写一个实现类-->
+	    <bean id="userMapper" class="com.komorebi.mapper.UserMapperImpl">
+	        <property name="sqlSession" ref="sqlSession"/>
+	    </bean>
+	</beans>
+	```
+
+* Spring需要一个实现类
+
+	```java
+	public class UserMapperImpl implements UserMapper {
+	    // 我们的所有操作，原来都是用sqlSession来执行，现在都使用SqlSessionTemplate
+	    private SqlSessionTemplate sqlSession;
+	
+	    public void setSqlSession(SqlSessionTemplate sqlSession) {
+	        this.sqlSession = sqlSession;
+	    }
+	
+	    public List<User> selectUser() {
+	        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+	        return mapper.selectUser();
+	    }
+	}
+	```
+
+* Test.java
+
+	```java
+	public class MyTest {
+	    @Test
+	    public void testSelectUser() throws IOException {
+	        ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
+	        UserMapper userMapper = context.getBean("userMapper", UserMapper.class);
+	        for (User user : userMapper.selectUser()) {
+	            System.out.println(user);
+	        }
+	    }
+	}
+	```
+
+###  12.3 整合
+
+* 实现类简化，这种方式在Spring.xml中可以不写sqlSession
+
+	```java
+	public class UserMapperImpl2 extends SqlSessionDaoSupport implements UserMapper {
+	    public List<User> selectUser() {
+	        return getSqlSession().getMapper(UserMapper.class).selectUser();
+	    }
+	}
+	```
+
+* applicationContext.xml
+
+	```xml
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+	       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	       xmlns:aop="http://www.springframework.org/schema/aop"
+	       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	       https://www.springframework.org/schema/beans/spring-beans.xsd
+	       http://www.springframework.org/schema/aop
+	       https://www.springframework.org/schema/aop/spring-aop.xsd">
+	
+	    <import resource="spring-dao.xml"/>
+	
+	    <!--需要写一个实现类-->
+	    <bean id="userMapper" class="com.komorebi.mapper.UserMapperImpl">
+	        <property name="sqlSession" ref="sqlSession"/>
+	    </bean>
+	
+	    <!--这种方式在Spring.xml中可以不写sqlSession-->
+	    <bean id="userMapper2" class="com.komorebi.mapper.UserMapperImpl2">
+	        <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+	    </bean>
+	</beans>
+	```
+
+
+
+## 13 声明式事务
+
+### 13.1 事务
+
+* 要么都成功，要么都失败
+* 设计到数据的一致性问题，不能马虎
+* 确保一致性和完整性
+
+**为什么需要事务**：
+
+* 如果不配置事务，可能存在数据提交不一致的情况
+* 如果不在Spring中配置声明式事务，需要在代码中手动配置事务
+* 事务在项目的开发中十分重要，涉及到数据的一致性和完整性问题，不容马虎。
+
+**事务的ACID原则**：
+
+* 原子性
+* 一致性
+* 隔离性：多个业务可能操作同一个资源，防止数据损坏
+* 持久性：事务一旦提交，无论系统发送什么问题，结果都不会再被影响，被持久化的写到存储器中
+
+### 13.2 Spring中的事务管理
+
+* 声明式事务：AOP，在Spring-dao.xml中配置
+
+	```xml
+	<!--配置声明式事务-->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+	    <constructor-arg ref="dataSource" />
+	</bean>
+	
+	<!--结合AOP实现事务的织入-->
+	<!--配置事务通知-->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+	    <!--给哪些方法配置事务-->
+	    <!--配置事务的传播特性-->
+	    <tx:attributes>
+	        <tx:method name="add" propagation="REQUIRED"/>
+	        <tx:method name="delete" propagation="REQUIRED"/>
+	        <tx:method name="update" propagation="REQUIRED"/>
+	        <tx:method name="query" read-only="true"/>
+	        <tx:method name="*" propagation="REQUIRED"/>
+	    </tx:attributes>
+	</tx:advice>
+	
+	<!--配置事务切入-->
+	<aop:config>
+	    <aop:pointcut id="txPointCut" expression="execution(* com.komorebi.mapper.*.*(..))"/>
+	    <aop:advisor advice-ref="txAdvice" pointcut-ref="txPointCut"/>
+	</aop:config>
+	```
+
+* 编程式事务：需要在代码中，进行事务的管理（需要改代码，不看）
 
