@@ -305,45 +305,58 @@
 
 2. 配置springmvc-servlet.xml
 
-	```xml
-	<?xml version="1.0" encoding="UTF-8"?>
-	<beans xmlns="http://www.springframework.org/schema/beans"
-	       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	       xmlns:context="http://www.springframework.org/schema/context"
-	       xmlns:mvc="http://www.springframework.org/schema/mvc"
-	       xsi:schemaLocation="http://www.springframework.org/schema/beans
-	       http://www.springframework.org/schema/beans/spring-beans.xsd
-	       http://www.springframework.org/schema/context
-	       https://www.springframework.org/schema/context/spring-context.xsd
-	       http://www.springframework.org/schema/mvc
-	       https://www.springframework.org/schema/mvc/spring-mvc.xsd">
-	
-	    <!--自动扫描包，让指定包下的注解生效，由IOC容器统一管理-->
-	    <context:component-scan base-package="com.komorebi.controller"/>
-	
-	    <!--让Spring MVC不处理静态资源-->
-	    <mvc:default-servlet-handler/>
-	
-	    <!--
-	    支持MVC注解驱动
-	        在Spring中一般采用@RequestMapping注解完成映射关系
-	        要想使@RequestMapping注解生效
-	        必须向上下文中注册DefaultAnnotationHandlerMapping和一个AnnotationMethodHandlerAdapter实例
-	        这两个实例分别在类级别和方法级别处理
-	        而annotation-driven配置帮助我们自动完成上述两个实例的注入
-	    -->
-	    <mvc:annotation-driven/>
-	
-	    <!--添加视图解析器-->
-	    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" id="InternalResourceViewResolver">
-	        <!--前缀-->
-	        <property name="prefix" value="/WEB-INF/jsp/"/>
-	        <!--后缀-->
-	        <property name="suffix" value=".jsp"/>
-	    </bean>
-	
-	</beans>
-	```
+  ```xml
+  <?xml version="1.0" encoding="UTF-8"?>
+  <beans xmlns="http://www.springframework.org/schema/beans"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:context="http://www.springframework.org/schema/context"
+         xmlns:mvc="http://www.springframework.org/schema/mvc"
+         xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://www.springframework.org/schema/context
+         https://www.springframework.org/schema/context/spring-context.xsd
+         http://www.springframework.org/schema/mvc
+         https://www.springframework.org/schema/mvc/spring-mvc.xsd">
+  
+      <!--自动扫描包，让指定包下的注解生效，由IOC容器统一管理-->
+      <context:component-scan base-package="com.komorebi.controller"/>
+  
+      <!--让Spring MVC不处理静态资源-->
+      <mvc:default-servlet-handler/>
+  
+      <!--
+      支持MVC注解驱动
+          在Spring中一般采用@RequestMapping注解完成映射关系
+          要想使@RequestMapping注解生效
+          必须向上下文中注册DefaultAnnotationHandlerMapping和一个AnnotationMethodHandlerAdapter实例
+          这两个实例分别在类级别和方法级别处理
+          而annotation-driven配置帮助我们自动完成上述两个实例的注入
+      -->
+      <mvc:annotation-driven>
+          <mvc:message-converters register-defaults="true">
+              <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                  <constructor-arg value="UTF-8"/>
+              </bean>
+              <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                  <property name="objectMapper">
+                      <bean class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean">
+                          <property name="failOnEmptyBeans" value="false"/>
+                      </bean>
+                  </property>
+              </bean>
+          </mvc:message-converters>
+      </mvc:annotation-driven>
+  
+      <!--添加视图解析器-->
+      <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" id="InternalResourceViewResolver">
+          <!--前缀-->
+          <property name="prefix" value="/WEB-INF/jsp/"/>
+          <!--后缀-->
+          <property name="suffix" value=".jsp"/>
+      </bean>
+  
+  </beans>
+  ```
 
 3. 创建Controller
 
@@ -826,4 +839,196 @@ public class ControllerEncodingTest06 {
 		```
 
 		
+
+## 6 JSON
+
+**JSON 和 JavaScript 对象互转**
+
+要实现从JSON字符串转换为JavaScript 对象，使用 JSON.parse() 方法：
+
+```javascript
+var obj = JSON.parse('{"a": "Hello", "b": "World"}');
+//结果是 {a: 'Hello', b: 'World'}
+```
+
+要实现从JavaScript 对象转换为JSON字符串，使用 JSON.stringify() 方法：
+
+```javascript
+var json = JSON.stringify({a: 'Hello', b: 'World'});
+//结果是 '{"a": "Hello", "b": "World"}'
+```
+
+### 6.1 Jackson
+
+* 1 导包
+
+	```xml
+	<!--jackson-core-->
+	<dependency>
+	   <groupId>com.fasterxml.jackson.core</groupId>
+	   <artifactId>jackson-databind</artifactId>
+	   <version>2.10.0</version>
+	</dependency>
+	```
+
+* 2 web.xml
+
+* 3 springmvc-servlet.xml
+
+* 4 User.java
+
+* 5 UserController.java
+
+	```java
+	@Controller
+	public class UserController {
+	    @RequestMapping(value = "/j1", produces = "application/json;charset=utf-8")		// 乱码问题
+	    @ResponseBody           // 不走视图解析器，直接返回一个字符串
+	    public String json1() throws JsonProcessingException {
+	        // jsakson, ObjectMapper
+	        ObjectMapper mapper = new ObjectMapper();
+	
+	        User user = new User("komorebi1", 18, "man");
+	
+	        String s = mapper.writeValueAsString(user);
+	        return s;
+	    }
+	}
+	```
+
+	​       在类上直接使用 **@RestController** ，这样子，里面所有的方法都只会返回 json 字符串了，不用再每一个都添加@ResponseBody ！我们在前后端分离开发中，一般都使用 @RestController ，十分便捷！
+
+	```java
+	@RestController
+	public class UserController {
+	    @RequestMapping("/j1")
+	//    @ResponseBody           // 不走视图解析器，直接返回一个字符串
+	    public String json1() throws JsonProcessingException {
+	        // jsakson, ObjectMapper
+	        ObjectMapper mapper = new ObjectMapper();
+	
+	        User user = new User("komorebi1", 18, "man");
+	
+	        String s = mapper.writeValueAsString(user);
+	        return s;
+	    }
+	    
+	    @RequestMapping("/j2")
+	    public String json2() throws JsonProcessingException{
+	        ObjectMapper mapper = new ObjectMapper();
+	
+	        List<User> userList = new ArrayList<User>();
+	
+	        User user1 = new User("komorebi1", 18, "man");
+	        User user2 = new User("komorebi2", 18, "man");
+	        User user3 = new User("komorebi3", 18, "man");
+	        User user4 = new User("komorebi4", 18, "man");
+	
+	        userList.add(user1);
+	        userList.add(user2);
+	        userList.add(user3);
+	        userList.add(user4);
+	
+	        String s = mapper.writeValueAsString(userList);
+	        return s;
+	    }
+	}
+	```
+
+* 对于输出时间的情况，可以抽象为工具类
+
+	```java
+	package com.komorebi.utils;
+	
+	import com.fasterxml.jackson.core.JsonProcessingException;
+	import com.fasterxml.jackson.databind.ObjectMapper;
+	import com.fasterxml.jackson.databind.SerializationFeature;
+	
+	import java.text.SimpleDateFormat;
+	
+	public class JsonUtils {
+	    public static String getJson(Object object) {
+	        return getJson(object,"yyyy-MM-dd HH:mm:ss");
+	    }
+	
+	    public static String getJson(Object object, String dateFormat) {
+	        ObjectMapper mapper = new ObjectMapper();
+	        //不使用时间差的方式
+	        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+	        //自定义日期格式对象
+	        SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+	        //指定日期格式
+	        mapper.setDateFormat(sdf);
+	        try {
+	            return mapper.writeValueAsString(object);
+	        } catch (JsonProcessingException e) {
+	            e.printStackTrace();
+	        }
+	        return null;
+	    }
+	}
+	```
+
+	```java
+	@RequestMapping("/j4")
+	public String json5() throws JsonProcessingException {
+	   Date date = new Date();
+	   String json = JsonUtils.getJson(date);
+	   return json;
+	}
+	```
+
+### 6.2 FastJson
+
+fastjson.jar是阿里开发的一款专门用于Java开发的包，可以方便的实现json对象与JavaBean对象的转换，实现JavaBean对象与json字符串的转换，实现json对象与json字符串的转换。实现json的转换方法很多，最后的实现结果都是一样的。![image-20201128104248693](../images/image-20201128104248693.png)
+
+* 1 导包
+
+	```xml
+	<!--fastjson-->
+	<dependency>
+	    <groupId>com.alibaba</groupId>
+	    <artifactId>fastjson</artifactId>
+	    <version>1.2.75</version>
+	</dependency>
+	```
+
+* 2 测试
+
+	```java
+	@RequestMapping("/j5")
+	public String json5(){
+	    //创建一个对象
+	    User user1 = new User("K1号", 30, "男");
+	    User user2 = new User("K2号", 30, "男");
+	    User user3 = new User("K3号", 30, "男");
+	    User user4 = new User("K4号", 30, "男");
+	    List<User> list = new ArrayList<User>();
+	    list.add(user1);
+	    list.add(user2);
+	    list.add(user3);
+	    list.add(user4);
+	
+	    System.out.println("*******Java对象 转 JSON字符串*******");
+	    String str1 = JSON.toJSONString(list);
+	    System.out.println("JSON.toJSONString(list)==>" + str1);
+	    String str2 = JSON.toJSONString(user1);
+	    System.out.println("JSON.toJSONString(user1)==>" + str2);
+	
+	    System.out.println("\n****** JSON字符串 转 Java对象*******");
+	    User jp_user1 = JSON.parseObject(str2, User.class);
+	    System.out.println("JSON.parseObject(str2,User.class)==>" + jp_user1);
+	
+	    System.out.println("\n****** Java对象 转 JSON对象 ******");
+	    JSONObject jsonObject1 = (JSONObject) JSON.toJSON(user2);
+	    System.out.println("(JSONObject) JSON.toJSON(user2)==>" + jsonObject1.getString("name"));
+	
+	    System.out.println("\n****** JSON对象 转 Java对象 ******");
+	    User to_java_user = JSON.toJavaObject(jsonObject1, User.class);
+	    System.out.println("JSON.toJavaObject(jsonObject1, User.class)==>" + to_java_user);
+	    return str1;
+	}
+	```
+
+	
 

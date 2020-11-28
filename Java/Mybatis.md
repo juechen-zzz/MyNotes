@@ -147,7 +147,7 @@
 	}
 	```
 
-* 接口实现类（由原来的Impl转换为一个Mapper配置文件）
+* 接口实现类（由原来的Impl转换为一个Mapper配置文件）UserMapper.xml
 
 	```xml
 	<?xml version="1.0" encoding="UTF-8" ?>
@@ -200,7 +200,7 @@
 
 ### 3.1 namespace
 
-* namespace中的包名要和mapper接口的包名一致
+* **namespace中的包名要和mapper接口的包名一致**
 
 * id：对应的namespace中的方法名
 * resultType：SQL语句执行的返回值
@@ -295,7 +295,7 @@ public void testAddUser2(){
 
     mapper.addUser2(map);
 
-    sqlSession.commit();
+    sqlSession.commit();		//提交事务,重点!不写的话不会提交到数据库
     sqlSession.close();
 }
 ```
@@ -306,6 +306,8 @@ public void testAddUser2(){
 * 多个参数情况下，可以用Map，也可以用**注解**
 
 ### 3.4 模糊查询
+
+<img src="../images/image-20201128144610775.png" alt="image-20201128144610775"  />
 
 * Java代码执行的时候，传递通配符%%
 * 在SQL拼接中使用通配符
@@ -349,8 +351,24 @@ public void testGetUserLike(){
 ### 4.2 环境配置（environments）
 
 * MyBatis 可以配置成适应多种环境
+
 * **尽管可以配置多个环境，但每个 SqlSessionFactory 实例只能选择一种环境。**
+
 * 默认的事务管理器：**JDBC**，连接池：**POOLED**
+
+	```xml
+	<environments default="development">
+	    <environment id="development">
+	        <transactionManager type="JDBC"/>
+	        <dataSource type="POOLED">
+	            <property name="driver" value="com.mysql.jdbc.Driver"/>
+	            <property name="url" value="jdbc:mysql://localhost:3306/mybatis?useSSL=true&amp;useUnicode=true&amp;characterEncoding=UTF-8"/>
+	            <property name="username" value="root"/>
+	            <property name="password" value="123456"/>
+	        </dataSource>
+	    </environment>
+	</environments>
+	```
 
 ### 4.3 属性（properties）
 
@@ -371,6 +389,18 @@ public void testGetUserLike(){
 
 	```xml
 	<properties resource="db.properties"/>
+	
+	<environments default="development">
+	    <environment id="development">
+	        <transactionManager type="JDBC"/>
+	        <dataSource type="POOLED">
+	            <property name="driver" value="${driver}"/>
+	            <property name="url" value="${url}"/>
+	            <property name="username" value="${username}"/>
+	            <property name="password" value="${password}"/>
+	        </dataSource>
+	    </environment>
+	</environments>
 	```
 
 ### 4.4 类型别名（typeAliases）
@@ -435,23 +465,21 @@ MapperRegistry：注册绑定我们的Mapper文件
 
 * 注意：接口和Mapper配置文件**必须同名**，必须在用一个包下
 
+方式四：完全限定资源定位费（URL）
+
+```xml
+<mappers>
+ <mapper url="file:///var/mappers/AuthorMapper.xml"/>
+</mappers>
+```
+
 ### 4.8 生命周期和作用域
 
 <img src="../images/image-20201114143004071.png" alt="image-20201114143004071" style="zoom:50%;" />
 
 * 错误的使用会导致非常严重的**并发问题**
-*  **SqlSessionFactoryBuilder**
-	* 一旦创建了 SqlSessionFactory，就不再需要它了
-	* 局部变量
-* **SqlSessionFactory**
-	* 可以想象为数据库连接池
-	* SqlSessionFactory 一旦被创建就应该在应用的运行期间**一直存在**，**没有任何理由丢弃它**或重新创建另一个实例
-	* **最佳作用域**：应用作用域
-	* 最简单的就是使用单例模式或者静态单例模式
-* **SqlSession**
-	* 连接到连接池的一个请求
-	* **最佳作用域**：方法作用域
-	* 用完需要关闭，否则资源被占用
+
+![image-20201128153720860](../images/image-20201128153720860.png)
 
 <img src="../images/image-20201114143554104.png" alt="image-20201114143554104" style="zoom:50%;" />
 
@@ -604,12 +632,27 @@ MapperRegistry：注册绑定我们的Mapper文件
 
 		* （2）日志对象，参数为当前类的class
 
-			```java
-			static Logger logger = Logger.getLogger(UserDaoTest.class);
-			```
-
+		  ```java
+		  //注意导包：org.apache.log4j.Logger
+		  static Logger logger = Logger.getLogger(MyTest.class);
+  
+		  @Test
+  public void selectUser() {
+		     logger.info("info：进入selectUser方法");
+		     logger.debug("debug：进入selectUser方法");
+		     logger.error("error: 进入selectUser方法");
+		     SqlSession session = MybatisUtils.getSession();
+		     UserMapper mapper = session.getMapper(UserMapper.class);
+		     List<User> users = mapper.selectUser();
+		     for (User user: users){
+		         System.out.println(user);
+		    }
+		     session.close();
+		  }
+		  ```
+		
 		* （3）日志级别：info debug error
-
+		
 		* （4）查看.log文件
 
 
@@ -1379,15 +1422,17 @@ Ehcache是一种广泛使用的开源Java分布式缓存。主要面向通用缓
 	</ehcache>
 	```
 
-	
 
-## 14 练习
+### 13.5 一级缓存失效的四种情况
 
-![image-20201119202759998](../images/image-20201119202759998.png)
+一级缓存是SqlSession级别的缓存，是一直开启的，我们关闭不了它；
 
-![image-20201119203041082](../images/image-20201119203041082.png)
+一级缓存失效情况：没有使用到当前的一级缓存，效果就是，还需要再向数据库中发起一次查询请求！
 
-![image-20201119203051470](../images/image-20201119203051470.png)
-
-![image-20201119203058949](../images/image-20201119203058949.png)
-
+1. sqlSession不同
+	结论：**每个sqlSession中的缓存相互独立**
+2. sqlSession相同，查询条件不同
+	结论：**当前缓存中，不存在这个数据**
+3. sqlSession相同，两次查询之间执行了增删改操作！
+	结论：**因为增删改操作可能会对当前数据产生影响**
+4. sqlSession相同，手动清除一级缓存

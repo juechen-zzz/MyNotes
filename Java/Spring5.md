@@ -133,6 +133,20 @@ public class MyTest {
 	}
 	```
 
+- Hello 对象是谁创建的 ?  hello 对象是由Spring创建的
+- Hello 对象的属性是怎么设置的 ?  hello 对象的属性是由Spring容器设置的
+
+这个过程就叫**控制反转** :
+
+- 控制 : 谁来控制对象的创建 , 传统应用程序的对象是由程序本身控制创建的 , 使用Spring后 , 对象是由Spring来创建的
+- 反转 : 程序本身不创建对象 , 而变成被动的接收对象 .
+
+**依赖注入 : 就是利用set方法来进行注入的.**
+
+ IOC是一种编程思想，由主动的编程变成被动的接收
+
+可以通过new ClassPathXmlApplicationContext去浏览一下底层源码 .
+
 
 
 ## 4 IOC创建对象的方式
@@ -345,19 +359,20 @@ public class MyTest {
 
 ![image-20201122102525398](../images/image-20201122102525398.png)
 
-* 单例模式（默认）：只创建一个对象
+* 单例模式（默认）：当一个bean的作用域为Singleton，那么Spring IoC容器中只会存在一个共享的bean实例，并且所有对bean的请求，只要id与该bean定义相匹配，则只会返回bean的同一实例。Singleton是单例类型，**就是在创建起容器时就同时自动创建了一个bean的对象，不管你是否使用，他都存在了，每次获取到的对象都是同一个对象**。注意，Singleton作用域是Spring中的缺省作用域。要在XML中将bean定义成singleton，可以这样配置
 
 ```xml
 <bean id="user2" class="com.komorebi.pojo.User" c:age="18" c:name="komorebi" scope="singleton"/>
 ```
 
-* 原型模式：每次从容器中get的时候，都创建一个对象
+* 原型模式：当一个bean的作用域为Prototype，表示一个bean定义对应多个对象实例。Prototype作用域的bean会导致在每次对该bean请求（将其注入到另一个bean中，或者以程序的方式调用容器的getBean()方法）时都会创建一个新的bean实例。**Prototype是原型类型，它在我们创建容器的时候并没有实例化，而是当我们获取bean的时候才会去创建一个对象，而且我们每次获取到的对象都不是同一个对象。**根据经验，对有状态的bean应该使用prototype作用域，而对无状态的bean则应该使用singleton作用域。在XML中将bean定义成prototype，可以这样配置：
 
 ```xml
 <bean id="user2" class="com.komorebi.pojo.User" c:age="18" c:name="komorebi" scope="singleton"/>
 ```
 
-* 其余的只有在web情况下才需要使用
+* Request：当一个bean的作用域为Request，表示**在一次HTTP请求中，一个bean定义对应一个实例；即每个HTTP请求都会有各自的bean实例，它们依据某个bean定义创建而成。**该作用域仅在基于web的Spring ApplicationContext情形下有效。针对每次HTTP请求，Spring容器会根据loginAction bean的定义创建一个全新的LoginAction bean实例，且该loginAction bean实例仅在当前HTTP request内有效，因此可以根据需要放心的更改所建实例的内部状态，而其他请求中根据loginAction bean定义创建的实例，将不会看到这些特定于某个请求的状态变化。当处理请求结束，request作用域的bean实例将被销毁。
+* Session：当一个bean的作用域为Session，表示**在一个HTTP Session中，一个bean定义对应一个实例**。该作用域仅在基于web的Spring ApplicationContext情形下有效。针对某个HTTP Session，Spring容器会根据userPreferences bean定义创建一个全新的userPreferences bean实例，且该userPreferences bean仅在当前HTTP Session内有效。与request作用域一样，可以根据需要放心的更改所创建实例的内部状态，而别的HTTP Session中根据userPreferences创建的实例，将不会看到这些特定于某个HTTP Session的状态变化。当HTTP Session最终被废弃的时候，在该HTTP Session作用域内的bean也会被废弃掉。
 
 
 
@@ -1174,6 +1189,8 @@ public class AnnotationPointCut {
 
 ## 13 声明式事务
 
+<img src="../images/image-20201128213649445.png" alt="image-20201128213649445" style="zoom: 50%;" />
+
 ### 13.1 事务
 
 * 要么都成功，要么都失败
@@ -1185,13 +1202,6 @@ public class AnnotationPointCut {
 * 如果不配置事务，可能存在数据提交不一致的情况
 * 如果不在Spring中配置声明式事务，需要在代码中手动配置事务
 * 事务在项目的开发中十分重要，涉及到数据的一致性和完整性问题，不容马虎。
-
-**事务的ACID原则**：
-
-* 原子性
-* 一致性
-* 隔离性：多个业务可能操作同一个资源，防止数据损坏
-* 持久性：事务一旦提交，无论系统发送什么问题，结果都不会再被影响，被持久化的写到存储器中
 
 ### 13.2 Spring中的事务管理
 
