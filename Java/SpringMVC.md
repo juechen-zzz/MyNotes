@@ -141,7 +141,7 @@
 
 * 5 配置Tomcat，测试
 
-
+![image-20201129091711490](../images/image-20201129091711490.png)
 
 ## 2 SpringMVC特性
 
@@ -1032,3 +1032,936 @@ fastjson.jar是阿里开发的一款专门用于Java开发的包，可以方便�
 
 	
 
+## 7 整合SSM框架
+
+### 7.1 Mybatis层
+
+1. 构建数据库
+
+	```sql
+	CREATE DATABASE `ssmbuild`;
+	
+	USE `ssmbuild`;
+	
+	DROP TABLE IF EXISTS `books`;
+	
+	CREATE TABLE `books` (
+	`bookID` INT(10) NOT NULL AUTO_INCREMENT COMMENT '书id',
+	`bookName` VARCHAR(100) NOT NULL COMMENT '书名',
+	`bookCounts` INT(11) NOT NULL COMMENT '数量',
+	`detail` VARCHAR(200) NOT NULL COMMENT '描述',
+	KEY `bookID` (`bookID`)
+	) ENGINE=INNODB DEFAULT CHARACTER SET=utf8;
+	
+	INSERT INTO `books`(`bookID`,`bookName`,`bookCounts`,`detail`) VALUES
+	(1,'Java',1,'从入门到放弃'),
+	(2,'MySQL',10,'从删库到跑路'),
+	(3,'Linux',5,'从进门到进牢');
+	```
+
+2. 新建一个Maven项目，导包
+
+3. Idea连接数据库
+
+4. 建立各级目录，resource下新建**mybatis-config.xml**和**applicaionContext.xml**
+
+	```xml
+	<?xml version="1.0" encoding="UTF-8" ?>
+	<!DOCTYPE configuration
+	        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+	        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+	<configuration>
+	</configuration>
+	```
+
+	```xml
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+	       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	       http://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	</beans>
+	```
+
+	<img src="../images/image-20201205100128800.png" alt="image-20201205100128800" style="zoom:50%;" />
+
+5. 新建**database.properties**
+
+	```properties
+	jdbc.driver=com.mysql.jdbc.Driver
+	jdbc.url=jdbc:mysql://localhost:3306/ssmbuild?useSSL=true&useUnicode=true&characterEncoding=utf8
+	jdbc.username=root
+	jdbc.password=123456
+	```
+
+6. 编写**typeAliases**和**mappers**（mybatis-config.xml）
+
+	```xml
+	<?xml version="1.0" encoding="UTF-8" ?>
+	<!DOCTYPE configuration
+	        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+	        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+	<configuration>
+	    <typeAliases>
+	        <package name="com.komorebi.pojo"/>
+	    </typeAliases>
+	    <mappers>
+	        <mapper class="com.komorebi.dao.BookMapper"/>
+	    </mappers>
+	
+	</configuration>
+	```
+
+7. 新建实体类**Books**
+
+	```java
+	@Data
+	@AllArgsConstructor
+	@NoArgsConstructor
+	public class Books {
+	
+	    private int bookID;
+	    private String bookName;
+	    private int bookCounts;
+	    private String detail;
+	
+	}
+	```
+
+8. 新建接口**BookMapper**，定义要实现的功能接口
+
+	```java
+	public interface BookMapper {
+	    //增加一个Book
+	    int addBook(Books book);
+	
+	    //根据id删除一个Book
+	    int deleteBookById(@Param("bookID") int id);
+	
+	    //更新Book
+	    int updateBook(Books books);
+	
+	    //根据id查询,返回一个Book
+	    Books queryBookById(@Param("bookID") int id);
+	
+	    //查询全部Book,返回list集合
+	    List<Books> queryAllBook();
+	
+	    //根据书名查询,返回一个Book
+	    Books queryBookByName(@Param("bookName") String bookName);
+	}
+	```
+
+9. 新建相应的**BookMapper.xml**
+
+	```xml
+	<?xml version="1.0" encoding="UTF-8" ?>
+	<!DOCTYPE mapper
+	        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+	<mapper namespace="com.komorebi.dao.BookMapper">
+	
+	    <!--增加一个Book-->
+	    <insert id="addBook" parameterType="Books">
+	      insert into ssmbuild.books(bookName,bookCounts,detail)
+	      values (#{bookName}, #{bookCounts}, #{detail})
+	   </insert>
+	
+	    <!--根据id删除一个Book-->
+	    <delete id="deleteBookById" parameterType="int">
+	      delete from ssmbuild.books
+	      where bookID=#{bookID}
+	   </delete>
+	
+	    <!--更新Book-->
+	    <update id="updateBook" parameterType="Books">
+	      update ssmbuild.books
+	      set bookName = #{bookName},bookCounts = #{bookCounts},detail = #{detail}
+	      where bookID = #{bookID}
+	   </update>
+	
+	    <!--根据id查询,返回一个Book-->
+	    <select id="queryBookById" resultType="Books">
+	      select * from ssmbuild.books
+	      where bookID = #{bookID}
+	   </select>
+	
+	    <!--查询全部Book-->
+	    <select id="queryAllBook" resultType="Books">
+	      select * from ssmbuild.books
+	   </select>
+	
+	    <!--根据书名查询,返回一个Book-->
+	    <select id="queryBookByName" resultType="Books">
+	      select * from ssmbuild.books
+	      where bookName = #{bookName}
+	   </select>
+	
+	</mapper>
+	```
+
+10. 新建BookService
+
+	```java
+	//BookService:底下需要去实现,调用dao层
+	public interface BookService {
+	    //增加一个Book
+	    int addBook(Books book);
+	
+	    //根据id删除一个Book
+	    int deleteBookById(int id);
+	
+	    //更新Book
+	    int updateBook(Books books);
+	
+	    //根据id查询,返回一个Book
+	    Books queryBookById(int id);
+	
+	    //查询全部Book,返回list集合
+	    List<Books> queryAllBook();
+	
+	    //根据书名查询,返回一个Book
+	    Books queryBookByName(String bookName);
+	}
+	```
+
+11. 新建BookServiceImpl
+
+	```java
+	public class BookServiceImpl implements BookService{
+	    //调用dao层的操作，设置一个set接口，方便Spring管理
+	    private BookMapper bookMapper;
+	
+	    public void setBookMapper(BookMapper bookMapper) {
+	        this.bookMapper = bookMapper;
+	    }
+	
+	    public int addBook(Books book) {
+	        return bookMapper.addBook(book);
+	    }
+	
+	    public int deleteBookById(int id) {
+	        return bookMapper.deleteBookById(id);
+	    }
+	
+	    public int updateBook(Books books) {
+	        return bookMapper.updateBook(books);
+	    }
+	
+	    public Books queryBookById(int id) {
+	        return bookMapper.queryBookById(id);
+	    }
+	
+	    public List<Books> queryAllBook() {
+	        return bookMapper.queryAllBook();
+	    }
+	
+	    public Books queryBookByName(String bookName) {
+	        return bookMapper.queryBookByName(bookName);
+	    }
+	}
+	```
+
+### 7.2 Spring层
+
+1. 新建**spring-dao.xml**
+
+	```xml
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+	       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	       xmlns:context="http://www.springframework.org/schema/context"
+	       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	       http://www.springframework.org/schema/beans/spring-beans.xsd
+	       http://www.springframework.org/schema/context
+	       https://www.springframework.org/schema/context/spring-context.xsd">
+	
+	    <!-- 配置整合mybatis -->
+	    <!-- 1.关联数据库文件 -->
+	    <context:property-placeholder location="classpath:database.properties"/>
+	
+	    <!-- 2.数据库连接池 -->
+	    <!--数据库连接池
+	        dbcp 半自动化操作 不能自动连接
+	        c3p0 自动化操作（自动的加载配置文件 并且设置到对象里面）
+	    -->
+	    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+	        <!-- 配置连接池属性 -->
+	        <property name="driverClass" value="${jdbc.driver}"/>
+	        <property name="jdbcUrl" value="${jdbc.url}"/>
+	        <property name="user" value="${jdbc.username}"/>
+	        <property name="password" value="${jdbc.password}"/>
+	
+	        <!-- c3p0连接池的私有属性 -->
+	        <property name="maxPoolSize" value="30"/>
+	        <property name="minPoolSize" value="10"/>
+	        <!-- 关闭连接后不自动commit -->
+	        <property name="autoCommitOnClose" value="false"/>
+	        <!-- 获取连接超时时间 -->
+	        <property name="checkoutTimeout" value="10000"/>
+	        <!-- 当获取连接失败重试次数 -->
+	        <property name="acquireRetryAttempts" value="2"/>
+	    </bean>
+	
+	    <!-- 3.配置SqlSessionFactory对象 -->
+	    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	        <!-- 注入数据库连接池 -->
+	        <property name="dataSource" ref="dataSource"/>
+	        <!-- 配置MyBaties全局配置文件:mybatis-config.xml -->
+	        <property name="configLocation" value="classpath:mybatis-config.xml"/>
+	    </bean>
+	
+	    <!-- 4.配置扫描Dao接口包，动态实现Dao接口注入到spring容器中 -->
+	    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+	        <!-- 注入sqlSessionFactory -->
+	        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+	        <!-- 给出需要扫描Dao接口包 -->
+	        <property name="basePackage" value="com.komorebi.dao"/>
+	    </bean>
+	
+	</beans>
+	```
+
+2. **spring-service.xml**
+
+	```xml
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+	       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	       xmlns:context="http://www.springframework.org/schema/context"
+	       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   http://www.springframework.org/schema/beans/spring-beans.xsd
+	   http://www.springframework.org/schema/context
+	   http://www.springframework.org/schema/context/spring-context.xsd">
+	
+	    <!-- 扫描service相关的bean -->
+	    <context:component-scan base-package="com.komorebi.service" />
+	
+	    <!--BookServiceImpl注入到IOC容器中-->
+	    <bean id="BookServiceImpl" class="com.komorebi.service.BookServiceImpl">
+	        <property name="bookMapper" ref="bookMapper"/>
+	    </bean>
+	
+	    <!-- 配置事务管理器 -->
+	    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+	        <!-- 注入数据库连接池 -->
+	        <property name="dataSource" ref="dataSource" />
+	    </bean>
+	
+	</beans>
+	```
+
+### 7.3 SpringMVC层
+
+1. 增加web支持，web.xml
+
+	```xml
+	<?xml version="1.0" encoding="UTF-8"?>
+	<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+	         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+	         version="4.0">
+	
+	    <!--DispatcherServlet-->
+	    <servlet>
+	        <servlet-name>DispatcherServlet</servlet-name>
+	        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+	        <init-param>
+	            <param-name>contextConfigLocation</param-name>
+	            <!--一定要注意:我们这里加载的是总的配置文件，之前被这里坑了！-->
+	            <param-value>classpath:applicationContext.xml</param-value>
+	        </init-param>
+	        <load-on-startup>1</load-on-startup>
+	    </servlet>
+	    <servlet-mapping>
+	        <servlet-name>DispatcherServlet</servlet-name>
+	        <url-pattern>/</url-pattern>
+	    </servlet-mapping>
+	
+	    <!--encodingFilter-->
+	    <filter>
+	        <filter-name>encodingFilter</filter-name>
+	        <filter-class>
+	            org.springframework.web.filter.CharacterEncodingFilter
+	        </filter-class>
+	        <init-param>
+	            <param-name>encoding</param-name>
+	            <param-value>utf-8</param-value>
+	        </init-param>
+	    </filter>
+	    <filter-mapping>
+	        <filter-name>encodingFilter</filter-name>
+	        <url-pattern>/*</url-pattern>
+	    </filter-mapping>
+	
+	    <!--Session过期时间-->
+	    <session-config>
+	        <session-timeout>15</session-timeout>
+	    </session-config>
+	
+	</web-app>
+	```
+
+2. Spring-mvc.xml
+
+	```xml
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+	       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	       xmlns:context="http://www.springframework.org/schema/context"
+	       xmlns:mvc="http://www.springframework.org/schema/mvc"
+	       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   http://www.springframework.org/schema/beans/spring-beans.xsd
+	   http://www.springframework.org/schema/context
+	   http://www.springframework.org/schema/context/spring-context.xsd
+	   http://www.springframework.org/schema/mvc
+	   https://www.springframework.org/schema/mvc/spring-mvc.xsd">
+	
+	    <!-- 配置SpringMVC -->
+	    <!-- 1.开启SpringMVC注解驱动 -->
+	    <mvc:annotation-driven />
+	    <!-- 2.静态资源默认servlet配置-->
+	    <mvc:default-servlet-handler/>
+	
+	    <!-- 3.配置jsp 显示ViewResolver视图解析器 -->
+	    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+	        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
+	        <property name="prefix" value="/WEB-INF/jsp/" />
+	        <property name="suffix" value=".jsp" />
+	    </bean>
+	
+	    <!-- 4.扫描web相关的bean -->
+	    <context:component-scan base-package="com.komorebi.controller" />
+	
+	</beans>
+	```
+
+3. **applicatonContext.xml**
+
+	```xml
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+	       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	       http://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	    <import resource="classpath:spring-dao.xml"/>
+	    <import resource="classpath:spring-service.xml"/>
+	    <import resource="classpath:spring-mvc.xml"/>
+	</beans>
+	```
+
+### 7.4 实现功能
+
+1. BookController.java
+
+	```java
+	@Controller
+	@RequestMapping("/book")
+	public class BookController {
+	    // 查询
+	    @Autowired
+	    @Qualifier("BookServiceImpl")
+	    private BookService bookService;
+	
+	    @RequestMapping("/allBook")
+	    public String list(Model model) {
+	        List<Books> list = bookService.queryAllBook();
+	        model.addAttribute("list", list);
+	        return "allBook";
+	    }
+	
+	    // 新增
+	    @RequestMapping("toAddBook")
+	    public String toAddPaper(){
+	        return "addBook";
+	    }
+	    @RequestMapping("/addBook")
+	    public String addPaper(Books books) {
+	        System.out.println(books);
+	        bookService.addBook(books);
+	        return "redirect:/book/allBook";
+	    }
+	
+	    // 更新
+	    @RequestMapping("/toUpdateBook")
+	    public String toUpdateBook(Model model, int id) {
+	        Books books = bookService.queryBookById(id);
+	        System.out.println(books);
+	        model.addAttribute("book",books);
+	        return "updateBook";
+	    }
+	    @RequestMapping("/updateBook")
+	    public String updateBook(Model model, Books book) {
+	        System.out.println(book);
+	        bookService.updateBook(book);
+	        Books books = bookService.queryBookById(book.getBookID());
+	        model.addAttribute("books", books);
+	        return "redirect:/book/allBook";
+	    }
+	
+	    // 删除
+	    @RequestMapping("/del/{bookId}")
+	    public String deleteBook(@PathVariable("bookId") int id) {
+	        bookService.deleteBookById(id);
+	        return "redirect:/book/allBook";
+	    }
+	
+	    // 查询书籍
+	    @RequestMapping("/queryBook")
+	    public String queryBook(Model model, String queryBookName){
+	        Books book = bookService.queryBookByName(queryBookName);
+	        List<Books> list = new ArrayList<Books>();
+	        list.add(book);
+	        if (book == null){
+	            list = bookService.queryAllBook();
+	            model.addAttribute("error", "未查到");
+	        }
+	        model.addAttribute("list", list);
+	        return "allBook";
+	    }
+	}
+	```
+
+2. Index.jsp
+
+	```jsp
+	<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+	<!DOCTYPE HTML>
+	<html>
+	<head>
+	  <title>首页</title>
+	
+	  <style type="text/css">
+	    a {
+	      text-decoration: none;
+	      color: black;
+	      font-size: 18px;
+	    }
+	    h3 {
+	      width: 180px;
+	      height: 38px;
+	      margin: 100px auto;
+	      text-align: center;
+	      line-height: 38px;
+	      background: deepskyblue;
+	      border-radius: 4px;
+	    }
+	  </style>
+	</head>
+	<body>
+	
+	  <h3>
+	    <a href="${pageContext.request.contextPath}/book/allBook">点击进入列表页</a>
+	  </h3>
+	</body>
+	</html>
+	```
+
+3. allBook.jsp
+
+	```jsp
+	<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+	<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+	<html>
+	<head>
+	    <title>书籍列表</title>
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	    <!-- 引入 Bootstrap -->
+	    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+	</head>
+	<body>
+	
+	<div class="container">
+	
+	    <div class="row clearfix">
+	        <div class="col-md-12 column">
+	            <div class="page-header">
+	                <h1>
+	                    <small>书籍列表 —— 显示所有书籍</small>
+	                </h1>
+	            </div>
+	        </div>
+	    </div>
+	
+	    <div class="row">
+	        <div class="col-md-4 column">
+	            <a class="btn btn-primary" href="${pageContext.request.contextPath}/book/toAddBook">新增</a>
+	            <a class="btn btn-primary" href="${pageContext.request.contextPath}/book/allBook">显示全部书籍</a>
+	        </div>
+	        <div class="col-md-4 column"></div>
+	        <div class="col-md-4 column">
+	            <form action="${pageContext.request.contextPath}/book/queryBook" method="post" style="float: right">
+	                <span style="color:red;font-weight: bold">${error}</span>
+	                <input type="text" name="queryBookName" class="form-inline" placeholder="请输入要查询的书籍名称">
+	                <input type="submit" value="查询" class="btn btn-primary">
+	            </form>
+	        </div>
+	    </div>
+	
+	    <div class="row clearfix">
+	        <div class="col-md-12 column">
+	            <table class="table table-hover table-striped">
+	                <thead>
+	                <tr>
+	                    <th>书籍编号</th>
+	                    <th>书籍名字</th>
+	                    <th>书籍数量</th>
+	                    <th>书籍详情</th>
+	                    <th>操作</th>
+	                </tr>
+	                </thead>
+	
+	                <tbody>
+	                <c:forEach var="book" items="${requestScope.get('list')}">
+	                    <tr>
+	                        <td>${book.getBookID()}</td>
+	                        <td>${book.getBookName()}</td>
+	                        <td>${book.getBookCounts()}</td>
+	                        <td>${book.getDetail()}</td>
+	                        <td>
+	                            <a href="${pageContext.request.contextPath}/book/toUpdateBook?id=${book.getBookID()}">更改</a> |
+	                            <a href="${pageContext.request.contextPath}/book/del/${book.getBookID()}">删除</a>
+	                        </td>
+	                    </tr>
+	                </c:forEach>
+	                </tbody>
+	            </table>
+	        </div>
+	    </div>
+	</div>
+	```
+
+4. addBook.jsp
+
+	```jsp
+	<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+	<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+	
+	<html>
+	<head>
+	    <title>新增书籍</title>
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	    <!-- 引入 Bootstrap -->
+	    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+	</head>
+	<body>
+	<div class="container">
+	
+	    <div class="row clearfix">
+	        <div class="col-md-12 column">
+	            <div class="page-header">
+	                <h1>
+	                    <small>新增书籍</small>
+	                </h1>
+	            </div>
+	        </div>
+	    </div>
+	    <form action="${pageContext.request.contextPath}/book/addBook" method="post">
+	        书籍名称：<input type="text" name="bookName"><br><br><br>
+	        书籍数量：<input type="text" name="bookCounts"><br><br><br>
+	        书籍详情：<input type="text" name="detail"><br><br><br>
+	        <input type="submit" value="添加">
+	    </form>
+	
+	</div>
+	```
+
+5. updateBook.jsp
+
+	```jsp
+	<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+	<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+	<html>
+	<head>
+	    <title>修改信息</title>
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	    <!-- 引入 Bootstrap -->
+	    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+	</head>
+	<body>
+	<div class="container">
+	
+	    <div class="row clearfix">
+	        <div class="col-md-12 column">
+	            <div class="page-header">
+	                <h1>
+	                    <small>修改信息</small>
+	                </h1>
+	            </div>
+	        </div>
+	    </div>
+	
+	    <form action="${pageContext.request.contextPath}/book/updateBook" method="post">
+	        <input type="hidden" name="bookID" value="${book.getBookID()}"/>
+	        书籍名称：<input type="text" name="bookName" value="${book.getBookName()}"/>
+	        书籍数量：<input type="text" name="bookCounts" value="${book.getBookCounts()}"/>
+	        书籍详情：<input type="text" name="detail" value="${book.getDetail() }"/>
+	        <input type="submit" value="提交"/>
+	    </form>
+	
+	</div>
+	```
+
+
+
+## 8 Ajax
+
+![image-20201207081101164](../images/image-20201207081101164.png)
+
+### 8.1 测试
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>iframe测试体验页面无刷新</title>
+
+    <script>
+        function go() {
+            var url = document.getElementById("url").value;
+            document.getElementById("iframe1").src=url;
+        }
+    </script>
+</head>
+<body>
+
+<div>
+    <p>请输入地址：</p>
+    <p>
+        <input type="text" id="url" value="https://www.baidu.com/">
+        <input type="button" value="提交" onclick="go()">
+    </p>
+</div>
+
+<div>
+    <iframe id="iframe1" style="width: 100%;height: 500px"></iframe>
+</div>
+
+
+</body>
+</html>
+```
+
+### 8.2 JQuery
+
+<img src="../images/image-20201207104040570.png" alt="image-20201207104040570" style="zoom:50%;" />
+
+1. 配置web.xml 和 springmvc的配置文件
+
+2. 编写一个**AjaxController**
+
+	```java
+	@Controller
+	public class AjaxController {
+	
+	   @RequestMapping("/a1")
+	   public void ajax1(String name , HttpServletResponse response) throws IOException {
+	       if ("admin".equals(name)){
+	           response.getWriter().print("true");
+	      }else{
+	           response.getWriter().print("false");
+	      }
+	  }
+	
+	}
+	```
+
+3. 编写**index.jsp**测试
+
+	```jsp
+	<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+	<html>
+	 <head>
+	   <title>$Title$</title>
+	   <%--<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>--%>
+	   <script src="${pageContext.request.contextPath}/statics/js/jquery-3.1.1.min.js"></script>
+	   <script>
+	       function a1(){
+	           $.post({
+	               url:"${pageContext.request.contextPath}/a1",
+	               data:{'name':$("#txtName").val()},
+	               success:function (data,status) {
+	                   alert(data);
+	                   alert(status);
+	              }
+	          });
+	      }
+	   </script>
+	 </head>
+	 <body>
+	
+	<%--onblur：失去焦点触发事件--%>
+	用户名:<input type="text" id="txtName" onblur="a1()"/>
+	
+	 </body>
+	</html>
+	```
+
+### 8.3 返回json
+
+1. 实体类user
+
+	```java
+	@Data
+	@AllArgsConstructor
+	@NoArgsConstructor
+	public class User {
+	
+	   private String name;
+	   private int age;
+	   private String sex;
+	
+	}
+	```
+
+2. 获取一个集合对象，展示到前端页面
+
+	```java
+	@RequestMapping("/a2")
+	public List<User> a2(){
+	    List<User> userList = new ArrayList<User>();
+	    userList.add(new User("k1", 18, "man"));
+	    userList.add(new User("k2", 18, "man"));
+	    userList.add(new User("k3", 18, "man"));
+	    return userList;
+	}
+	```
+
+3. 前端页面 **test2.jsp**
+
+	```jsp
+	<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+	<html>
+	<head>
+	    <title>Title</title>
+	
+	    <script src="${pageContext.request.contextPath}/statics/js/jquery-3.5.1.js"></script>
+	    <script>
+	        $(function () {
+	            $("#btn").click(function () {
+	                // $.post(url, param, success)
+	                $.post("${pageContext.request.contextPath}/a2", function (data) {
+	                    // console.log(data);
+	                    var html = "";
+	                    for (let i = 0; i < data.length; i++) {
+	                        html += "<tr>" +
+	                                "<td>" + data[i].name + "</td>" +
+	                                "<td>" + data[i].age + "</td>" +
+	                                "<td>" + data[i].sex + "</td>" +
+	                                "</tr>"
+	                    }
+	                    $("#content").html(html);
+	                });
+	            })
+	        });
+	    </script>
+	
+	    </head>
+	<body>
+	
+	<input type="button" value="加载数据" id="btn">
+	<table>
+	    <tr>
+	        <td>姓名</td>
+	        <td>年龄</td>
+	        <td>性别</td>
+	    </tr>
+	    <tbody id="content">
+	        <%--数据：后台--%>
+	    </tbody>
+	</table>
+	
+	</body>
+	</html>
+	```
+
+### 8.4 注册提示结果
+
+1. **AjaxController**
+
+	```java
+	@RequestMapping("/a3")
+	public String ajax3(String name,String pwd){
+	   String msg = "";
+	   //模拟数据库中存在数据
+	   if (name!=null){
+	       if ("admin".equals(name)){
+	           msg = "OK";
+	      }else {
+	           msg = "用户名输入错误";
+	      }
+	  }
+	   if (pwd!=null){
+	       if ("123456".equals(pwd)){
+	           msg = "OK";
+	      }else {
+	           msg = "密码输入有误";
+	      }
+	  }
+	   return msg; //由于@RestController注解，将msg转成json格式返回
+	}
+	```
+
+2. login.jsp
+
+	```jsp
+	<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+	<html>
+	<head>
+	    <title>Title</title>
+	
+	    <script src="${pageContext.request.contextPath}/statics/js/jquery-3.5.1.js"></script>
+	
+	    <script>
+	        function a1(){
+	            $.post({
+	                url:"${pageContext.request.contextPath}/a3",
+	                data:{'name':$("#name").val()},
+	                success:function (data) {
+	                    if (data.toString() == 'OK'){
+	                        $("#userInfo").css("color","green");
+	                    }else {
+	                        $("#userInfo").css("color","red");
+	                    }
+	                    $("#userInfo").html(data);
+	                }
+	            });
+	        }
+	        function a2(){
+	            $.post({
+	                url:"${pageContext.request.contextPath}/a3",
+	                data:{'pwd':$("#pwd").val()},
+	                success:function (data) {
+	                    if (data.toString() == 'OK'){
+	                        $("#pwdInfo").css("color","green");
+	                    }else {
+	                        $("#pwdInfo").css("color","red");
+	                    }
+	                    $("#pwdInfo").html(data);
+	                }
+	            });
+	        }
+	    </script>
+	</head>
+	<body>
+	
+	<p>
+	    用户名：<input type="text" id="name" onblur="a1()">
+	    <span id="userInfo"></span>
+	</p>
+	<p>
+	    密码：<input type="text" id="pwd" onblur="a2()">
+	    <span id="pwdInfo"></span>
+	</p>
+	
+	</body>
+	</html>
+	```
+
+
+
+## 9 
