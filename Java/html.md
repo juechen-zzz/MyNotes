@@ -81,7 +81,7 @@ Hello, world
 <img src="path" alt="text" title="text" width="x" height="y"/>
 ```
 
-* src, alt必填
+* **src, alt必填**
 
 ### 1.8 链接
 
@@ -114,3 +114,84 @@ Hello, world
 	```
 
 	
+
+## 二、列表标签
+
+```html
+<!-- 1 有序列表 -->
+<ol>
+    <li>Java</li>
+    <li>Python</li>
+    <li>C++</li>
+</ol>
+
+<hr/>
+
+<!-- 2 无序列表 -->
+<ul>
+    <li>Java</li>
+    <li>Python</li>
+    <li>C++</li>
+</ul>
+
+<!-- 3 自定义列表 -->
+<dl>
+    <dt>学科</dt>
+    
+    <dd>Java</dd>
+    <dd>Python</dd>
+    <dd>C++</dd>
+</dl>
+```
+
+
+
+## 三、表格标签
+
+```html
+<table border="1px">
+    <tr>
+        <td colspan="3">1</td>			<!--跨列-->
+    </tr>
+    <tr>
+        <td rowspan="2">21</td>			<!--跨行-->
+        <td>22</td>
+        <td>23</td>
+    </tr>
+    <tr>
+        <td>32</td>
+        <td>33</td>
+    </tr>
+</table>
+```
+
+
+
+## 四、媒体元素
+
+```html
+<video src="../resources/video/XXX.mp4" controls autoplay></video>
+
+<audio src="../resources/audio/XXX.mp3" controls autoplay></audio>
+```
+
+
+
+## 五、网页结构
+
+```html
+<header>
+    <h2>网页头部</h2>
+</header>
+
+<section>
+    <h2>网页主体</h2>
+</section>
+
+<footer>
+    <h2>网页脚部</h2>
+</footer>
+```
+
+
+

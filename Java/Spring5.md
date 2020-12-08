@@ -609,7 +609,7 @@ JavaConfig是Spring的子项目，在Spring4之后成为了一个核心功能
 
 
 
-## 10 代理模式
+## 10 代理模式（重点）
 
 代理模式就是SpringAOP的底层[SpringAOP 和 SpringMVC]
 
@@ -1187,7 +1187,7 @@ public class AnnotationPointCut {
 
 
 
-## 13 声明式事务
+## 13 声明式事务（重点）
 
 <img src="../images/image-20201128213649445.png" alt="image-20201128213649445" style="zoom: 50%;" />
 
