@@ -93,8 +93,8 @@ Hello, world
 
 * target：表示窗口**在哪里打开**
 
-	* _blank：在新标签中打开
-	* _self：在自己的网页中打开
+	* **_blank**：在新标签中打开
+	* **_self**：在自己的网页中打开
 
 * 锚链接
 
@@ -194,4 +194,35 @@ Hello, world
 ```
 
 
+
+## 六、内联框架
+
+<img src="../images/image-20201210195538350.png" alt="image-20201210195538350" style="zoom:50%;" />
+
+```html
+<!-- iframe:内联框架
+    src：页面地址 -->
+<iframe src="https://www.baidu.com" name="hello" frameborder="0" width="1000px" height="800px">
+</iframe>
+
+<!-- target设置为hello，指在名为hello的窗口中打开链接 -->
+<a href="0 first_web.html" target="hello">跳转</a>
+```
+
+
+
+## 七、表单
+
+<img src="../images/image-20201210200304656.png" alt="image-20201210200304656" style="zoom:50%;" />
+
+```html
+<form method="POST" action="0 first_web.html">
+    <p>名字:<input name="name" type="text"></p>
+    <p>密码:<input name="pass" type="password"></p>
+    <p>
+        <input type="submit" name="Button" value="提交"/>
+        <input type="reset" name="Reset" value="重填"/>
+    </p>
+</form>
+```
 
