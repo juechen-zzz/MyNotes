@@ -215,6 +215,8 @@ Hello, world
 
 <img src="../images/image-20201210200304656.png" alt="image-20201210200304656" style="zoom:50%;" />
 
+<img src="../images/image-20201211195035262.png" alt="image-20201211195035262" style="zoom:50%;" />
+
 ```html
 <form method="POST" action="0 first_web.html">
     <p>名字:<input name="name" type="text"></p>
@@ -226,3 +228,6 @@ Hello, world
 </form>
 ```
 
+
+
+## 八、 

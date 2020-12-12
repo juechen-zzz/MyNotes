@@ -60,7 +60,7 @@ public class HelloController {
 	server.port=8081
 	```
 
-* 更改启动时显示的 banner 图案；
+* 更改启动时显示的 **banner 图案**；
 
 	到项目下的 resources 目录下新建一个banner.txt 即可。
 
@@ -356,4 +356,6 @@ public class Person {
 * 多环境配置
 	* ![image-20201211142543987](../images/image-20201211142543987.png)
 	* ![image-20201211142555693](../images/image-20201211142555693.png)
+
+## 5 springboot web开发
 
