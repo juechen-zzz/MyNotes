@@ -359,3 +359,149 @@ public class Person {
 
 ## 5 springboot web开发
 
+### 5.1 静态资源
+
+SpringBoot中，SpringMVC的web配置都在 **WebMvcAutoConfiguration** 这个配置类里面；
+
+我们可以去看看 WebMvcAutoConfigurationAdapter 中有很多配置方法；
+
+有一个方法：addResourceHandlers 添加资源处理
+
+```java
+@Override
+public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    if (!this.resourceProperties.isAddMappings()) {
+        logger.debug("Default resource handling disabled");
+        return;
+    }
+    Duration cachePeriod = this.resourceProperties.getCache().getPeriod();
+    CacheControl cacheControl = this.resourceProperties.getCache().getCachecontrol().toHttpCacheControl();
+    if (!registry.hasMappingForPattern("/webjars/**")) {
+        customizeResourceHandlerRegistration(registry.addResourceHandler("/webjars/**")
+        .addResourceLocations("classpath:/META-INF/resources/webjars/")
+        .setCachePeriod(getSeconds(cachePeriod)).setCacheControl(cacheControl)
+        .setUseLastModified(this.resourceProperties.getCache().isUseLastModified()));
+    }
+    String staticPathPattern = this.mvcProperties.getStaticPathPattern();
+	if (!registry.hasMappingForPattern(staticPathPattern)) {
+		customizeResourceHandlerRegistration(registry.addResourceHandler(staticPathPattern)
+		.addResourceLocations(getResourceLocations(this.resourceProperties.getStaticLocations()))
+		.setCachePeriod(getSeconds(cachePeriod)).setCacheControl(cacheControl)
+		.setUseLastModified(this.resourceProperties.getCache().isUseLastModified()));
+	}
+}
+```
+
+* 什么是webjars？一个可以帮助导入的包，包括jquery[https://www.webjars.org/]
+
+* 静态资源目录
+
+	```java
+	// resources > static > public
+	"classpath:/META-INF/resources/",
+	"classpath:/resources/", 
+	"classpath:/static/", 
+	"classpath:/public/" 
+	```
+
+* 总结：
+
+	* 可以使用一下方式处理静态资源
+		* webjars         localhost:8080/webjars/
+		* public      static       /**     resources    localhost:8080/
+	* ![image-20201213103152258](../images/image-20201213103152258.png)
+
+### 5.2 定制首页
+
+* 方式一：在静态资源目录下放index.html
+
+* 方式二：在templates目录下放，然后通过controller访问，需要模板引擎的支持
+
+	```java
+	@Controller
+	public class IndexController {
+	    @RequestMapping("/index")
+	    public String index(){
+	        return "index";
+	    }
+	}
+	```
+
+* 网站图标：favicon.ico![image-20201213151012676](../images/image-20201213151012676.png)
+
+### 5.3 Thymeleaf
+
+```xml
+<!--thymeleaf-->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-thymeleaf</artifactId>
+</dependency>
+```
+
+​        前端交给我们的页面，是html页面。如果是我们以前开发，我们需要把他们转成jsp页面，jsp好处就是当我们查出一些数据转发到JSP页面以后，我们可以用jsp轻松实现数据的显示，及交互等。
+
+​		jsp支持非常强大的功能，包括能写Java代码，但是呢，我们现在的这种情况，SpringBoot这个项目首先是以jar的方式，不是war，第二，我们用的还是嵌入式的Tomcat，所以呢，**他现在默认是不支持jsp的**。
+
+​		那不支持jsp，如果我们直接用纯静态页面的方式，那给我们开发会带来非常大的麻烦，那怎么办呢？
+
+**SpringBoot推荐你可以来使用模板引擎：**
+
+​		模板引擎，我们其实大家听到很多，其实jsp就是一个模板引擎，还有用的比较多的freemarker，包括SpringBoot给我们推荐的Thymeleaf，模板引擎有非常多，但再多的模板引擎，他们的思想都是一样的，什么样一个思想呢我们来看一下这张图：
+
+<img src="../images/image-20201213152454389.png" alt="image-20201213152454389" style="zoom: 33%;" />
+
+* Thymeleaf 官网：https://www.thymeleaf.org/
+
+	Thymeleaf 在Github 的主页：https://github.com/thymeleaf/thymeleaf
+
+	Spring官方文档：找到我们对应的版本
+
+	https://docs.spring.io/spring-boot/docs/2.2.5.RELEASE/reference/htmlsingle/#using-boot-starter 
+
+	找到对应的pom依赖：可以适当点进源码看下本来的包！
+
+* 只需要把我们的html页面放在类路径下的templates下，thymeleaf就可以帮我们自动渲染了。
+
+* 测试
+
+	* 1 修改测试请求，增加数据传输；
+
+		```java
+		@RequestMapping("/t1")
+		public String test1(Model model){
+		    //存入数据
+		    model.addAttribute("msg","Hello,Thymeleaf");
+		    //classpath:/templates/test.html
+		    return "test";
+		}
+		```
+
+	* 2 前端（注意命名空间）
+
+		```html
+		<!DOCTYPE html>
+		<html lang="en" xmlns:th="http://www.thymeleaf.org">
+		<head>
+		    <meta charset="UTF-8">
+		    <title>Title</title>
+		</head>
+		<body>
+		
+		<h1>test</h1>
+		
+		<!--th:text就是将div中的内容设置为它指定的值，和之前学习的Vue一样-->
+		<div th:text="${msg}"></div>
+		
+		</body>
+		</html>
+		```
+
+### 5.4 Thymeleaf语法
+
+![image-20201213161308905](../images/image-20201213161308905.png)
+
+![image-20201213160153538](../images/image-20201213160153538.png)
+
+![image-20201213160850960](../images/image-20201213160850960.png)
+

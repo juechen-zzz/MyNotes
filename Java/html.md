@@ -230,4 +230,70 @@ Hello, world
 
 
 
-## 八、 
+## 八、 下拉框、文本框和文件域
+
+* 下拉框
+
+	```html
+	<p>下拉框：
+	    <select name="列表名称">
+	        <option value="选项的值">A</option>
+	        <option value="选项的值">B</option>
+	        <option value="选项的值" selected>C</option>
+	        <option value="选项的值">D</option>
+	    </select>
+	</p>
+	```
+
+* 文本框
+
+	```HTML
+	!-- 文本域 -->
+	<p>反馈：
+	    <textarea name="textarea" cols="50" rows="10">
+	        文本内容
+	    </textarea>
+	</p>
+	```
+
+* 文件域
+
+	```html
+	<!-- 文件域 -->
+	<p>
+	    <input type="file" name="files">
+	    <input type="button" value="上传" name="upload">
+	</p>
+	```
+
+
+
+## 九、搜索框滑块和简单验证
+
+```html
+<!-- 邮件验证 -->
+<p>
+    <input type="email" name="email">
+</p>
+
+<!-- URL验证 -->
+<p>
+    <input type="url" name="url">
+</p>
+
+<!-- 数字验证(商品数量) -->
+<p>
+    <input type="number" name="num" max="100" min="0" step="10">
+</p>
+
+<!-- 滑块 -->
+<p>滑块：
+    <input type="range" min="0" max="100">
+</p>
+
+<!-- 搜索框 -->
+<p>
+    <input type="search" name="search">
+</p>
+```
+
