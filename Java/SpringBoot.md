@@ -505,3 +505,167 @@ public void addResourceHandlers(ResourceHandlerRegistry registry) {
 
 ![image-20201213160850960](../images/image-20201213160850960.png)
 
+
+
+## 6 MVC配置原理
+
+* https://mp.weixin.qq.com/s?__biz=Mzg2NTAzMTExNg==&mid=2247483819&idx=1&sn=b9009aaa2a9af9d681a131b3a49d8848&scene=19#wechat_redirect
+
+* ```java
+	// 如果想DIY一些定制化的功能，只需要写这个组件，springboot会自动装配
+	// 扩展springmvc
+	@Configuration
+	public class MyMvcConfig implements WebMvcConfigurer {
+	
+	    @Bean
+	    public ViewResolver myViewResolver(){
+	        return new MyViewResolver();
+	    }
+	
+	    // 自定义一个自己的视图解析器
+	    public static class MyViewResolver implements ViewResolver{
+	        @Override
+	        public View resolveViewName(String viewName, Locale locale) throws Exception {
+	            return null;
+	        }
+	    }
+	
+	    // 视图跳转
+	    @Override
+	    public void addViewControllers(ViewControllerRegistry registry) {
+	        registry.addViewController("/komorebi").setViewName("test");
+	    }
+	}
+	```
+
+* ![image-20201214104749868](../images/image-20201214104749868.png)
+
+
+
+## 7 员工管理系统
+
+### 7.1 准备
+
+1. 导入静态资源![image-20201214145229678](../images/image-20201214145229678.png)
+
+2. **新建实体类**
+
+	(1) Department
+
+	```java
+	// 部门表
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public class Department {
+	    private Integer id;
+	    private String departmentName;
+	}
+	```
+
+	(2) Employee
+
+	```java
+	// 员工表
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public class Employee {
+	    private Integer id;
+	    private String lastName;
+	    private String email;
+	    private Integer gender; // 0:女 1:男
+	    private Department department;
+	    private Date birth;
+	
+	    public Employee(Integer id, String lastName, String email, Integer gender, Department department) {
+	        this.id = id;
+	        this.lastName = lastName;
+	        this.email = email;
+	        this.gender = gender;
+	        this.department = department;
+	        this.birth = new Date();
+	    }
+	}
+	```
+
+3. **新建Dao层**
+	（1）DepartmentDao
+
+	```java
+	// 部门Dao
+	@Repository
+	public class DepartmentDao {
+	    // 模拟数据库中的数据
+	    private static Map<Integer, Department> departments = null;
+	    static {
+	        departments = new HashMap<Integer, Department>();   // 创建一个部门表
+	        departments.put(101, new Department(101, "教学部"));
+	        departments.put(102, new Department(102, "市场部"));
+	        departments.put(103, new Department(103, "教研部"));
+	        departments.put(104, new Department(104, "研发部"));
+	        departments.put(105, new Department(105, "组织部"));
+	    }
+	
+	    // 数据库操作
+	    public Collection<Department> getDepartments(){
+	        return departments.values();
+	    }
+	
+	    // 通过id得到部门
+	    public Department getDepartmentById(Integer id){
+	        return departments.get(id);
+	    }
+	}
+	```
+
+	（2）EmployeeDao
+
+	```java
+	// 员工Dao
+	@Repository
+	public class EmployeeDao {
+	    // 模拟数据库中的数据
+	    private static Map<Integer, Employee> employees = null;
+	    // 员工有所属的部门
+	    @Autowired
+	    private DepartmentDao departmentDao;
+	
+	    static {
+	        employees = new HashMap<Integer, Employee>();   // 创建一个部门表
+	        employees.put(1001, new Employee(1001, "A", "a123@qq.com", 1, new Department(101, "教学部")));
+	        employees.put(1002, new Employee(1002, "B", "b123@qq.com", 0, new Department(102, "市场部")));
+	        employees.put(1003, new Employee(1003, "C", "c123@qq.com", 1, new Department(103, "教研部")));
+	        employees.put(1004, new Employee(1004, "D", "d123@qq.com", 0, new Department(104, "研发部")));
+	        employees.put(1005, new Employee(1005, "E", "e123@qq.com", 1, new Department(105, "组织部")));
+	    }
+	
+	    // 增加一个员工，主键自增
+	    private static Integer initId = 1006;
+	    public void save(Employee employee){
+	        if (employee.getId() == null) {
+	            employee.setId(initId++);
+	        }
+	        employee.setDepartment(departmentDao.getDepartmentById(employee.getDepartment().getId()));
+	        employees.put(employee.getId(), employee);
+	    }
+	
+	    // 查询所有员工
+	    public Collection<Employee> getAll(){
+	        return employees.values();
+	    }
+	
+	    // 通过ID查询员工
+	    public Employee getEmployeeById(Integer id){
+	        return employees.get(id);
+	    }
+	
+	    // 通过ID删除员工
+	    public void deleteEmployee(Integer id){
+	        employees.remove(id);
+	    }
+	}
+	```
+
+
+
