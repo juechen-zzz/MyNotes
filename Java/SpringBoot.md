@@ -667,5 +667,122 @@ public void addResourceHandlers(ResourceHandlerRegistry registry) {
 	}
 	```
 
+### 7.2 首页设计
 
+1. MyMvcConfig
+
+	```java
+	@Configuration
+	public class MyMvcConfig implements WebMvcConfigurer {
+	    @Override
+	    public void addViewControllers(ViewControllerRegistry registry) {
+	        registry.addViewController("/").setViewName("index");
+	        registry.addViewController("/index.html").setViewName("index");
+	    }
+	}
+	```
+
+2. Index.html中先加入命名空间，然后链接处前面加th:![image-20201215091251503](../images/image-20201215091251503.png)
+
+3. 页面国际化
+	（1）新建文件夹i18n![image-20201215103701483](../images/image-20201215103701483.png)
+	（2）按钮自动切换，需要自定义组件**MyLocalResolver**，最后在**MyMvcConfig**中设置
+
+	```java
+	public class MyLocalResolver implements LocaleResolver {
+	    // 解析请求
+	    @Override
+	    public Locale resolveLocale(HttpServletRequest request) {
+	        // 获取请求中语言参数
+	        String language = request.getParameter("l");
+	
+	        Locale locale = Locale.getDefault(); // 如果没有就使用默认的
+	
+	        //如果请求的链接携带了国际化的参数
+	        if (!StringUtils.isEmpty(language)){
+	            // zh_CN
+	            String[] split = language.split("_");
+	            // 国家，地区
+	            locale = new Locale(split[0], split[1]);
+	        }
+	        return locale;
+	    }
+	
+	    @Override
+	    public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
+	
+	    }
+	}
+	```
+
+	（3）将组件配置到容器中@Bean
+
+	```java
+	@Configuration
+	public class MyMvcConfig implements WebMvcConfigurer {
+	    @Override
+	    public void addViewControllers(ViewControllerRegistry registry) {
+	        registry.addViewController("/").setViewName("index");
+	        registry.addViewController("/index.html").setViewName("index");
+	    }
+	
+	    // 自定义的国际化组件就生效了
+	    @Bean
+	    public LocaleResolver localeResolver(){
+	        return new MyLocalResolver();
+	    }
+	}
+	```
+
+### 7.3 登录
+
+* 1 修改index
+
+	```html
+	<body class="text-center">
+			<form class="form-signin" th:action="@{/user/login}">
+				<img class="mb-4" th:src="@{/img/bootstrap-solid.svg}" alt="" width="72" height="72">
+				<h1 class="h3 mb-3 font-weight-normal" th:text="#{login.tip}">Please sign in</h1>
+	
+				<!--如果msg的值为空，则不显示消息-->
+				<p style="color: red" th:text="${msg}" th:if="${not #strings.isEmpty(msg)}"></p>
+	
+				<label class="sr-only" th:text="#{login.username}">Username</label>
+				<input type="text" name="username" class="form-control" th:placeholder="#{login.username}" required="" autofocus="">
+				<label class="sr-only" th:text="#{login.password}">Password</label>
+				<input type="password" name="password" class="form-control" th:placeholder="#{login.password}" required="">
+				<div class="checkbox mb-3">
+					<label>
+	          <input type="checkbox" value="remember-me">[[#{login.remember}]]
+	        </label>
+				</div>
+				<button class="btn btn-lg btn-primary btn-block" type="submit" th:text="#{login.btn}">Sign in</button>
+				<p class="mt-5 mb-3 text-muted">© 2017-2018</p>
+				<a class="btn btn-sm" th:href="@{/index.html(l='zh_CN')}">中文</a>
+				<a class="btn btn-sm" th:href="@{/index.html(l='en_US')}">English</a>
+			</form>
+		</body>
+	```
+
+* 2 controller
+
+	```java
+	@Controller
+	public class LoginController {
+	    @RequestMapping("/user/login")
+	    public String login(@RequestParam("username") String username, @RequestParam("password") String password, Model model){
+	        // 具体业务，判定用户密码是否正确
+	        if ("admin".equals(username) &&"123456".equals(password)){
+	            return "redirect:/main.html";
+	        }
+	        else {
+	            // 告诉用户失败了
+	            model.addAttribute("msg", "用户名或密码错误");
+	            return "index";
+	        }
+	    }
+	}
+	```
+
+	
 
