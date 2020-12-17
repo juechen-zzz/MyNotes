@@ -740,28 +740,28 @@ public void addResourceHandlers(ResourceHandlerRegistry registry) {
 
 	```html
 	<body class="text-center">
-			<form class="form-signin" th:action="@{/user/login}">
-				<img class="mb-4" th:src="@{/img/bootstrap-solid.svg}" alt="" width="72" height="72">
-				<h1 class="h3 mb-3 font-weight-normal" th:text="#{login.tip}">Please sign in</h1>
+	    <form class="form-signin" th:action="@{/user/login}">
+	        <img class="mb-4" th:src="@{/img/bootstrap-solid.svg}" alt="" width="72" height="72">
+	        <h1 class="h3 mb-3 font-weight-normal" th:text="#{login.tip}">Please sign in</h1>
 	
-				<!--如果msg的值为空，则不显示消息-->
-				<p style="color: red" th:text="${msg}" th:if="${not #strings.isEmpty(msg)}"></p>
+	        <!--如果msg的值为空，则不显示消息-->
+	        <p style="color: red" th:text="${msg}" th:if="${not #strings.isEmpty(msg)}"></p>
 	
-				<label class="sr-only" th:text="#{login.username}">Username</label>
-				<input type="text" name="username" class="form-control" th:placeholder="#{login.username}" required="" autofocus="">
-				<label class="sr-only" th:text="#{login.password}">Password</label>
-				<input type="password" name="password" class="form-control" th:placeholder="#{login.password}" required="">
-				<div class="checkbox mb-3">
-					<label>
-	          <input type="checkbox" value="remember-me">[[#{login.remember}]]
-	        </label>
-				</div>
-				<button class="btn btn-lg btn-primary btn-block" type="submit" th:text="#{login.btn}">Sign in</button>
-				<p class="mt-5 mb-3 text-muted">© 2017-2018</p>
-				<a class="btn btn-sm" th:href="@{/index.html(l='zh_CN')}">中文</a>
-				<a class="btn btn-sm" th:href="@{/index.html(l='en_US')}">English</a>
-			</form>
-		</body>
+	        <label class="sr-only" th:text="#{login.username}">Username</label>
+	        <input type="text" name="username" class="form-control" th:placeholder="#{login.username}" required="" autofocus="">
+	        <label class="sr-only" th:text="#{login.password}">Password</label>
+	        <input type="password" name="password" class="form-control" th:placeholder="#{login.password}" required="">
+	        <div class="checkbox mb-3">
+	            <label>
+	                <input type="checkbox" value="remember-me">[[#{login.remember}]]
+	            </label>
+	        </div>
+	        <button class="btn btn-lg btn-primary btn-block" type="submit" th:text="#{login.btn}">Sign in</button>
+	        <p class="mt-5 mb-3 text-muted">© 2017-2018</p>
+	        <a class="btn btn-sm" th:href="@{/index.html(l='zh_CN')}">中文</a>
+	        <a class="btn btn-sm" th:href="@{/index.html(l='en_US')}">English</a>
+	    </form>
+	</body>
 	```
 
 * 2 controller
@@ -784,5 +784,284 @@ public void addResourceHandlers(ResourceHandlerRegistry registry) {
 	}
 	```
 
+
+### 7.4 拦截器
+
+1. LoginHandlerInterceptor
+
+	```java
+	public class LoginHandlerInterceptor implements HandlerInterceptor {
+	    @Override
+	    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+	        // 登录成功后，应该有用户的Session
+	        Object loginUser = request.getSession().getAttribute("loginUser");
 	
+	        if (loginUser == null) {
+	            request.setAttribute("msg", "没有权限，请先登录");
+	            request.getRequestDispatcher("/index.html").forward(request, response);
+	            return false;
+	        }
+	        else {
+	            return true;
+	        }
+	    }
+	}
+	```
+
+2. 设置Session
+
+	```java
+	@Controller
+	public class LoginController {
+	    @RequestMapping("/user/login")
+	    public String login(@RequestParam("username") String username, @RequestParam("password") String password, Model model, HttpSession session){
+	        // 具体业务，判定用户密码是否正确
+	        if ("admin".equals(username) &&"123456".equals(password)){
+	            session.setAttribute("loginUser", username);
+	            return "redirect:/main.html";
+	        }
+	        else {
+	            // 告诉用户失败了
+	            model.addAttribute("msg", "用户名或密码错误");
+	            return "index";
+	        }
+	    }
+	}
+	```
+
+3. MvcConfig
+
+	```java
+	@Configuration
+	public class MyMvcConfig implements WebMvcConfigurer {
+	    @Override
+	    public void addViewControllers(ViewControllerRegistry registry) {
+	        registry.addViewController("/").setViewName("index");
+	        registry.addViewController("/index.html").setViewName("index");
+	        registry.addViewController("/main.html").setViewName("dashboard");
+	    }
+	
+	    // 自定义的国际化组件就生效了
+	    @Bean
+	    public LocaleResolver localeResolver(){
+	        return new MyLocalResolver();
+	    }
+	
+	    // 配置拦截器
+	    @Override
+	    public void addInterceptors(InterceptorRegistry registry) {
+	        registry.addInterceptor(new LoginHandlerInterceptor()).addPathPatterns("/**").excludePathPatterns("/index.html", "/", "/user/login", "/css/**", "/js/**", "/img/**");
+	    }
+	}
+	```
+
+### 7.5 展示员工列表
+
+* 主要修改前端html代码
+
+![image-20201216104012843](../images/image-20201216104012843.png)
+
+* EmployeeController
+
+	```java
+	@Controller
+	public class EmployeeController {
+	    @Autowired
+	    EmployeeDao employeeDao;
+	
+	    @RequestMapping("/emps")
+	    public String list(Model model){
+	        Collection<Employee> employees = employeeDao.getAll();
+	        model.addAttribute("emps", employees);
+	        return "emp/list";
+	    }
+	}
+	```
+
+### 7.6 添加员工
+
+1. List.html中添加按钮，这里是get传输
+
+	```HTML
+	<h3>
+	    <a class="btn btn-sm btn-success" th:href="@{/addEmplyee}">Add Employee</a>
+	</h3>
+	```
+
+2. EmployeeController.java
+
+	```java
+	@GetMapping("/addEmplyee")
+	public String toAddPage(Model model){
+	    // 查出所有部门的信息
+	    Collection<Department> departments = departmentDao.getDepartments();
+	    model.addAttribute("departments", departments);
+	    return "emp/add";
+	}
+	```
+
+3. 新建add.html，对照list修改显示的那部分，写一个form表单
+
+	```HTML
+	<form th:action="@{/addEmplyee}" method="post">
+	    <div class="form-group">
+	        <label>LastName</label>
+	        <input type="text" name="lastName" class="form-control" placeholder="username">
+	    </div>
+	    <div class="form-group">
+	        <label>Email</label>
+	        <input type="email" name="email" class="form-control" placeholder="email address">
+	    </div>
+	    <div class="form-group">
+	        <label>Gender</label><br>
+	        <div class="form-check form-check-inline">
+	            <input class="form-check-input" type="radio" name="gender" value="1">
+	            <label class="form-check-label">男</label>
+	        </div>
+	        <div class="form-check form-check-inline">
+	            <input class="form-check-input" type="radio" name="gender" value="0">
+	            <label class="form-check-label">女</label>
+	        </div>
+	    </div>
+	    <div class="form-group">
+	        <label>department</label>
+	        <select class="form-control" name="department.id" >
+	            <option th:each="dept:${departments}" th:text="${dept.getDepartmentName()}" th:value="${dept.getId()}"></option>
+	        </select>
+	    </div>
+	    <div class="form-group">
+	        <label>Birth</label>
+	        <input type="text" name="birth" class="form-control" placeholder="xxxx-xx-xx">
+	    </div>
+	    <button type="submit" class="btn btn-primary">添加</button>
+	</form>
+	```
+
+4. EmployeeController.java
+
+	```java
+	@PostMapping("/addEmplyee")
+	public String AddEmployee(Model model, Employee employee){
+	// 添加操作
+	employeeDao.save(employee);
+	return "redirect:/emps";
+	}
+	```
+
+### 7.7 修改员工信息
+
+1. 修改list.html中的modificate
+
+	```html
+	<td>
+	    <a class="btn btn-sm btn-primary" th:href="@{updateEmployee/{id}(id=${emp.getId()})}">modificate</a>
+	    <button class="btn btn-sm btn-danger">delete</button>
+	</td>
+	```
+
+2. EmployeeController.java
+
+	```java
+	@GetMapping("/updateEmployee/{id}")
+	public String toUpdatePage(@PathVariable("id")Integer id, Model model){
+	// 查出原来的数据
+	Employee employee = employeeDao.getEmployeeById(id);
+	model.addAttribute("emp", employee);
+	// 查出所有部门的信息
+	Collection<Department> departments = departmentDao.getDepartments();
+	model.addAttribute("departments", departments);
+	return "emp/update";
+	}
+	```
+
+3. 新建update.html，对照add修改显示的那部分，修改form表单
+
+	```html
+	<main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+	    <form th:action="@{/updateEmplyee}" method="post">
+	        <input type="hidden" name="id" th:value="${emp.getId()}">
+	        <div class="form-group">
+	            <label>LastName</label>
+	            <input th:value="${emp.getLastName()}" type="text" name="lastName" class="form-control" placeholder="username">
+	        </div>
+	        <div class="form-group">
+	            <label>Email</label>
+	            <input th:value="${emp.getEmail()}" type="email" name="email" class="form-control" placeholder="email address">
+	        </div>
+	        <div class="form-group">
+	            <label>Gender</label><br>
+	            <div class="form-check form-check-inline">
+	                <input th:checked="${emp.getGender()==1}" class="form-check-input" type="radio" name="gender" value="1">
+	                <label class="form-check-label">男</label>
+	            </div>
+	            <div class="form-check form-check-inline">
+	                <input th:checked="${emp.getGender()==0}" class="form-check-input" type="radio" name="gender" value="0">
+	                <label class="form-check-label">女</label>
+	            </div>
+	        </div>
+	        <div class="form-group">
+	            <label>department</label>
+	            <select class="form-control" name="department.id" >
+	                <option th:selected="${dept.getId()==emp.getDepartment().getId()}" th:each="dept:${departments}"
+	                        th:text="${dept.getDepartmentName()}" th:value="${dept.getId()}"></option>
+	            </select>
+	        </div>
+	        <div class="form-group">
+	            <label>Birth</label>
+	            <input th:value="${#dates.format(emp.getBirth(), 'yyyy-MM-dd')}" type="text" name="birth" class="form-control" placeholder="xxxx-xx-xx">
+	        </div>
+	        <button type="submit" class="btn btn-primary">Save</button>
+	    </form>
+	```
+
+4. EmployeeController.java
+
+	```java
+	@PostMapping("/updateEmplyee")
+	public String updateEmployee(Employee employee){
+	    employeeDao.save(employee);
+	    return "redirect:/emps";
+	}
+	```
+
+### 7.8 删除员工
+
+1. 修改按钮
+
+	```html
+	<td>
+	    <a class="btn btn-sm btn-primary" th:href="@{updateEmployee/{id}(id=${emp.getId()})}">modificate</a>
+	    <a class="btn btn-sm btn-danger" th:href="@{deleteEmployee/{id}(id=${emp.getId()})}">delete</a>
+	</td>
+	```
+
+2. EmployeeController.java
+
+	```java
+	@GetMapping("/deleteEmployee/{id}")
+	public String deleteEmployee(@PathVariable("id")Integer id){
+	    employeeDao.deleteEmployee(id);
+	    return "redirect:/emps";
+	}
+	```
+
+### 7.9 404
+
+* 在template目录下新建一个error文件夹，在放入404.html
+
+### 7.10 注销
+
+* 1 修改list.html中的注销按钮
+
+* 2 LoginController.java
+
+	```java
+	@RequestMapping("/user/logout")
+	public String logout(HttpSession session){
+	    session.invalidate();
+	    return "redirect:/index.html";
+	}
+	```
+
+
 
