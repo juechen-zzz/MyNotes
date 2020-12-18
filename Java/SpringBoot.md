@@ -1065,3 +1065,73 @@ public void addResourceHandlers(ResourceHandlerRegistry registry) {
 
 
 
+## 8 结合JDBC
+
+1. 新建一个springboot项目![image-20201218101642192](../images/image-20201218101642192.png)
+
+2. 新建application.yml，在里面配置数据库
+
+	```yml
+	spring:
+	  datasource:
+	    username: root
+	    password: 123456
+	    url: jdbc:mysql://localhost:3306/mybatis?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+	    driver-class-name: com.mysql.cj.jdbc.Driver
+	```
+
+3. JDBCController.java
+
+	```java
+	@Controller
+	public class JDBCController {
+	    @Autowired
+	    JdbcTemplate jdbcTemplate;
+	
+	    // 查询数据库的所有信息
+	    @GetMapping("/userlist")
+	    @ResponseBody
+	    public List<Map<String, Object>> userList(){
+	        String sql = "select * from mybatis.user";
+	        List<Map<String, Object>> listMaps = jdbcTemplate.queryForList(sql);
+	        return listMaps;
+	    }
+	
+	    // 增加用户
+	    @GetMapping("/addUser")
+	    public String addUser(){
+	        String sql = "insert into mybatis.user(id,name,pwd) values(5, 'kk', '123')";
+	        jdbcTemplate.update(sql);
+	        return "redirect:/userlist";
+	    }
+	
+	    // 修改用户
+	    @GetMapping("/updateUser/{id}")
+	    public String updateUser(@PathVariable("id") int id){
+	        String sql = "update mybatis.user set name=?,pwd=? where id=" + id;
+	        Object[] objects = new Object[2];
+	        objects[0] = "ming1";
+	        objects[1] = "123123";
+	        jdbcTemplate.update(sql, objects);
+	        return "redirect:/userlist";
+	    }
+	
+	    // 删除用户
+	    @GetMapping("/deleteUser/{id}")
+	    public String deleteUser(@PathVariable("id") int id){
+	        String sql = "delete from mybatis.user where id=?";
+	        jdbcTemplate.update(sql, id);
+	        return "redirect:/userlist";
+	    }
+	}
+	```
+
+
+
+## 9 整合Druid数据源
+
+* Java程序很大一部分要操作数据库，为了提高性能操作数据库的时候，又不得不使用数据库连接池。
+* Druid 是阿里巴巴开源平台上一个数据库连接池实现，结合了 C3P0、DBCP 等 DB 池的优点，同时加入了日志监控。
+* Druid 可以很好的监控 DB 池连接和 SQL 的执行情况，天生就是针对监控而生的 DB 连接池。
+* Spring Boot 2.0 以上默认使用 Hikari 数据源，可以说 Hikari 与 Driud 都是当前 Java Web 上最优秀的数据源，我们来重点介绍 Spring Boot 如何集成 Druid 数据源，如何实现数据库监控。
+
