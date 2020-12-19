@@ -1131,7 +1131,204 @@ public void addResourceHandlers(ResourceHandlerRegistry registry) {
 ## 9 整合Druid数据源
 
 * Java程序很大一部分要操作数据库，为了提高性能操作数据库的时候，又不得不使用数据库连接池。
+
 * Druid 是阿里巴巴开源平台上一个数据库连接池实现，结合了 C3P0、DBCP 等 DB 池的优点，同时加入了日志监控。
+
 * Druid 可以很好的监控 DB 池连接和 SQL 的执行情况，天生就是针对监控而生的 DB 连接池。
+
 * Spring Boot 2.0 以上默认使用 Hikari 数据源，可以说 Hikari 与 Driud 都是当前 Java Web 上最优秀的数据源，我们来重点介绍 Spring Boot 如何集成 Druid 数据源，如何实现数据库监控。
+
+* 步骤：
+
+	* 1 yml文件 
+
+		```yml
+		spring:
+		  datasource:
+		    username: root
+		    password: 123456
+		    url: jdbc:mysql://localhost:3306/mybatis?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+		    driver-class-name: com.mysql.cj.jdbc.Driver
+		    type: com.alibaba.druid.pool.DruidDataSource
+		
+		    #Spring Boot 默认是不注入这些属性值的，需要自己绑定
+		    #druid 数据源专有配置
+		    initialSize: 5
+		    minIdle: 5
+		    maxActive: 20
+		    maxWait: 60000
+		    timeBetweenEvictionRunsMillis: 60000
+		    minEvictableIdleTimeMillis: 300000
+		    validationQuery: SELECT 1 FROM DUAL
+		    testWhileIdle: true
+		    testOnBorrow: false
+		    testOnReturn: false
+		    poolPreparedStatements: true
+		
+		    #配置监控统计拦截的filters，stat:监控统计、log4j：日志记录、wall：防御sql注入
+		    #如果允许时报错  java.lang.ClassNotFoundException: org.apache.log4j.Priority
+		    #则导入 log4j 依赖即可，Maven 地址：https://mvnrepository.com/artifact/log4j/log4j
+		    filters: stat,wall,log4j
+		    maxPoolPreparedStatementPerConnectionSize: 20
+		    useGlobalDataSourceStat: true
+		    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
+		```
+
+	* 2 DruidConfig.java
+
+		```java
+		@Configuration
+		public class DruidConfig {
+		    @ConfigurationProperties(prefix = "spring.datasource")
+		    @Bean
+		    public DataSource druidDataSource(){
+		        return new DruidDataSource();
+		    }
+		
+		    // 后台监控功能
+		    // 配置 Druid 监控管理后台的Servlet；
+		    // 内置 Servlet 容器时没有web.xml文件，所以使用 Spring Boot 的注册 Servlet 方式
+		    @Bean
+		    public ServletRegistrationBean statViewServlet(){
+		        ServletRegistrationBean<StatViewServlet> bean = new ServletRegistrationBean<>(new StatViewServlet(), "/druid/*");
+		
+		        // 后台需要有人登陆，账号密码配置
+		        HashMap<String, String> initParameters = new HashMap<>();
+		
+		        // 增加配置
+		        initParameters.put("loginUsername", "admin");
+		        initParameters.put("loginPassword", "12345");
+		
+		        // 允许谁可以访问
+		        initParameters.put("allow", "localhost");
+		
+		        // 禁止谁不能访问
+		//        initParameters.put("xxx", "192.168.11.123");
+		
+		        bean.setInitParameters(initParameters); // 设置初始化参数
+		        return bean;
+		    }
+		}
+		```
+
+	* 访问http://localhost:8080/druid/
+
+	* **配置 Druid web 监控 filter 过滤器**
+
+		```java
+		//配置 Druid 监控 之  web 监控的 filter
+		//WebStatFilter：用于配置Web和Druid数据源之间的管理关联监控统计
+		@Bean
+		public FilterRegistrationBean webStatFilter() {
+		    FilterRegistrationBean bean = new FilterRegistrationBean();
+		    bean.setFilter(new WebStatFilter());
+		
+		    //exclusions：设置哪些请求进行过滤排除掉，从而不进行统计
+		    Map<String, String> initParams = new HashMap<>();
+		    initParams.put("exclusions", "*.js,*.css,/druid/*,/jdbc/*");
+		    bean.setInitParameters(initParams);
+		
+		    //"/*" 表示过滤所有请求
+		    bean.setUrlPatterns(Arrays.asList("/*"));
+		    return bean;
+		}
+		```
+
+
+
+## 10 整合Mybatis
+
+1. 新建springboot项目，预设web jdbc mysql-driver
+
+2. 导入MyBatis Spring Boot Starter 
+
+3. 新建实体类和对应的mapper
+
+4. 新建mapper.xml
+
+	```xml
+	<?xml version="1.0" encoding="UTF-8" ?>
+	<!DOCTYPE mapper
+	        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	<!--命名空间 绑定一个对应的Mapper接口-->
+	<mapper namespace="com.komorebi.mapper.UserMapper">
+	    <select id="queryUserList" resultType="User">
+	        select * from mybatis.user;
+	    </select>
+	
+	    <select id="queryUserById" resultType="User">
+	        select * from mybatis.user where id=#{id};
+	    </select>
+	
+	    <insert id="addUser" parameterType="User">
+	        insert into mybatis.user(id, name, pwd) values (#{id}, #{name}, #{pwd});
+	    </insert>
+	
+	    <update id="updateUser" parameterType="User">
+	        update mybatis.user set name=#{name}, pwd=#{pwd} where id=#{id};
+	    </update>
+	
+	    <delete id="deleteUser" parameterType="int">
+	        delete from mybatis.user where id=#{id};
+	    </delete>
+	</mapper>
+	```
+
+	![image-20201219135521343](../images/image-20201219135521343.png)
+
+5. 配置文件
+
+	```properties
+	spring.datasource.username=root
+	spring.datasource.password=123456
+	spring.datasource.url=jdbc:mysql://localhost:3306/mybatis?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+	spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+	
+	# 整合mybatis
+	mybatis.type-aliases-package=com.komorebi.pojo
+	mybatis.mapper-locations=classpath:mybatis/mapper/*.xml
+	```
+
+6. UserController.java
+
+	```java
+	@RestController
+	public class UserController {
+	    @Autowired
+	    private UserMapper userMapper;
+	
+	    @GetMapping("/queryUserList")
+	    public List<User> queryUserList(){
+	        List<User> userList = userMapper.queryUserList();
+	        return userList;
+	    }
+	
+	    @GetMapping("/queryUserById/{id}")
+	    public User queryUserById(@PathVariable("id") int id){
+	        User user = userMapper.queryUserById(id);
+	        return user;
+	    }
+	
+	    @GetMapping("/addUser")
+	    public String addUser(){
+	        userMapper.addUser(new User(5, "k5", "345"));
+	        return "add ok";
+	    }
+	
+	    @GetMapping("/updateUser")
+	    public String updateUser(){
+	        userMapper.updateUser(new User(5, "k6", "345"));
+	        return "update ok";
+	    }
+	
+	    @GetMapping("/deleteUser/{id}")
+	    public String deleteUser(@PathVariable("id") int id){
+	        userMapper.deleteUser(id);
+	        return "delete ok";
+	    }
+	}
+	```
+
+	
 
