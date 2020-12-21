@@ -1514,5 +1514,137 @@ public void addResourceHandlers(ResourceHandlerRegistry registry) {
 
 
 
+## 12 Shiro
+
+* java安全框架，功能：认证，授权，加密，会话管理，Web集成，缓存
+
+### 12.1 架构（外部）
+
+<img src="../images/image-20201221094411771.png" alt="image-20201221094411771" style="zoom:50%;" />
 
 
+
+* subject：应用代码直接交互的对象是subject，也就是说Shiro的对外API核心是Subject，Subject代表了当前的用户，这个用户不一定是一个具体的人，与当前应用交互的任何东西都是Subject，如网络爬虫、机器人等。与Subject的所有交互都会委托给SecurityManager；Subject其实是一个门面，SecurityManager才是真正的执行者
+* SecurityManager：安全管理器，即所有与安全有关的操作都会与SecurityManager交互，并且他管理着所有的Subject，可以看出他是Shiro的核心，负责与Shiro的其他组件进行交互，相当于MVC中的DispatcherServlet的角色
+* Realm：Shiro从Realm获取安全数据（用户、角色、权限），也就是说SecurityManager要验证用户身份，那么他需要从Realm获取相应的用户进行比较，来确定用户的身份是否合法，也需要从Realm得到用户相应的角色、权限，进行验证用户的操作是否能够进行，可以把Realm看出DataSource
+
+### 12.2 步骤
+
+1. 导入依赖
+
+2. 配置文件
+
+3. QuickStart
+
+	```java
+	Subject currentUser = SecurityUtils.getSubject();
+	
+	Session session = currentUser.getSession();
+	
+	currentUser.isAuthenticated()
+	
+	currentUser.getPrincipal()
+	    
+	currentUser.hasRole("schwartz")
+	
+	currentUser.isPermitted("lightsaber:wield")
+	
+	currentUser.logout();
+	```
+
+### 12.3 SpringBoot集成
+
+1. 新建springboot项目，导包
+
+	```xml
+	<!--thymeleaf-->
+	<dependency>
+	    <groupId>org.thymeleaf</groupId>
+	    <artifactId>thymeleaf-spring5</artifactId>
+	</dependency>
+	<dependency>
+	    <groupId>org.thymeleaf.extras</groupId>
+	    <artifactId>thymeleaf-extras-java8time</artifactId>
+	</dependency>
+	
+	<!--shiro整合SpringBoot的包-->
+	<dependency>
+	    <groupId>org.apache.shiro</groupId>
+	    <artifactId>shiro-spring</artifactId>
+	    <version>1.7.0</version>
+	</dependency>
+	```
+
+2. 新建首页index.html和MyController.java
+
+3. UserRealm.java
+
+	```java
+	public class UserRealm extends AuthorizingRealm {
+	    // 授权
+	    @Override
+	    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
+	        System.out.println("执行了授权");
+	        return null;
+	    }
+	
+	    // 认证
+	    @Override
+	    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
+	        System.out.println("执行了认证");
+	        return null;
+	    }
+	}
+	```
+
+4. UserRealm.java
+
+	```java
+	public class UserRealm extends AuthorizingRealm {
+	    // 授权
+	    @Override
+	    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
+	        System.out.println("执行了授权");
+	        return null;
+	    }
+	
+	    // 认证
+	    @Override
+	    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
+	        System.out.println("执行了认证");
+	        return null;
+	    }
+	}
+	```
+
+5. ShiroConfig
+
+	```java
+	@Configuration
+	public class ShiroConfig {
+	    // 3 ShiroFilterFactoryBean
+	    @Bean
+	    public ShiroFilterFactoryBean ShiroFilterFactoryBean(@Qualifier("getDefaultWebSecurityManager")DefaultWebSecurityManager defaultWebSecurityManager){
+	        ShiroFilterFactoryBean bean = new ShiroFilterFactoryBean();
+	        // 设置安全管理器
+	        bean.setSecurityManager(defaultWebSecurityManager);
+	        return bean;
+	    }
+	    // 2 DefaultWebSecurityManager
+	    @Bean
+	    public DefaultWebSecurityManager getDefaultWebSecurityManager(@Qualifier("userRealm") UserRealm userRealm){
+	        DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
+	        // 关联UserRealm
+	        securityManager.setRealm(userRealm);
+	        return securityManager;
+	    }
+	
+	    // 1 创建 Realm 对象，需要自定义
+	    @Bean
+	    public UserRealm userRealm(){
+	        return new UserRealm();
+	    }
+	}
+	```
+
+	
