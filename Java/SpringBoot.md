@@ -1597,26 +1597,6 @@ public void addResourceHandlers(ResourceHandlerRegistry registry) {
 	}
 	```
 
-4. UserRealm.java
-
-	```java
-	public class UserRealm extends AuthorizingRealm {
-	    // 授权
-	    @Override
-	    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
-	        System.out.println("执行了授权");
-	        return null;
-	    }
-	
-	    // 认证
-	    @Override
-	    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
-	        System.out.println("执行了认证");
-	        return null;
-	    }
-	}
-	```
-
 5. ShiroConfig
 
 	```java
@@ -1630,6 +1610,7 @@ public void addResourceHandlers(ResourceHandlerRegistry registry) {
 	        bean.setSecurityManager(defaultWebSecurityManager);
 	        return bean;
 	    }
+	    
 	    // 2 DefaultWebSecurityManager
 	    @Bean
 	    public DefaultWebSecurityManager getDefaultWebSecurityManager(@Qualifier("userRealm") UserRealm userRealm){
@@ -1647,4 +1628,278 @@ public void addResourceHandlers(ResourceHandlerRegistry registry) {
 	}
 	```
 
+### 12.4 实现登录拦截
+
+ShrioConfig中修改
+
+```java
+@Bean
+public ShiroFilterFactoryBean ShiroFilterFactoryBean(@Qualifier("getDefaultWebSecurityManager")DefaultWebSecurityManager defaultWebSecurityManager){
+    ShiroFilterFactoryBean bean = new ShiroFilterFactoryBean();
+    // 设置安全管理器
+    bean.setSecurityManager(defaultWebSecurityManager);
+
+    // 添加shiro的内置过滤器
+    /*
+            anno: 无需认证就可以访问
+            authc：必须认证才能访问
+            user：必须拥有记住我才能访问
+            perms：拥有对某个资源的权限才能访问
+            role：拥有某个角色权限才能访问
+         */
+    Map<String, String> filterMap = new LinkedHashMap<>();
+    filterMap.put("/user/add", "authc");
+    filterMap.put("/user/update", "authc");
+
+    bean.setFilterChainDefinitionMap(filterMap);
+
+    // 设置登录的请求
+    bean.setLoginUrl("/toLogin");
+
+    return bean;
+}
+```
+
+### 12.5 用户认证
+
+1. 在Controller中写login方法
+
+	```java
+	@RequestMapping("/login")
+	public String login(String username, String password, Model model){
+	    // 获取当前用户
+	    Subject subject = SecurityUtils.getSubject();
+	    // 封装用户的登录数据
+	    UsernamePasswordToken token = new UsernamePasswordToken(username, password);
 	
+	    try{
+	        subject.login(token);   // 执行登录的方法
+	        return "index";
+	    }catch (UnknownAccountException e){     // 用户名不存在
+	        model.addAttribute("msg", "用户名错误");
+	        return "login";
+	    } catch (IncorrectCredentialsException e) { // 密码不存在
+	        model.addAttribute("msg", "密码错误");
+	        return "login";
+	    }
+	}
+	```
+
+2. UserRealm
+
+	```java
+	// 认证
+	@Override
+	protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
+	    System.out.println("执行了认证");
+	
+	    // 认证
+	    String name = "root";
+	    String password = "123456";
+	    UsernamePasswordToken userToken = (UsernamePasswordToken) authenticationToken;
+	    if (!userToken.getUsername().equals(name)){
+	        return null;    // 抛出异常  UnknownAccountException
+	    }
+	
+	    // 密码认证：自动完成
+	    return new SimpleAuthenticationInfo("", password, "");
+	}
+	```
+
+### 12.6 shiro整合Mybatis
+
+1. 导包
+
+	```xml
+	<!--lombok-->
+	<dependency>
+	    <groupId>org.projectlombok</groupId>
+	    <artifactId>lombok</artifactId>
+	    <version>1.18.12</version>
+	</dependency>
+	
+	<!--MySQL-->
+	<dependency>
+	    <groupId>mysql</groupId>
+	    <artifactId>mysql-connector-java</artifactId>
+	</dependency>
+	
+	<!--Druid-->
+	<dependency>
+	    <groupId>com.alibaba</groupId>
+	    <artifactId>druid</artifactId>
+	    <version>1.1.12</version>
+	</dependency>
+	
+	<!--log4j-->
+	<dependency>
+	    <groupId>log4j</groupId>
+	    <artifactId>log4j</artifactId>
+	    <version>1.2.17</version>
+	</dependency>
+	
+	<!--mybatis-spring-boot-starter-->
+	<dependency>
+	    <groupId>org.mybatis.spring.boot</groupId>
+	    <artifactId>mybatis-spring-boot-starter</artifactId>
+	    <version>2.1.3</version>
+	</dependency>
+	```
+
+2. 新建application.yml，同Druid那里
+
+3. Application.properties中配置mybatis
+
+	```properties
+	# 整合mybatis
+	mybatis.type-aliases-package=com.komorebi.pojo
+	mybatis.mapper-locations=classpath:mapper/*.xml
+	```
+
+4. 新建实体类，以及对应的mapper和service
+	![image-20201222111544248](../images/image-20201222111544248.png)
+
+5. 后台测试成功后，修改UserRealm
+
+	```java
+	public class UserRealm extends AuthorizingRealm {
+	    @Autowired
+	    UserService userService;
+	
+	    // 授权
+	    @Override
+	    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
+	        System.out.println("执行了授权");
+	        return null;
+	    }
+	
+	    // 认证
+	    @Override
+	    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
+	        System.out.println("执行了认证");
+	
+	        // 连接真实数据库
+	        UsernamePasswordToken userToken = (UsernamePasswordToken) authenticationToken;
+	        User user = userService.queryUserByName(userToken.getUsername());
+	
+	        if (user == null){
+	            return null;    // 抛出异常  UnknownAccountException
+	        }
+	
+	        // 密码认证：自动完成
+	        return new SimpleAuthenticationInfo("", user.getPwd(), "");
+	    }
+	}
+	```
+
+### 12.7 shiro请求授权
+
+1 修改ShiroConfig，写明授权检测和未授权跳转
+
+```java
+// 3 ShiroFilterFactoryBean
+@Bean
+public ShiroFilterFactoryBean ShiroFilterFactoryBean(@Qualifier("getDefaultWebSecurityManager")DefaultWebSecurityManager defaultWebSecurityManager){
+    ShiroFilterFactoryBean bean = new ShiroFilterFactoryBean();
+    // 设置安全管理器
+    bean.setSecurityManager(defaultWebSecurityManager);
+
+    // 添加shiro的内置过滤器
+    /*
+            anno: 无需认证就可以访问
+            authc：必须认证才能访问
+            user：必须拥有记住我才能访问
+            perms：拥有对某个资源的权限才能访问
+            role：拥有某个角色权限才能访问
+         */
+    // 拦截
+    Map<String, String> filterMap = new LinkedHashMap<>();
+    // 授权，正常情况下，没有授权会跳到未授权页面
+    filterMap.put("/user/add", "perms[user:add]");
+    filterMap.put("/user/update", "perms[user:update]");
+    filterMap.put("/user/*", "authc");
+
+    bean.setFilterChainDefinitionMap(filterMap);
+
+    // 设置登录的请求
+    bean.setLoginUrl("/toLogin");
+
+    // 未授权请求
+    bean.setUnauthorizedUrl("/noauth");
+
+    return bean;
+}
+```
+
+2 UserRealm 写用户授权部分
+
+```java
+public class UserRealm extends AuthorizingRealm {
+    @Autowired
+    UserService userService;
+
+    // 授权
+    @Override
+    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
+        System.out.println("执行了授权");
+        SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
+
+        // 拿到当前登录的这个对象
+        Subject subject = SecurityUtils.getSubject();
+        User currentUser = (User) subject.getPrincipal();
+
+        info.addStringPermission(currentUser.getPerms());
+
+        return info;
+    }
+
+    // 认证
+    @Override
+    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
+        System.out.println("执行了认证");
+
+        // 连接真实数据库
+        UsernamePasswordToken userToken = (UsernamePasswordToken) authenticationToken;
+        User user = userService.queryUserByName(userToken.getUsername());
+
+        if (user == null){
+            return null;    // 抛出异常  UnknownAccountException
+        }
+
+        // 密码认证：自动完成
+        return new SimpleAuthenticationInfo(user, user.getPwd(), "");
+    }
+}
+```
+
+### 12.8 shiro整合thymeleaf
+
+1. 导包
+
+	```xml
+	<!-- shiro整合thymeleaf -->
+	<dependency>
+	    <groupId>com.github.theborakompanioni</groupId>
+	    <artifactId>thymeleaf-extras-shiro</artifactId>
+	    <version>2.0.0</version>
+	</dependency>
+	```
+
+2. ShiroConfig
+
+	```java
+	// 整合ShiroDialect，用来整合shiro 和 thymeleaf
+	@Bean
+	public ShiroDialect getShiroDialect(){
+	    return new ShiroDialect();
+	}
+	```
+
+3. 认证中加入代码
+
+	```java
+	Subject currentSubject = SecurityUtils.getSubject();
+	Session session = currentSubject.getSession();
+	session.setAttribute("loginUser", user);
+	```
+
