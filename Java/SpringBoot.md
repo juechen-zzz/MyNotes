@@ -1903,3 +1903,104 @@ public class UserRealm extends AuthorizingRealm {
 	session.setAttribute("loginUser", user);
 	```
 
+
+
+## 13 Swagger
+
+<img src="../images/image-20201223104429336.png" alt="image-20201223104429336" style="zoom:50%;" />
+
+* RestFul API 文档在线自动生成工具，API文档与API定义同步更新https://swagger.io/
+* 直接运行，在线测试API接口
+
+### 13.1 SpringBoot集成Swagger
+
+1. 导包
+
+	```xml
+	<!-- springfox-swagger2 -->
+	<dependency>
+	    <groupId>io.springfox</groupId>
+	    <artifactId>springfox-swagger2</artifactId>
+	    <version>2.9.2</version>
+	</dependency>
+	<!-- springfox-swagger-ui -->
+	<dependency>
+	    <groupId>io.springfox</groupId>
+	    <artifactId>springfox-swagger-ui</artifactId>
+	    <version>2.9.2</version>
+	</dependency>
+	```
+
+2. 配置Swagger--> config
+
+	```java
+	@Configuration
+	@EnableSwagger2
+	public class SwaggerConfig {
+	    
+	}
+	```
+
+3. http://localhost:8080/swagger-ui.html
+
+### 13.2 配置
+
+Swagger的bean实例Docket，配置Config
+
+```java
+@Configuration
+@EnableSwagger2
+public class SwaggerConfig {
+    @Bean
+    public Docket docket(){
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo());
+    }
+
+    // 配置Swagger信息 apiInfo
+    private ApiInfo apiInfo(){
+        // 作者信息
+        Contact contact = new Contact("komorebi", "http://www.baidu.com", "240553516");
+        return new ApiInfo(
+                "Komorebi API Document",
+                "be the best",
+                "v1.0",
+                "http://www.baidu.com",
+                contact,
+                "Apache 2.0",
+                "http://www.apache.org/licenses/LICENSE-2.0",
+                new ArrayList<VendorExtension>()
+        );
+    }
+}
+```
+
+### 13.3 配置扫描接口
+
+Docket.select()
+
+```java
+@Bean
+public Docket docket(){
+    return new Docket(DocumentationType.SWAGGER_2)
+        .apiInfo(apiInfo())
+        .select()
+        // RequestHandlerSelectors 配置要扫描接口的方式
+        //   basePackage:指定要扫描的包
+        //   any()：扫描全部
+        //   none()：不扫描
+        //   withClassAnnotation：扫描类上的注解
+        //   withMethodAnnotation：扫描方法上的注解
+        .apis(RequestHandlerSelectors.basePackage("com.komorebi.controller"))
+        // 过滤
+        .paths(PathSelectors.ant("/komorebi/**"))
+        .build();
+}
+```
+
+* 若希望Swagger在生成环境中使用，在发布的时候不使用
+	* 判断是否为生成环境
+	* 注入enable(flag)<img src="../images/image-20201223140348452.png" alt="image-20201223140348452" style="zoom:50%;" />
+
+
+
