@@ -2002,5 +2002,206 @@ public Docket docket(){
 	* 判断是否为生成环境
 	* 注入enable(flag)<img src="../images/image-20201223140348452.png" alt="image-20201223140348452" style="zoom:50%;" />
 
+### 13.4 配置文档分组
+
+```java
+public class SwaggerConfig {
+    @Bean
+    public Docket docket1(){
+        return new Docket(DocumentationType.SWAGGER_2)
+                .groupName("A");
+    }
+
+    @Bean
+    public Docket docket(){
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+//                .enable(false)            // 是否启动Swagger
+                .groupName("komorebi")
+                .select()
+                // RequestHandlerSelectors 配置要扫描接口的方式
+                //   basePackage:指定要扫描的包
+                //   any()：扫描全部
+                //   none()：不扫描
+                //   withClassAnnotation：扫描类上的注解
+                //   withMethodAnnotation：扫描方法上的注解
+                .apis(RequestHandlerSelectors.basePackage("com.komorebi.controller"))
+                // 过滤
+//                .paths(PathSelectors.ant("/komorebi/**"))
+                .build();
+    }
+
+    // 配置Swagger信息 apiInfo
+    private ApiInfo apiInfo(){
+        // 作者信息
+        Contact contact = new Contact("komorebi", "http://www.baidu.com", "240553516");
+        return new ApiInfo(
+                "Komorebi API Document",
+                "be the best",
+                "v1.0",
+                "http://www.baidu.com",
+                contact,
+                "Apache 2.0",
+                "http://www.apache.org/licenses/LICENSE-2.0",
+                new ArrayList<VendorExtension>()
+        );
+    }
+}
+```
+
+### 13.5 实体类配置
+
+* 实体类
+
+```java
+// @Api("用户实体类")
+@ApiModel("用户实体类")
+public class User {
+    @ApiModelProperty("用户名")
+    public String username;
+    @ApiModelProperty("密码")
+    public String password;
+}
+```
+
+* controller
+
+```java
+@RestController
+public class HelloController {
+    // 默认请求：/error
+    @GetMapping(value = "/hello")
+    public String hello(){
+        return "hello";
+    }
+
+    // 只要接口中返回值存在实体类，就会被扫描到swagger中
+    @PostMapping(value = "/user")
+    public User user(){
+        return new User();
+    }
+
+    @ApiOperation("hello控制类")
+    @GetMapping(value = "/hello2")
+    public String hello2(@ApiParam("用户名") String username){
+        return "hello" + username;
+    }
+
+    @ApiOperation("post控制类")
+    @PostMapping(value = "/postTest")
+    public String postTest(@ApiParam("用户") User user){
+        return "hello" + user;
+    }
+}
+```
+
+* 总结：
+	* 可以通过Swagger给一些比较难理解的属性或者接口，增加注释信息
+	* 接口文档实时更新
+	* 可以在线测试
 
 
+
+## 14 任务
+
+### 14.1 异步任务
+
+* Service
+
+	```java
+	@Service
+	public class AsyncService {
+	    // 告诉Spring这是一个异步的方法
+	    @Async
+	    public void hello(){
+	        try {
+	            Thread.sleep(3000);
+	        } catch (InterruptedException e) {
+	            e.printStackTrace();
+	        }
+	
+	        System.out.println("数据正在处理...");
+	    }
+	}
+	```
+
+* Controller
+
+	```java
+	@RestController
+	public class AsyncController {
+	    @Autowired
+	    AsyncService asyncService;
+	
+	    @RequestMapping("/hello")
+	    public String hello(){
+	        asyncService.hello();
+	        return "OK";
+	    }
+	}
+	```
+
+* 主函数加上**@EnableAsync**注解
+
+### 14.2 邮件任务
+
+* 导入依赖
+
+	```xml
+	<dependency>
+	    <groupId>org.springframework.boot</groupId>
+	    <artifactId>spring-boot-starter-mail</artifactId>
+	</dependency>
+	```
+
+* 配置properties
+
+	```properties
+	spring.mail.username=nihaopeng1997
+	spring.mail.password=GDONFUPUUKPOUAGN
+	spring.mail.host=smtp.126.com
+	```
+
+* Test
+
+	```java
+	@SpringBootTest
+	class Springboot10TestApplicationTests {
+	    @Autowired
+	    JavaMailSenderImpl mailSender;
+	
+	    // 简单邮件
+	    @Test
+	    void contextLoads() {
+	        SimpleMailMessage mailMessage = new SimpleMailMessage();
+	
+	        mailMessage.setSubject("nihao~");
+	        mailMessage.setText("123123");
+	        mailMessage.setTo("240553516@qq.com");
+	        mailMessage.setFrom("nihaopeng1997@126.com");
+	
+	        mailSender.send(mailMessage);
+	    }
+	
+	    // 复杂邮件
+	    @Test
+	    void contextLoads2() throws MessagingException {
+	        MimeMessage mimeMessage = mailSender.createMimeMessage();
+	
+	        // 组装
+	        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "utf-8");
+	        helper.setSubject("nihao2~");
+	        helper.setText("<p style='color:red'>321321</p>", true);
+	
+	        // 附件
+	        helper.addAttachment("dog.jpg", new File("/Users/nihaopeng/Pictures/DynamicWallpaperClub壁纸/dog.jpg"));
+	
+	        helper.setTo("240553516@qq.com");
+	        helper.setFrom("nihaopeng1997@126.com");
+	
+	        mailSender.send(mimeMessage);
+	    }
+	}
+	```
+
+	
