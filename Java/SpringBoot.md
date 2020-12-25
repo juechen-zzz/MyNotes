@@ -2,7 +2,7 @@
 
 <img src="../images/image-20201209092000099.png" alt="image-20201209092000099" style="zoom:50%;" /><img src="../images/image-20201209092242410.png" alt="image-20201209092242410" style="zoom:50%;" />
 
-## 1 微服务阶段
+## 1  微服务阶段
 
 1. JavaSE：OOP
 2. Mysql：持久化
@@ -14,7 +14,7 @@
 
 
 
-## 2 构建
+## 2  构建
 
 ![image-20201210110625340](../images/image-20201210110625340.png)
 
@@ -2204,4 +2204,50 @@ public class HelloController {
 	}
 	```
 
-	
+
+### 14.3 定时任务
+
+* TaskScheduler(调度)、TaskExecutor(执行)
+
+* ```java
+	@EnableScheduling   // 开启定时功能的注解
+	@Scheduled 			// 什么时候执行
+	```
+
+* cron表达式，新建一个ScheduledService<img src="../images/image-20201225105751354.png" alt="image-20201225105751354" style="zoom:50%;" />
+
+	```java
+	@Service
+	public class ScheduledService {
+	    // 在一个特定的时间执行这个方法
+	    // cron表达式
+	    // 秒 分 时 日 月 星期
+	    @Scheduled(cron = "0 50 10 * * 0-7")
+	    public void hello(){
+	        System.out.println("hello");
+	    }
+	}
+	```
+
+
+
+## 15 分布式Dubbo和Zookeeper
+
+* 分布式系统
+
+<img src="../images/image-20201225110202952.png" alt="image-20201225110202952" style="zoom:50%;" />
+
+<img src="../images/image-20201225132036356.png" alt="image-20201225132036356" style="zoom:50%;" />
+
+* RPC
+	* 通信
+	* 序列化
+
+<img src="../images/image-20201225143151833.png" alt="image-20201225143151833" style="zoom:50%;" />
+
+<img src="../images/image-20201225143442645.png" alt="image-20201225143442645" style="zoom:50%;" />
+
+### 15.1 Dubbo
+
+* Apache Dubbo 是一款高性能、轻量级的开源 Java 服务框架(RPC框架)
+* 
