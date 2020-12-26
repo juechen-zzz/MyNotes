@@ -2250,4 +2250,301 @@ public class HelloController {
 ### 15.1 Dubbo
 
 * Apache Dubbo 是一款高性能、轻量级的开源 Java 服务框架(RPC框架)
-* 
+* 三大核心能力
+	* 面向接口的远程方法调用
+	* 智能容错和负载均衡
+	* 服务自动注册和发现
+* <img src="../images/image-20201226084926024.png" alt="image-20201226084926024" style="zoom:50%;" />
+* <img src="../images/image-20201226085351259.png" alt="image-20201226085351259" style="zoom:50%;" />
+
+### 15.2 安装zookeeper
+
+![image-20201226091028523](../images/image-20201226091028523.png)
+
+* 安装
+
+	* 1 下载http://archive.apache.org/dist/zookeeper/
+
+	* 2 解压tar.gz，放到Library目录下
+
+	* 3 配置conf下的zoo.cfg
+
+		```cfg
+		# 服务器与客户端之间交互的基本时间单元（ms） 
+		tickTime=2000   
+		# zookeeper所能接受的客户端数量 
+		initLimit=10  
+		# 服务器和客户端之间请求和应答之间的时间间隔 
+		syncLimit=5
+		# zookeeper中使用的基本时间单位, 毫秒值.
+		tickTime=2000
+		# 数据目录. 可以是任意目录.
+		dataDir=/Library/zookeeper-3.4.14/data
+		# log目录, 同样可以是任意目录. 如果没有设置该参数, 将使用和#dataDir相同的设置.
+		dataLogDir=/Library/zookeeper-3.4.14/log
+		# t监听client连接的端口号.
+		clientPort=2181
+		```
+
+	* 3 基本操作
+
+		* 启动：/zkServer.sh start
+
+		* 停止：/zkServer.sh stop
+
+		* Cli连接
+
+			```sh
+			> cd zookeeper-3.4.10/bin //切换到 bin目录
+			> ./zkCli.sh -server 127.0.0.1:2181
+			[zk: 127.0.0.1:2181(CONNECTED) 0] help //输入help命令
+			ZooKeeper -server host:port cmd args
+			    stat path [watch]
+			    set path data [version]
+			    ls path [watch]
+			    delquota [-n|-b] path
+			    ls2 path [watch]
+			    setAcl path acl
+			    setquota -n|-b val path
+			    history
+			    redo cmdno
+			    printwatches on|off
+			    delete path [version]
+			    sync path
+			    listquota path
+			    rmr path
+			    get path [watch]
+			    create [-s] [-e] path data acl
+			    addauth scheme auth
+			    quit
+			    getAcl path
+			    close
+			    connect host:port
+			
+			/////////////////////官方测试命令////////////////////////
+			
+			[zk: 127.0.0.1:2181(CONNECTED) 2] ls /
+			[zookeeper]
+			[zk: 127.0.0.1:2181(CONNECTED) 3] create /zk_test my_data
+			Created /zk_test
+			[zk: 127.0.0.1:2181(CONNECTED) 4] ls /
+			[zookeeper, zk_test]
+			[zk: 127.0.0.1:2181(CONNECTED) 5] get /zk_test
+			my_data
+			cZxid = 0x2
+			ctime = Wed Feb 28 15:18:45 CST 2018
+			mZxid = 0x2
+			mtime = Wed Feb 28 15:18:45 CST 2018
+			pZxid = 0x2
+			cversion = 0
+			dataVersion = 0
+			aclVersion = 0
+			ephemeralOwner = 0x0
+			dataLength = 7
+			numChildren = 0
+			[zk: 127.0.0.1:2181(CONNECTED) 6] set /zk_test junk
+			cZxid = 0x2
+			ctime = Wed Feb 28 15:18:45 CST 2018
+			mZxid = 0x3
+			mtime = Wed Feb 28 15:20:23 CST 2018
+			pZxid = 0x2
+			cversion = 0
+			dataVersion = 1
+			aclVersion = 0
+			ephemeralOwner = 0x0
+			dataLength = 4
+			numChildren = 0
+			[zk: 127.0.0.1:2181(CONNECTED) 7] get /zk_test
+			junk
+			cZxid = 0x2
+			ctime = Wed Feb 28 15:18:45 CST 2018
+			mZxid = 0x3
+			mtime = Wed Feb 28 15:20:23 CST 2018
+			pZxid = 0x2
+			cversion = 0
+			dataVersion = 1
+			aclVersion = 0
+			ephemeralOwner = 0x0
+			dataLength = 4
+			numChildren = 0
+			[zk: 127.0.0.1:2181(CONNECTED) 8] delete /zk_test
+			[zk: 127.0.0.1:2181(CONNECTED) 9] ls
+			[zk: 127.0.0.1:2181(CONNECTED) 10] ls /
+			[zookeeper]
+			```
+
+### 15.3 安装Dubbo
+
+* dubbo是一个监控管理后台，查看我们注册了哪些服务，哪些服务被消费了
+* 步骤
+	* 1 下载，复制到Library目录https://github.com/apache/dubbo-admin/tree/master
+	* 2 导入idea，打包
+	* 3 java -jar dubbo-admin-0.0.1-SNAPSHOT.jar （此时zookeeper一定要打开）
+	* 4 执行完毕，我们去访问一下 http://localhost:7001/ ， 这时候我们需要输入登录账户和密码，我们都是默认的root-root；
+
+### 15.4 SpringBoot集成
+
+1. 启动zookeeper ！
+
+2. IDEA创建一个空项目；
+
+3. 创建一个模块，实现服务提供者：provider-server ， 选择web依赖即可
+
+4. 项目创建完毕，写一个服务，比如卖票的服务；
+
+```java
+// zookeeper：服务注册与发现
+@Component          // 使用了Dubbo后尽量不用Service注解
+@DubboService       // 可以被扫描到，在项目一启动就自动注册到注册中心
+public class TicketServiceImpl implements TicketService {
+    @Override
+    public String getTicket() {
+        return "komorebi";
+    }
+}
+```
+
+5. 再新建一个模块，实现服务消费者，
+
+6. 提供者导包
+
+	```xml
+	<!--导入依赖，dubbo + zookeeper-->
+	<!-- dubbo-spring-boot-starter -->
+	<dependency>
+	    <groupId>org.apache.dubbo</groupId>
+	    <artifactId>dubbo-spring-boot-starter</artifactId>
+	    <version>2.7.8</version>
+	</dependency>
+	<!-- zkclient -->
+	<dependency>
+	    <groupId>com.github.sgroschupf</groupId>
+	    <artifactId>zkclient</artifactId>
+	    <version>0.1</version>
+	</dependency>
+	<!-- 引入zookeeper -->
+	<dependency>
+	    <groupId>org.apache.curator</groupId>
+	    <artifactId>curator-framework</artifactId>
+	    <version>2.12.0</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.apache.curator</groupId>
+	    <artifactId>curator-recipes</artifactId>
+	    <version>2.12.0</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.apache.zookeeper</groupId>
+	    <artifactId>zookeeper</artifactId>
+	    <version>3.4.14</version>
+	    <!--排除这个slf4j-log4j12-->
+	    <exclusions>
+	        <exclusion>
+	            <groupId>org.slf4j</groupId>
+	            <artifactId>slf4j-log4j12</artifactId>
+	        </exclusion>
+	    </exclusions>
+	</dependency>
+	```
+
+7. 在springboot配置文件中配置dubbo相关属性！
+
+	```properties
+	server.port=8001
+	
+	# 服务应用名字
+	dubbo.application.name=provider-server
+	# 注册中心地址
+	dubbo.registry.address=zookeeper://127.0.0.1:2181
+	# 哪些服务要被注册
+	dubbo.scan.base-packages=com.komorebi.service
+	```
+
+8. 运行Dubbo-admin，进7001先测试提供者![image-20201226134844927](../images/image-20201226134844927.png)
+
+9. 消费者导包
+
+	```xml
+	<!--dubbo-->
+	<!-- Dubbo Spring Boot Starter -->
+	<dependency>
+	   <groupId>org.apache.dubbo</groupId>
+	   <artifactId>dubbo-spring-boot-starter</artifactId>
+	   <version>2.7.3</version>
+	</dependency>
+	<!--zookeeper-->
+	<!-- https://mvnrepository.com/artifact/com.github.sgroschupf/zkclient -->
+	<dependency>
+	   <groupId>com.github.sgroschupf</groupId>
+	   <artifactId>zkclient</artifactId>
+	   <version>0.1</version>
+	</dependency>
+	<!-- 引入zookeeper -->
+	<dependency>
+	   <groupId>org.apache.curator</groupId>
+	   <artifactId>curator-framework</artifactId>
+	   <version>2.12.0</version>
+	</dependency>
+	<dependency>
+	   <groupId>org.apache.curator</groupId>
+	   <artifactId>curator-recipes</artifactId>
+	   <version>2.12.0</version>
+	</dependency>
+	<dependency>
+	   <groupId>org.apache.zookeeper</groupId>
+	   <artifactId>zookeeper</artifactId>
+	   <version>3.4.14</version>
+	   <!--排除这个slf4j-log4j12-->
+	   <exclusions>
+	       <exclusion>
+	           <groupId>org.slf4j</groupId>
+	           <artifactId>slf4j-log4j12</artifactId>
+	       </exclusion>
+	   </exclusions>
+	</dependency>
+	```
+
+10. 配置参数
+
+	```properties
+	server.port=8002
+	
+	#当前应用名字
+	dubbo.application.name=consumer-server
+	#注册中心地址
+	dubbo.registry.address=zookeeper://127.0.0.1:2181
+	```
+
+11. 写服务类
+
+	```java
+	@Service
+	public class UserService {
+	    @Reference //远程引用指定的服务，他会按照全类名进行匹配，看谁给注册中心注册了这个全类名
+	    TicketService ticketService;
+	
+	    public void bugTicket(){
+	        String ticket = ticketService.getTicket();
+	        System.out.println("在注册中心买到" + ticket);
+	    }
+	}
+	```
+
+12. 测试
+
+	```java
+	@SpringBootTest
+	class ConsumerServerApplicationTests {
+		@Autowired
+		UserService userService;
+	
+		@Test
+		void contextLoads() {
+			userService.bugTicket();
+		}
+	
+	}
+	```
+
+	![image-20201226140948892](../images/image-20201226140948892.png)
+
