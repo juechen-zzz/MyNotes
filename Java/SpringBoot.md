@@ -358,7 +358,7 @@ public class Person {
 ### 4.4 多环境配置及配置文件位置
 
 * yaml文件位置<img src="../images/image-20201211142007089.png" alt="image-20201211142007089" style="zoom:50%;" />
-	* 默认的是第四个，优先级最低的
+	* 默认的是第四个，优先级**最低**的
 * 多环境配置
 	* ![image-20201211142543987](../images/image-20201211142543987.png)
 	* ![image-20201211142555693](../images/image-20201211142555693.png)
@@ -445,7 +445,7 @@ public void addResourceHandlers(ResourceHandlerRegistry registry) {
 </dependency>
 ```
 
-​        前端交给我们的页面，是html页面。如果是我们以前开发，我们需要把他们转成jsp页面，jsp好处就是当我们查出一些数据转发到JSP页面以后，我们可以用jsp轻松实现数据的显示，及交互等。
+​        前端交给我们的页面，是html页面。如果是我们以前开发，我们需要把他们转成jsp页面，jsp好处就是当我们查出一些数据转发到JSP页面以后，我们可以用jsp轻松实现数据的显示及交互等。
 
 ​		jsp支持非常强大的功能，包括能写Java代码，但是呢，我们现在的这种情况，SpringBoot这个项目首先是以jar的方式，不是war，第二，我们用的还是嵌入式的Tomcat，所以呢，**他现在默认是不支持jsp的**。
 

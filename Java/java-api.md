@@ -118,11 +118,35 @@ se.remove(n);
 # 8 Stack
 
 ```java
+// 创建
 Stack<Integer> s = new Stack<>();
 // 添加删除
 s.push(n);
 s.pop(n);
 s.peek();
+// 判定是否为空
+s.isEmpty();
+// 大小
+s.size();
+```
+
+# 9 PriorityQueue
+
+* 最小堆（优先级队列）
+
+```java
+// 创建
+PriorityQueue<Integer> pq = new PriorityQueue<>();						// 最小堆
+PriorityQueue<Integer> pq = new PriorityQueue<>((a, b) -> b - a);		// 最大堆
+PriorityQueue<int[]> pq = new PriorityQueue<>(new Comparator<int[]>() {
+    public int compare(int[] pair1, int[] pair2) {
+        return pair1[0] != pair2[0] ? pair2[0] - pair1[0] : pair1[1] - pair2[1];
+    }
+});
+// 添加删除
+pq.offer(n);
+pq.poll();
+pq.peek();
 // 判定是否为空
 s.isEmpty();
 // 大小
