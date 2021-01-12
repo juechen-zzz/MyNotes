@@ -153,3 +153,10 @@ s.isEmpty();
 s.size();
 ```
 
+# 10 List
+
+```java
+List<Pair>[] edges = new List[stringNum];
+for (int i = 0; i < stringNum; i++){edges[i] = new ArrayList<Pair>();}
+```
+
