@@ -1,12 +1,15 @@
 # 0 排序
 
 ```java
-// 排序自定义
+// 排序自定义(按照二维数组的第一维排序)
 Arrays.sort(envelopes, new Comparator<int[]>(){
             public int compare(int[] a, int[] b){
                 return a[0] == b[0] ? b[1] - a[1] : a[0] - b[0];
             }
         });
+
+// 数组部分排序
+Arrays.sort(nums, startIndex, endIndex+1);
 ```
 
 # 1 数组
