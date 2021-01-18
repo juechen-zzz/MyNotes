@@ -10,6 +10,8 @@ Arrays.sort(envelopes, new Comparator<int[]>(){
 
 // 数组部分排序
 Arrays.sort(nums, startIndex, endIndex+1);
+// ArrayList排序
+Collections.sort(ans);
 ```
 
 # 1 数组
