@@ -294,6 +294,307 @@ redis-benchmark -h localhost -p 6379 -c 100 -n 100000
 
 ### 4.1 geospatial
 
+* 地理位置，有效经度-180 -- +180，有效维度-85 -- +85
+* 底层用zset实现，zset的指令也可以用 
+
+|       操作        |                             指令                             |                      含义                      |
+| :---------------: | :----------------------------------------------------------: | :--------------------------------------------: |
+|      geoadd       |           geoadd china:city 31.23 121.47 shanghai            |       添加地理位置（key-(维度精度名称)）       |
+|      geopos       |                  geopos china:city beijing                   |       从key中返回所有给定位置元素的位置        |
+|      geodist      |          geodist china:city beijing shanghai （km）          |           返回两个给定位置之间的距离           |
+|     georadius     | georadius china:city 116.40 39.90 1100 km （withdist / withcoord） |   以给定的经纬度为中心，找出某一半径内的元素   |
+| georadiusbymember |         georadiusbymember china:city beijing 1100 km         | georadiusbymember 的中心点由给定的位置元素决定 |
+|      geohash      |                  geohash china:city beijing                  |        返回一个或多个元素的geohash表示         |
+
 ### 4.2 hyperloglog
 
+* 基数（不重复的元素）
+* hyperloglog 基数统计的算法（一个人访问一个网站多次，也还是算一个人）
+* 优点：占用的内存固定，2^64不同的基数的集合，只需要12KB的内存
+
+|  操作   |              指令               |   含义   |
+| :-----: | :-----------------------------: | :------: |
+|  pfadd  | pfadd mykey a b c d e f g h i j | 添加元素 |
+| pfcount |          pfcount mykey          |   计数   |
+| pfmerge |   pfmerge mykey3 mykey mykey2   |   融合   |
+
 ### 4.3 bitmaps
+
+* 位存储，用来统计用户信息（活跃与否、登录状态、打卡）
+
+|   操作   |      指令       |       含义        |
+| :------: | :-------------: | :---------------: |
+|  setbit  | setbit sign 3 1 | 添加（索引+状态） |
+|  getbit  |  getbit sign 0  |       查看        |
+| bitcount |  bitcount sign  |       统计        |
+
+
+
+## 五、事务
+
+### 5.1 基础指令
+
+* Redis单条命令是**保持原子性**的，但是事务**不保证原子性**
+
+* 事务本质：一组命令的集合（一次性、顺序性、排他性）
+
+* 步骤：
+
+	```bash
+	127.0.0.1:6379> multi
+	OK
+	127.0.0.1:6379> set k1 v1
+	QUEUED
+	127.0.0.1:6379> set k2 v2
+	QUEUED
+	127.0.0.1:6379> set k3 v3
+	QUEUED
+	127.0.0.1:6379> exec
+	1) OK
+	2) OK
+	3) OK
+	```
+
+	* 开启事务（**multi**）
+	* 命令入队（）
+	* 执行事务（**exec**）
+
+* 放弃事务：**discard**
+
+* 编译型异常（**代码有问题，命令有错**），事务中的所有命令都不执行
+
+* 运行时异常（**1 / 0 这种**），事务队列中存在语法问题，那么执行命令的时候，其他命令是可以正常执行的
+
+### 5.2 实现乐观锁
+
+乐观锁：认为什么时候都不会出问题，所以不会上锁。更新数据的时候判断一下是否有人改动过数据
+
+悲观锁：无论做什么都会加锁
+
+* 乐观锁步骤：
+
+	* 获取version
+
+	* 更新的时候比较version
+
+	* ```bash
+		# 正常执行
+		127.0.0.1:6379> set money 100
+		OK
+		127.0.0.1:6379> set out 0
+		OK
+		127.0.0.1:6379> watch money
+		OK
+		127.0.0.1:6379> multi
+		OK
+		127.0.0.1:6379> decrby money 20
+		QUEUED
+		127.0.0.1:6379> incrby out 20
+		QUEUED
+		127.0.0.1:6379> exec
+		1) (integer) 80
+		2) (integer) 20
+		```
+
+	* ```bash
+		# 多线程修改值，使用watch可以当做Redis的乐观锁
+		127.0.0.1:6379> watch money
+		OK
+		127.0.0.1:6379> multi
+		OK
+		127.0.0.1:6379> decrby money 10
+		QUEUED
+		127.0.0.1:6379> incrby out 10
+		QUEUED
+		127.0.0.1:6379> exec
+		(nil)
+		# unwatch
+		```
+
+	* <img src="../images/image-20210119142450683.png" alt="image-20210119142450683" style="zoom:50%;" />
+
+
+
+## 六、Jedis
+
+要使用Java来操作Redis
+
+* Jedis是官方推荐的java连接开发工具，使用Java操作Redis中间件
+
+步骤：
+
+1. 导入依赖
+
+	```xml
+	<!--Jedis-->
+	<dependency>
+	    <groupId>redis.clients</groupId>
+	    <artifactId>jedis</artifactId>
+	    <version>3.2.0</version>
+	</dependency>
+	<!--fastjson-->
+	<dependency>
+	    <groupId>com.alibaba</groupId>
+	    <artifactId>fastjson</artifactId>
+	    <version>1.2.75</version>
+	</dependency>
+	```
+
+2. 测试:
+
+	* 连接数据库
+
+		```java
+		public class TestPing {
+		    public static void main(String[] args) {
+		        // 1 new一个Jedis对象
+		        Jedis jedis = new Jedis("127.0.0.1", 6379);
+		
+		        // Jedis的所有命令就是常规指令
+		        System.out.println(jedis.ping());
+		    }
+		}
+		```
+
+3. ```java
+	public class TestKey {
+	    public static void main(String[] args) {
+	        Jedis jedis = new Jedis("127.0.0.1", 6379);
+	
+	        System.out.println("清空数据："+jedis.flushDB());
+	        System.out.println("判断某个键是否存在："+jedis.exists("username"));
+	        System.out.println("新增<'username','kuangshen'>的键值对："+jedis.set("username", "kuangshen"));
+	        System.out.println("新增<'password','password'>的键值对："+jedis.set("password", "password"));
+	        System.out.print("系统中所有的键如下：");
+	        Set<String> keys = jedis.keys("*");
+	        System.out.println(keys);
+	        System.out.println("删除键password:"+jedis.del("password"));
+	        System.out.println("判断键password是否存在："+jedis.exists("password"));
+	        System.out.println("查看键username所存储的值的类型："+jedis.type("username"));
+	        System.out.println("随机返回key空间的一个："+jedis.randomKey());
+	        System.out.println("重命名key："+jedis.rename("username","name"));
+	        System.out.println("取出改后的name："+jedis.get("name"));
+	        System.out.println("按索引查询："+jedis.select(0));
+	        System.out.println("删除当前选择数据库中的所有key："+jedis.flushDB());
+	        System.out.println("返回当前数据库中key的数目："+jedis.dbSize());
+	        System.out.println("删除所有数据库中的所有key："+jedis.flushAll());
+	    }
+	}
+	```
+
+
+
+## 七、SpringBoot整合
+
+* 在SpringBoot2.x后，jedis被替换为了lettuce
+* jedis：采用直连，多个线程操作，是不安全的，如果想要避免不安全，使用jedis pool连接池
+* lettuce：采用netty，实例可以在多个线程中共享，不存在线程不安全的情况，可以减少线程数据，更像NIO模式
+
+```java
+@Configuration(proxyBeanMethods = false)
+@ConditionalOnClass(RedisOperations.class)
+@EnableConfigurationProperties(RedisProperties.class)
+@Import({ LettuceConnectionConfiguration.class, JedisConnectionConfiguration.class })
+public class RedisAutoConfiguration {
+	// 默认的RedisTemplate，没有过多的设置，对象都是需要序列化
+    // 两个泛型都是object，后面需要强制转换<String, Object>
+	@Bean
+	@ConditionalOnMissingBean(name = "redisTemplate")
+	@ConditionalOnSingleCandidate(RedisConnectionFactory.class)
+	public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+		RedisTemplate<Object, Object> template = new RedisTemplate<>();
+		template.setConnectionFactory(redisConnectionFactory);
+		return template;
+	}
+
+	@Bean
+	@ConditionalOnMissingBean   // 由于String是最常使用的类型，所以单独提出来一个bean
+	@ConditionalOnSingleCandidate(RedisConnectionFactory.class)
+	public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
+		StringRedisTemplate template = new StringRedisTemplate();
+		template.setConnectionFactory(redisConnectionFactory);
+		return template;
+	}
+
+}
+```
+
+### 7.1 测试
+
+1. 导入依赖
+
+2. 配置连接
+
+3. 测试
+
+	```java
+	@SpringBootTest
+	class Redis02SpringbootApplicationTests {
+	    @Autowired
+	    private RedisTemplate redisTemplate;
+	
+	    @Test
+	    void contextLoads() {
+	        // redisTemplate
+	        // opsForValue  操作字符串，类似String
+	        // opsForList   操作List，类似List...
+	        // 常用的方法可以直接通过template操作，比如事务
+	
+	        // 获取连接
+	//        RedisConnection connection = redisTemplate.getConnectionFactory().getConnection();
+	//        connection.flushDb();
+	
+	        redisTemplate.opsForValue().set("mykey", "komorebi");
+	        System.out.println(redisTemplate.opsForValue().get("mykey"));
+	    }
+	
+	    @Test
+	    public void test() throws JsonProcessingException {
+	        // 真实开发用json传送对象，注意必须序列化(或者实体类实现序列化接口)
+	        //public class User implements Serializable
+	        User user = new User("komorebi", 18);
+	        String jsonUser = new ObjectMapper().writeValueAsString(user);
+	        redisTemplate.opsForValue().set("user", jsonUser);
+	        System.out.println(redisTemplate.opsForValue().get("user"));
+	    }
+	}
+	```
+
+4. RedisTemplate模板
+
+	```java
+	@Configuration
+	public class RedisConfig {
+	
+	  @Bean
+	  @SuppressWarnings("all")
+	  public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
+	      RedisTemplate<String, Object> template = new RedisTemplate<String, Object>();
+	      template.setConnectionFactory(factory);
+	
+	      // Json序列化配置
+	      Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
+	      ObjectMapper om = new ObjectMapper();
+	      om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+	      om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+	      jackson2JsonRedisSerializer.setObjectMapper(om);
+	      // String序列化
+	      StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+	
+	      // key采用String的序列化方式
+	      template.setKeySerializer(stringRedisSerializer);
+	      // hash的key也采用String的序列化方式
+	      template.setHashKeySerializer(stringRedisSerializer);
+	      // value序列化方式采用jackson
+	      template.setValueSerializer(jackson2JsonRedisSerializer);
+	      // hash的value序列化方式采用jackson
+	      template.setHashValueSerializer(jackson2JsonRedisSerializer);
+	      template.afterPropertiesSet();
+	
+	      return template;
+	  }
+	}
+	```
+
+	
+
