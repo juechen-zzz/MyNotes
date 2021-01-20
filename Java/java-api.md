@@ -118,6 +118,8 @@ Set<String> se = new HashSet<>();
 // 添加删除
 se.add(n);
 se.remove(n);
+// 包含
+se.contains(n);
 ```
 
 # 8 Stack

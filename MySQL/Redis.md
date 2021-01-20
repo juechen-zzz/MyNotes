@@ -125,6 +125,8 @@ redis-cli -h 127.0.0.1 -p 6379
 // 测试
 cd /usr/local/bin
 redis-benchmark -h localhost -p 6379 -c 100 -n 100000
+// 查看当前库的信息
+info replication
 ```
 
 ![image-20210117151537271](../images/image-20210117151537271.png)
@@ -598,3 +600,230 @@ public class RedisAutoConfiguration {
 
 	
 
+## 八、Redis.conf详解
+
+### 8.1 单位
+
+* unit单位对大小写不敏感
+
+![image-20210120090625792](../images/image-20210120090625792.png)
+
+### 8.2 包含（INCLUDES）
+
+* 可以把多个配置文件配置过来
+
+![image-20210120090712460](../images/image-20210120090712460.png)
+
+### 8.3 网络（NETWORK）
+
+```bash
+bind 127.0.0.1		# 绑定的IP
+protected-mode yes  # 保护
+port 6379			# 端口设置
+```
+
+### 8.4 通用（GENERAL）
+
+```bash
+daemonize yes						# 以守护进程的方式运行
+pidfile /var/run/redis_6379.pid		# 如果以后台的方式运行，就需要指定一个pid文件
+
+# 日志
+# Specify the server verbosity level.
+# This can be one of:
+# debug (a lot of information, useful for development/testing)
+# verbose (many rarely useful info, but not a mess like the debug level)
+# notice (moderately verbose, what you want in production probably)
+# warning (only very important / critical messages are logged)
+loglevel notice
+logfile ""  				# 日志的输出文件位置名
+databases 16				# 数据库的数量
+always-show-logo yes		# 是否显示logo
+
+```
+
+### 8.5 快照（SNAPSHOTTING）
+
+持久化，在规定的时间内执行了多少次操作，则会持久化到文件（.rdb .aof）
+
+Redis是内存数据库，如果没有持久化，那么数据断电即失
+
+```bash
+#   In the example below the behavior will be to save:
+#   after 900 sec (15 min) if at least 1 key changed
+#   after 300 sec (5 min) if at least 10 keys changed
+#   after 60 sec if at least 10000 keys changed
+save 900 1
+save 300 10
+save 60 10000
+# 之后学习持久化，会自定义
+stop-writes-on-bgsave-error yes		# 持久化如果出错，是否还需要继续工作
+rdbcompression yes					# 是否压缩rdb文件，需要消耗一些CPU资源
+rdbchecksum yes						# 保存rdb文件的时候，进行错误的检查校验
+dir /usr/local/var/db/redis/		# rdb文件保存的目录
+```
+
+### 8.6 复制（REPLICATION）
+
+### 8.7 安全（SECURITY）
+
+```bash
+config get requirepass
+config set requirepass "XXXXXX"
+auth XXXXXX 			# 登录
+```
+
+* 设置密码
+
+![image-20210120092950018](../images/image-20210120092950018.png)
+
+### 8.8 限制（CLIENTS / MEMORY MANAGEMENT）
+
+```bash
+maxclients 10000				# 设置能连接上Redis的最大客户端的数量
+maxmemory <bytes>				# Redis配置最大的内存容量
+maxmemory-policy noeviction		# 内存达到上限之后的处理方式
+```
+
+### 8.9 APPEND ONLY MODE（AOF）
+
+```bash
+appendonly no 					# 默认不开始，默认使用rdb方式持久化，在大部分情况下，rdb完全够用
+appendfilename "appendonly.aof"	# 持久化文件的名字
+appendfsync everysec			# 每秒执行一次同步，可能会丢失这1s的数据
+```
+
+
+
+## 九、Redis持久化
+
+Redis是内存数据库，如果不将内存中的数据保存到磁盘，那么一旦服务器进程退出，服务器中的数据库状态也会消失，所以Redis提供了持久化功能
+
+### 9.1 RDB（Redis DataBase）
+
+<img src="../images/image-20210120095641281.png" alt="image-20210120095641281" style="zoom:50%;" />
+
+* 在指定的时间间隔内将内存中的数据集快照写入磁盘，也就是snapshot快照，它恢复时是将快照文件直接读到内存里
+* Redis会单独创建（fork）一个子进程来进行持久化，会先将数据写到一个临时文件中，待持久化过程快结束了，再用这个临时文件替换上次持久化好的文件。
+* **优点**：
+	* 整个过程中，主进程是不进行任何IO操作的，确保了高性能。
+	* 如果需要进行大规模数据的恢复，且对于数据恢复的完整性不是非常敏感，那rdb方式要比aof方式更加的高效。
+* **缺点**：
+	* 需要一定的时间间隔进行操作
+	* fork进程的时候，会占用一定的内存空间
+	* rdb最后一次持久化后的数据可能丢失
+* 触发机制（生成dump.rdb）：
+	* 1 save的规则满足的情况下，会自动触发rdb规则
+	* 2 执行flushall命令
+	* 3 退出Redis，也会产生rdb文件
+
+### 9.2 AOF（Append Only File）
+
+将我们的所有命令都记录下来，恢复的时候就把这个文件全部再执行一遍
+
+<img src="../images/image-20210120103540938.png" alt="image-20210120103540938" style="zoom:50%;" />
+
+* 以日志的形式记录每个**写**操作，将Redis执行过的所有指令记录下来，只许追加文件，但不可以改写文件
+
+* Redis启动之初会读取该文件重新构建数据，换言之，Redis重启就会根据日志文件的内容从前到后执行一次来恢复
+
+* 如果保存的aof文件有错误，那此时Redis是启动不起来的，需要修复
+
+	```bash
+	redis-check-aof --fix appendonly.aof
+	```
+
+* **优点**：
+
+	* 每一次修改都同步，文件的完整性会更好
+	* 每秒同步一次，可能会丢失一秒的数据
+	* 从不同步，效率最高
+
+* **缺点**：
+
+	* 相对于数据文件来说，aof远远大于rdb，修复的速度也比rdb慢
+	* aof运行效率也比rdb慢
+
+![image-20210120105754594](../images/image-20210120105754594.png)
+
+
+
+## 十、Redis订阅发布
+
+<img src="../images/image-20210120140920897.png" alt="image-20210120140920897" style="zoom:50%;" />
+
+<img src="../images/image-20210120141233273.png" alt="image-20210120141233273" style="zoom:50%;" />
+
+
+
+## 十一、Redis主从复制
+
+### 11.1 概念
+
+* 主从复制：指将一台Redis服务器的数据，复制到其他的Redis服务器。前者称为主节点（master / leader），后者称为从节点（slave / follower）；**数据的复制是单向的，只能从主节点到从节点**。Master以写为主，Slave以读为主。
+* 默认情况下，**每台Redis服务器都是主节点**，且一个主节点可以有多个从节点，但一个从节点只能有一个主节点
+* **作用**：
+	* 数据冗余：主从复制实现了数据的热备份，是持久化之外的一种数据冗余方式
+	* 故障恢复：当主节点出现问题时，可以由从节点提供服务，实现快速的故障恢复，实际上是一种服务的冗余
+	* 负载均衡：在主从复制的基础上，配合读写分离，可以由主节点提供写服务，从节点提供读服务，分担服务器负载；尤其是在写少读多的场景下，通过多个从节点分担读负载，可以大大提高Redis服务器的并发量
+	* 高可用（集群）基石：除了上述作用以外，主从复制还是哨兵和集群能够实施的基础
+* **主机断开连接**：从机依旧连接到主机，但是没有写操作，如果主机恢复了，还可以继续写
+* **从机断开连接**：如果不是用配置文件配置的，那从机就会变回主机，但只要变回从机，立刻还可以获取数据
+
+<img src="../images/image-20210120154058070.png" alt="image-20210120154058070" style="zoom:50%;" />
+
+
+
+## 十二、哨兵模式
+
+* 主从切换技术的方法是：当主机宕机后，需要手动把一台服务器切换为主服务器，需要人工干预，不是一种推荐的方式。更多时候，我们优先考虑哨兵模式，Redis从2.8开始提供Sentinel架构来解决问题
+* 哨兵模式是一种特殊的模式，首先Redis提供了哨兵的命令，哨兵是一个独立的进程，会自动运行。
+* 原理：哨兵通过发送命令，等待Redis服务器响应，从而监控运行的多个Redis实例
+	<img src="../images/image-20210120184831062.png" alt="image-20210120184831062" style="zoom:50%;" />
+* 作用：
+	* 通过发送命令，让Redis服务器返回运行状态，包括主服务器和从服务器
+	* 当哨兵监测到master宕机，会自动将slave切换成master，然后通过**发布订阅模式**通知其他的服务器，修改配置文件，让它们切换主机
+	* <img src="../images/image-20210120185128123.png" alt="image-20210120185128123" style="zoom:50%;" />
+	* <img src="../images/image-20210120185252556.png" alt="image-20210120185252556" style="zoom:50%;" />
+* 优点：
+	* 哨兵集群，基于主从复制模式，所有的主从配置模型优点都有
+	* 主从可以切换，故障可以转移，系统的可用性更好
+	* 哨兵模式就是主从模式的升级，手动到自动
+* 缺点：
+	* Redis不好在线扩容，集群容量一旦到达上限，在线扩容就十分麻烦
+	* 实现哨兵模式的配置很复杂
+
+
+
+## 十三、Redis缓存穿透和雪崩
+
+### 13.1 缓存穿透
+
+概念：用户想要查询一个数据，发现Redis内存数据库中没有，也就是缓存没有，于是向持久层数据库查询，发现也没有，于是本次查询失效。当用户很多的时候，缓存都没有命中（秒杀！），于是都去请求了持久层数据库，这会给持久层数据库造成很大的压力，这就相当于出现了缓存穿透
+
+解决方案：
+
+* <img src="../images/image-20210120193249534.png" alt="image-20210120193249534" style="zoom:50%;" />
+* <img src="../images/image-20210120193315206.png" alt="image-20210120193315206" style="zoom:50%;" />
+	* 问题
+		* 如果空值能够被缓存起来，那就意味着缓存需要更多的空间存储更多的键，因为这当中可能会有很多的空值的键
+		* 即使对空值设置了过期时间，还是会存在缓存层和存储层的数据会有一段时间窗口的不一致，只对于需要保持一致性的业务会有影响
+
+
+
+### 13.2 缓存击穿
+
+* 和缓存穿透的区别，缓存击穿，是指一个Key非常热点，在不停的扛着大并发，大并发集中对这一个点进行访问，当这个Key在失效的瞬间，持续的大并发就击破缓存，直接请求数据库，就像在一个屏障上凿开了一个洞
+* 当某个Key在过期的瞬间，有大量的请求并发访问，这类数据一般是热点数据，由于缓存过期，会同时访问数据库来查询最新数据，并且回写缓存，会导致数据库瞬间压力过大
+* 解决方案：
+	* <img src="../images/image-20210120194051043.png" alt="image-20210120194051043" style="zoom:50%;" />
+
+
+
+### 13.3 缓存雪崩
+
+概念：缓存雪崩，指在某一个时间段，缓存集中过期失效
+
+产生雪崩的原因之一：比如在写文本的时候，马上双十二零点，很快就会迎来一波抢购，这波商品时间比较集中的放入了缓存，假设缓存一个小时，那么到凌晨一点的时候，这批商品的缓存就过期了。而对这批商品的访问查询，都落到了数据库上，对于数据库而言，就会产生周期性的压力波峰。于是所有的请求都会达到存储层，存储层的调用量会暴增，造成存储层也挂掉的现象
+
+<img src="../images/image-20210120194728056.png" alt="image-20210120194728056" style="zoom:50%;" />
