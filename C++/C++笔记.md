@@ -1,3 +1,7 @@
+[TOC]
+
+
+
 # C++笔记
 
 * 头文件： **#include<stdio.h>**，C++中等价写法**cstdio**

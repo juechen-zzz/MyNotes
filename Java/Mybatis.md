@@ -1,3 +1,5 @@
+[TOC]
+
 # Mybatis
 
 ## 1 简介

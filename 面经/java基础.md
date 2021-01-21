@@ -107,6 +107,46 @@
 
 5. **反射**
 
+	* 定义：在运行状态中，对于任意一个类，都能够获取这个类的所有属性和方法，对于任意一个对象，都能够调用它的任意一个方法和属性（包括私有方法和属性），这种动态获取的信息以及动态调用对象的功能叫反射机制。
+
+	* 要想使用反射机制，必须要获取到该类的字节码文件对象（.class），获取方式(三种)
+
+		```java
+		// 1 通过Class类中的静态方法forName，直接获取到一个类的字节码文件对象，此时该类还是源文件阶段，并没有变为字节码文件
+		Class clazz1 = Class.forName("com.komorebi.pojo.User");
+		// 2 当类被加载成.class文件时，此时Person类变成了.class，在获取该字节码文件对象，也就是获取自己，该类处于字节码阶段。
+		Class clazz2  = Person.class;
+		// 3 通过类的实例获取该类的字节码文件对象，该类处于创建对象阶段　
+		Class clazz3 = p.getClass();
+		```
+
+	* 得到.class之后，创建实例对象
+
+		```java
+		// 无参
+		User user = (User)clazz1.newInstance();
+		// 有参
+		Constructor constructor = clazz1.getConstructor(int.class, String.class);
+		User user = (User)constructor.newInstance(12, "XX");
+		// 获取成员变量
+		Field field = clazz1.getDeclaredField("id");
+		```
+
+	* 动态代理：一种设计模式（火车票让人代买），实际上就是通过反射来生成一个代理
+
+		* java.lang.reflect包下提供了一个**Proxy**类和一个**InvocationHandler**接口，通过使用这个类和接口就可以生成动态代理对象
+		* 步骤：
+			* 1 new 出代理对象，通过实现InvacationHandler接口，然后new出代理对象
+			* 2 通过Proxy类的静态方法newProxyInstance，来将代理对象假装成那个被代理的对象
+			* 3 执行
+
+	* 优缺点：
+
+		* 优点：可以实现动态创建对象和编译
+		* 缺点：对性能有影响
+
+	
+
 6. **异常处理**
 
 7. **Log4j**

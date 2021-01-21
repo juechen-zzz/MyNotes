@@ -1,3 +1,5 @@
+[TOC]
+
 # SpringMVC
 
 * **MVC**：模型（**model**：dao和service层）、视图（**view**：jsp）、控制器（**controller**：servlet）的简写，是一种软件设计规范<img src="../images/image-20201125093837068.png" alt="image-20201125093837068" style="zoom:50%;" />
