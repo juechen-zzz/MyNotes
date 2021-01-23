@@ -1,3 +1,7 @@
+[TOC]
+
+
+
 # MySQL笔记
 
 * 安装教程：https://www.cnblogs.com/myxq666/p/7787744.html

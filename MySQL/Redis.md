@@ -1,3 +1,5 @@
+[TOC]
+
 # Redis笔记
 
 ## 一、Nosql
