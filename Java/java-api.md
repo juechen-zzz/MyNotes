@@ -12,6 +12,8 @@ Arrays.sort(intervals, new Comparator<int[]>(){
 Arrays.sort(nums, startIndex, endIndex+1);
 // ArrayList排序
 Collections.sort(ans);
+// 二进制
+Integer.parseInt(a, 2)
 ```
 
 # 1 数组
