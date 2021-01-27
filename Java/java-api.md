@@ -61,7 +61,6 @@ dic.put(key, window.getOrDefault(key, 0) + 1);
 ```java
 // 创建
 List<List<Integer>> res1 = new ArrayList<>();
-List<List<Integer>> res2 = new LinkedList<>();
 // 添加删除
 res1.add(val);
 res1.remove(index);
