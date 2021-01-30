@@ -152,6 +152,7 @@ PriorityQueue<int[]> pq = new PriorityQueue<>(new Comparator<int[]>() {
     }
 });
 // 添加删除
+pq.add(n);
 pq.offer(n);
 pq.poll();
 pq.peek();
