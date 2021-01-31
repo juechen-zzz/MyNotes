@@ -77,3 +77,91 @@
 
 ### 1.8 Eureka和Zookeeper都可以提供服务注册与发现的功能，请说说两者的区别
 
+
+
+## 2 环境搭建
+
+### 2.1 API
+
+![image-20210131180025296](../images/image-20210131180025296.png)
+
+### 2.2 Provider
+
+![image-20210131180055677](../images/image-20210131180055677.png)
+
+* Provider中写常规的dao-service-controller
+
+* application.yml
+
+	```yml
+	server:
+	  port: 8001
+	
+	mybatis:
+	  type-aliases-package: com.komorebi.springcloud.pojo
+	  config-location: classpath:mybatis/mybatis-config.xml
+	  mapper-locations: classpath:mybatis/mapper/*.xml
+	
+	spring:
+	  application:
+	    name: springcloud-provider-dept
+	  datasource:
+	    type: com.alibaba.druid.pool.DruidDataSource
+	    driver-class-name: com.mysql.jdbc.Driver
+	    url: jdbc:mysql://localhost:3306/db01?useUnicode=true&charcterEncoding=utf-8&useSSL=true
+	    username: root
+	    password: 123456
+	
+	```
+
+* dao同时配置mybatis-config.xml和正常的Mapper
+
+### 2.3 Consumer
+
+![image-20210131180345978](../images/image-20210131180345978.png)
+
+* 类似于远程调用，先配置端口80
+
+* 配置RestTemplate
+
+	```java
+	@Configuration
+	public class ConfigBean {
+	    @Bean
+	    public RestTemplate getRestTemplate() {
+	        return new RestTemplate();
+	    }
+	}
+	```
+
+* 写Controller
+
+	```java
+	@RestController
+	public class DeptConsumerController {
+	    // 对消费者而言，不应该有service
+	    // RestTemplate   供我们自己调用就可以了
+	    // (url, 实体：Map, Class<T> responseType)
+	    @Autowired
+	    private RestTemplate restTemplate;
+	
+	    private static final String REST_URL_PREFIX = "http://localhost:8001/";
+	
+	    @RequestMapping("/consumer/dept/add")
+	    public boolean add(Dept dept) {
+	        return restTemplate.postForObject(REST_URL_PREFIX + "/dept/add", dept, Boolean.class);
+	    }
+	
+	    @RequestMapping("/consumer/dept/get/{id}")
+	    public Dept get(@PathVariable("id") Long id) {
+	        return restTemplate.getForObject(REST_URL_PREFIX + "/dept/get/" + id, Dept.class);
+	    }
+	
+	    @RequestMapping("/consumer/dept/list")
+	    public List<Dept> list() {
+	        return restTemplate.getForObject(REST_URL_PREFIX + "/dept/list", List.class);
+	    }
+	}
+	```
+
+	
