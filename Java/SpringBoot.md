@@ -2464,7 +2464,7 @@ public class TicketServiceImpl implements TicketService {
 	dubbo.application.name=provider-server
 	# 注册中心地址
 	dubbo.registry.address=zookeeper://127.0.0.1:2181
-	# 哪些服务要被注册
+	# 哪些服务要被注册 
 	dubbo.scan.base-packages=com.komorebi.service
 	```
 
