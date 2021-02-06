@@ -2,7 +2,7 @@
 
 # SpringCloud
 
-![image-20210130133637144](../images/image-20210130133637144.png)
+<img src="../images/image-20210130133637144.png" alt="image-20210130133637144" style="zoom:80%;" />
 
 微服务架构4个问题：
 
@@ -171,7 +171,7 @@
 
 	
 
-## 3 Eureka
+## 3 Eureka -- 服务注册中心
 
 <img src="../images/image-20210203103356120.png" alt="image-20210203103356120" style="zoom:50%;" />
 
@@ -349,7 +349,7 @@
 
 
 
-## 4 Ribbon
+## 4 Ribbon -- 负载均衡
 
 ### 4.1 Ribbon原理
 
@@ -550,4 +550,330 @@ RandomRule 类是 IRule 接口的实现类，除此以外我们还有 Availabili
 		```
 
 	* 4 把 IRule 的 Bean 改成 MyRandomRule 的实例即可
+
+
+
+## 5 Feign -- 负载均衡
+
+* Feign是**声明式**的web service客户端，它让微服务之间的调用变得更简单了，类似于controller调用service。SpringCloud集成了Ribbon和Eureka，可以使用Feign提供负载均衡的客户端
+* feign，主要是社区，大家都习惯于面向接口编程，调用微服务访问有两种方法
+	* 微服务名称（Ribbon）
+	* 接口和注解（Feign）
+
+**Feign做什么**
+
+* Feign旨在使编写java http客户端变得更容易
+* 前面在使用Ribbon + RestTemplate时，利用RestTemplate对Http请求的封装处理，形成了一套模板化的调用方法。但在实际开发中，由于对服务依赖的调用可能不止一处，往往一个接口会被多处调用，所以通常会针对每一个微服务自行封装一些客户端类来包装这些依赖服务的调用。所以，Feign在此基础上做了进一步封装，由他来定义和实现依赖服务接口的定义。==在Feign的实现下，我们只需要创建一个接口并使用注解的方式来配置它（类似于以前Dao接口上标注Mapper注解，现在是一个微服务接口上面标注一个Feign注解）==这样可以完成对服务提供方的接口绑定，简化了使用SpringCloud Ribbon时，自行封装服务调用客户端的开发量
+
+**Feign集成Ribbon**
+
+* 利用Ribbon维护了MicroServiceCloud-Dept的服务列表信息，并且通过轮询实现了客户端的负载均衡，而与Ribbon不同的是，通过Feign只需要定义服务绑定接口且以声明式的方法，优雅且简单的实现了服务调用
+
+**使用步骤：**
+
+1. api-module中导包
+
+	```xml
+	<!--feign-->
+	<dependency>
+	    <groupId>org.springframework.cloud</groupId>
+	    <artifactId>spring-cloud-starter-feign</artifactId>
+	    <version>1.4.6.RELEASE</version>
+	</dependency>
+	```
+
+2. 复制80-module，成一个新的module，删除原本的自定义Ribbon算法
+
+3. api-module中新建service包，新建DeptClientService.java，其中 GetMapping 和 PostMapping 中写要访问的服务 url
+
+	```java
+	@Component
+	@FeignClient(value = "SPRINGCLOUD-PROVIDER-DEPT")
+	public interface DeptClientService {
+	    @GetMapping("/dept/get/{id}")
+	    public Dept queryById(@PathVariable("id")Long id);
+	
+	    @GetMapping("/dept/list")
+	    public List<Dept> queryAll();
+	
+	    @PostMapping("/dept/add")
+	    public boolean addDept(Dept dept);
+	}
+	```
+
+4. feign-module中修改controller
+
+	```java
+	@RestController
+	public class DeptConsumerController {
+	
+	    @Autowired
+	    private DeptClientService service = null;
+	
+	    @RequestMapping("/consumer/dept/add")
+	    public boolean add(Dept dept) {
+	        return this.service.addDept(dept);
+	    }
+	
+	    @RequestMapping("/consumer/dept/get/{id}")
+	    public Dept get(@PathVariable("id") Long id) {
+	        return this.service.queryById(id);
+	    }
+	
+	    @RequestMapping("/consumer/dept/list")
+	    public List<Dept> list() {
+	        return this.service.queryAll();
+	    }
+	}
+	```
+
+5. 主启动类添加注解  **@EnableFeignClients(basePackages = {"com.komorebi.springcloud"})**
+
+![image-20210206111715880](../images/image-20210206111715880.png)
+
+
+
+## 6 Hystrix -- 服务熔断、降级
+
+**分布式系统面临的问题**
+
+* 复杂分布式体系结构中的应用程序有很多依赖关系，每个依赖关系在某些时刻将不可避免的失败~
+
+**服务雪崩**
+
+* 多个微服务之间调用的时候，假设A调用B和C，B和C又调用其他的微服务，这就是所谓的**扇出**，如果扇出的链路上某个微服务的调用响应时间过长或者不可用，对A的调用就会占用越来越多的系统资源，从而引起系统崩溃，就叫做**服务雪崩**
+* 对于高流量的应用来说，单一的后端依赖可能会导致所有服务器上的所有资源都在几秒钟内饱和。比失败更糟糕的是，这些应用程序还可能导致服务之间的延迟增加，备份队列、线程和其他资源紧张，导致整个系统发生更多的级联故障，这些都表示需要对故障和延迟进行隔离和管理，以便单个依赖关系的失败，不能取消整个应用程序或系统。需要做==弃车保帅==的操作
+
+**服务熔断**
+
+* 服务熔断是对应雪崩效应的一种微服务链路保护机制。指的是服务端调用某一方法时发生异常时，服务端不会把这个异常直接抛给客户端，而是会调用一个备选方法，这样当遇到问题时也能向客户端传递一个 json 数据，避免服务的不可用。
+* 当扇出链路的某个微服务不可用或者响应时间太长，会进行服务的降级。==进而熔断该节点微服务的调用，快速返回错误的响应信息==。当检测到该节点微服务调用响应正常后恢复调用链路，在SpringCloud框架里熔断机制通过Hystrix实现
+* Hystrix会监控微服务间调用的状况，当失败的调用到一定阈值，缺省是5秒内20次调用失败就会启动熔断机制，熔断机制的注解是**@HystrixCommand**
+
+### 6.1 定义
+
+​		Hystrix是一个用于处理分布式系统的延迟和容错的开源库，在分布式系统里，许多依赖不可避免的会调用失败。比如超时、异常等，Hystrix能保证在一个依赖出问题的情况下，不会导致整体服务失败，避免级联故障，以提高分布式系统的弹性
+
+​		”断路器“本身是一种开关装置，当某个服务单元发生故障之后，**通过断路器的故障监控（类似熔断保险丝），向调用方返回一个服务预期的、可处理的备选响应（FallBack），而不是长时间的等待或者抛出调用方法无法处理的异常，这样就保证了服务调用方的线程不会被长时间不必要的占用**，从而避免了故障在分布式系统中的蔓延，甚至雪崩。	
+
+**功能**
+
+* 服务降级
+* 服务熔断
+* 服务限流
+* 接近实时的监控
+
+### 6.2 服务熔断 -- 服务端
+
+> 服务熔断指的是服务端调用某一方法时发生异常时，服务端不会把这个异常直接抛给客户端，而是会调用一个备选方法，这样当遇到问题时也能向客户端传递一个 json 数据，避免服务的不可用。
+
+1. 复制8001-module，改为springcloud-provider-dept-hystrix-8001
+
+2. 添加Hystrix依赖
+
+	```xml
+	<!--hystrix-->
+	<dependency>
+	    <groupId>org.springframework.cloud</groupId>
+	    <artifactId>spring-cloud-starter-hystrix</artifactId>
+	    <version>1.4.6.RELEASE</version>
+	</dependency>
+	```
+
+3. 修改配置文件 application.yml，修改 eureka 的 instance-id
+
+	```yml
+	# Eureka
+	eureka:
+	  client:
+	    service-url:
+	      defaultZone: http://eureka7001.com:7001/eureka/,http://eureka7002.com:7002/eureka/,http://eureka7003.com:7003/eureka/
+	  instance:    # 修改默认名字
+	    instance-id: springcloud-provider-dept-hystrix8001
+	    prefer-ip-address: true     # 为 true 可以显示客户端 ip
+	```
+
+4. 修改DeptController
+
+	```java
+	// 提供Restful服务
+	@RestController
+	public class DeptController {
+	    @Autowired
+	    private DeptService deptService;
+	
+	    @GetMapping("/dept/get/{id}")
+	    @HystrixCommand(fallbackMethod = "hystrixGet")
+	    public Dept get(@PathVariable("id") Long id) {
+	        Dept dept = deptService.queryById(id);
+	
+	        if (dept == null) {
+	            throw new RuntimeException("id=>" + id + ". 不存在改用户，或者信息无法查到~");
+	        }
+	
+	        return dept;
+	    }
+	
+	    // 备选方案
+	    public Dept hystrixGet(@PathVariable("id") Long id) {
+	        return new Dept()
+	                .setDeptno(id)
+	                .setDname("id=>" + id + "没有对应的信息，null--@Hystrix")
+	                .setDb_source("no this database");
+	    }
+	}
+	```
+
+5. 在主启动类上开启 Hystrix 熔断器。使用注解 **@EnableCircuitBreaker**
+
+### 6.3 服务降级 -- 客户端
+
+> 客户端的服务降级指当服务器压力剧增的情况下，根据实际业务情况及流量，对一些服务和页面有策略的不处理或换种简单的方式处理，从而释放服务器资源以保证核心交易正常运作或高效运作。
+
+1. 在 springcloud-api 项目下，创建 DeptClientService 的备选方案类 DeptClientServiceFallbackFactory
+			这个类实现 FallbackFactory 接口，是一个创建 Fallback 类实例的接口，主要需要重写其中的 create 方法，返回一个 DeptClientService 实例，我们这里重写 DeptClientService 接口中的方法，这些方法就是 Feign 调用服务端失败后会调用的备选方法（这里为了测试只写了 queryById 方法）。注意这里需要把该类注册成 Spring 中的一个组件（使用注解 `@Component`）
+
+	```java
+	// 降级
+	@Component
+	public class DeptClientServiceFallbackFactory implements FallbackFactory {
+	    @Override
+	    public DeptClientService create(Throwable throwable) {
+	        return new DeptClientService() {
+	            @Override
+	            public Dept queryById(Long id) {
+	                return new Dept()
+	                        .setDeptno(id)
+	                        .setDname("服务已降级，无法查询")
+	                        .setDb_source("服务已降级，无法查询");
+	            }
+	
+	            @Override
+	            public List<Dept> queryAll() {
+	                return null;
+	            }
+	
+	            @Override
+	            public boolean addDept(Dept dept) {
+	                return false;
+	            }
+	        };
+	    }
+	}
+	```
+
+2. 修改 DeptClientService 的 `@FeignClient(value = "SPRINGCLOUD-PROVIDER-DEPT")` 为
+	 `@FeignClient(value = "SPRINGCLOUD-PROVIDER-DEPT", fallbackFactory = DeptClientServiceFallbackFactory.class)`
+
+3. 在 springcloud-consumer-dept-feign 项目下，修改 application.xml，添加 feign 的 hystrix 支持
+
+	```yml
+	# 开启 feign 的 hystrix 的服务降级
+	feign:
+	  hystrix:
+	    enabled: true
+	```
+
+4. ![image-20210206183546763](../images/image-20210206183546763.png)
+
+### 6.4 服务监控
+
+1. 在 springcloud 下创建一个子项目 springcloud-consumer-hystrix-dashboard，添加如下依赖
+
+	```xml
+	<!--实体类+web-->
+	<dependencies>
+	    <!--hystrix-->
+	    <dependency>
+	        <groupId>org.springframework.cloud</groupId>
+	        <artifactId>spring-cloud-starter-hystrix</artifactId>
+	        <version>1.4.6.RELEASE</version>
+	    </dependency>
+	    <dependency>
+	        <groupId>org.springframework.cloud</groupId>
+	        <artifactId>spring-cloud-starter-hystrix-dashboard</artifactId>
+	        <version>1.4.6.RELEASE</version>
+	    </dependency>
+	
+	    <!--Ribbon-->
+	    <dependency>
+	        <groupId>org.springframework.cloud</groupId>
+	        <artifactId>spring-cloud-starter-ribbon</artifactId>
+	        <version>1.4.6.RELEASE</version>
+	    </dependency>
+	    <!--Eureka-Client-->
+	    <dependency>
+	        <groupId>org.springframework.cloud</groupId>
+	        <artifactId>spring-cloud-starter-eureka</artifactId>
+	        <version>1.4.6.RELEASE</version>
+	    </dependency>
+	
+	    <dependency>
+	        <groupId>com.komorebi</groupId>
+	        <artifactId>springcloud-api</artifactId>
+	        <version>1.0-SNAPSHOT</version>
+	    </dependency>
+	    <dependency>
+	        <groupId>org.springframework.boot</groupId>
+	        <artifactId>spring-boot-starter-web</artifactId>
+	    </dependency>
+	    <dependency>
+	        <groupId>org.springframework.boot</groupId>
+	        <artifactId>spring-boot-devtools</artifactId>
+	    </dependency>
+	</dependencies>
+	```
+
+2. 添加 resources/application.yml
+
+	```yml
+	server:
+	  port: 9001
+	```
+
+3. 添加一个启动类DeptConsumerDashboard_9001，添加注解 `@EnableHystrixDashboard`
+
+	```java
+	@SpringBootApplication
+	@EnableHystrixDashboard // 开启 Hystrix 的 dashboard
+	public class DeptConsumerDashboard_9001 {
+	   public static void main(String[] args) {
+	      SpringApplication.run(DeptConsumerDashboard_9001.class, args);
+	   }
+	}
+	```
+
+4. 启动项目后访问 `http://localhost:9001/hystrix`
+	<img src="../images/image-20210206185148607.png" alt="image-20210206185148607" style="zoom: 33%;" />
+
+5. 在 springcloud-provider-dept-hystrix-8001 项目下，修改主启动类，添加一个 HystrixMetricsStreamServlet 的 Bean(注意导包Hystrix)
+
+	```java
+	// 启动类
+	@SpringBootApplication
+	@EnableEurekaClient         // 在服务启动后，自动注册到Eureka中
+	@EnableDiscoveryClient      // 服务发现
+	public class DeptProvider_8001 {
+	    public static void main(String[] args) {
+	        SpringApplication.run(DeptProvider_8001.class, args);
+	    }
+	
+	    // 增加一个Servlet
+	    @Bean
+	    public ServletRegistrationBean hystrixMetricsStreamServlet() {
+	        ServletRegistrationBean registrationBean = new ServletRegistrationBean(new HystrixMetricsStreamServlet());
+	        registrationBean.addUrlMappings("/actuator/hystrix.stream");
+	        return registrationBean;
+	    }
+	}
+	```
+
+6. 依次启动 springcloud-eureka-7001、springcloud-provider-dept-hystrix-8001、springcloud-consumer-dept-feign 和 springcloud-consumer-hystrix-dashboard。（只能监控配置过熔断的module）
+
+7. 服务启动后，继续访问 `http://localhost:9001/hystrix`，输入监控页面 url 为 `http://localhost:8001/actuator/hystrix.stream`，Delay 和 Title 随便填。
+	![image-20210206191507958](../images/image-20210206191507958.png)
+
+8. <img src="../images/image-20210206191538473.png" alt="image-20210206191538473" style="zoom:80%;" />
+
+ 
 
