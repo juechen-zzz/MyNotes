@@ -877,3 +877,274 @@ RandomRule 类是 IRule 接口的实现类，除此以外我们还有 Availabili
 
  
 
+## 7 Zuul -- 路由网关
+
+### 7.1 概述
+
+**什么是Zuul**
+
+​		Zuul包含对请求的**路由和过滤**两个最主要的功能
+
+​		路由功能负责将外部请求转发到具体的微服务实例上，是实现外部访问统一入口的基础，而过滤器功能则负责对请求的处理过程进行干预，是实现请求校验、服务聚合等功能的基础。Zuul和Eureka进行整合，将Zuul自身注册为Eureka服务治理下的应用，同时从Eureka中获得其他微服务的消息，也即以后的访问微服务都是通过Zuul跳转后获得。
+
+​		注意：Zuul最终还是会注册进Eureka
+
+​		提供：**代理 + 路由 + 过滤** 三个功能
+
+### 7.2 应用步骤
+
+1. 新建zuul-9527的module，复制dashboard的依赖，并导入zuul依赖
+
+	```xml
+	<!--zuul-->
+	<dependency>
+	    <groupId>org.springframework.cloud</groupId>
+	    <artifactId>spring-cloud-starter-zuul</artifactId>
+	    <version>1.4.6.RELEASE</version>
+	</dependency>
+	```
+
+2. 配置application.yml
+
+	```yml
+	server:
+	  port: 9527
+	
+	spring:
+	  application:
+	    name: springcloud-zuul
+	
+	eureka:
+	  client:
+	    service-url:
+	      defaultZone: http://eureka7001.com:7001/eureka/,http://eureka7002.com:7002/eureka/,http://eureka7003.com:7003/eureka/
+	  instance:
+	    instance-id: zuul9527.com
+	    prefer-ip-address: true
+	
+	info:
+	  app.name: komorebi.blog
+	  company.name: komorebi
+	
+	zuul:
+	  routes:
+	    mydept.serviceId: springcloud-provider-dept
+	    mydept.path: /mydept/**
+	  ignored-services: springcloud-provider-dept   # 不能再使用这个路径访问了，如果是 "*" 说明不能用所有的真实项目名（/mydept 是可以的）
+	  prefix: /komorebi       # 表示域名前需要加这个前缀（如 localhost:9527/komorebi/mydept/dept/get/1）
+	```
+
+3. 主启动类加`@EnableZuulProxy`注解
+
+4. 依次开启 springcloud-eureka-7001、springcloud-provider-dept-hystrix-8001 和 springcloud-zuul-9527。访问 eureka 监控页面可以看到 zuul 和提供方已被注册到 eureka
+
+5. 接下来访问 `http://www.komorebi.com:9527/komorebi/mydept/dept/get/1`
+
+
+
+## 8 Config -- 分布式配置中心
+
+### 8.1 概述
+
+**分布式系统面临的问题 -- 配置文件**
+
+​		微服务意味着要将单体应用中的业务拆分成一个个服务，每个服务的粒度相对较小，因此系统中会出现大量的服务，由于每个服务都需要必要的配置信息才能运行。所以一套集中式的，动态的配置管理设施是必不可少的。SpringCloud提供了ConfigServer来解决这个问题，我们每一个微服务自己带着一个application.yml，若服务太多，改起来太麻烦
+
+**SpringCloud Config分布式配置中心**
+
+<img src="../images/image-20210207164423886.png" alt="image-20210207164423886" style="zoom:50%;" />
+
+SpringCloud Config为微服务架构中的微服务提供集中化的外部配置支持，配置服务器为**各个不同微服务应用**的所有环节提供了一个**中心化的外部配置**
+
+SpringCloud Config分为**服务端**和**客户端**两部分
+
+* 服务端也称为**分布式配置中心**，是一个独立的微服务应用，用来连接配置服务器并为客户端提供获取配置信息、加密、解密信息等访问接口
+* 客户端则是通过指定的配置中心来管理应用资源，以及与业务相关的配置内容，并在启动的时候从配置中心获取和加载配置信息。配置服务器默认采用Git来存储配置信息，这样就有助于对环境配置进行版本管理，并且可以通过Git客户端工具来方便管理和访问内容。
+
+### 8.2 作用
+
+* 集中管理配置文件
+* 不同环境、不同配置，动态化的配置更新。分环境部署，如/dev  /test  /prod  /beta  /release
+* 运行期间动态调整配置，不再需要再某个服务部署的机器上编写配置文件，服务会向配置中心统一拉取配置自己的信息
+* 当配置发生变动时，服务不需要重启，即可感知到配置的变化，并应用新的配置
+* 将配置信息以REST接口的形式暴露
+
+### 8.3 服务端
+
+1. GitHub新建一个仓库，传送一份application.yml
+
+	```yml
+	spring:
+	  profiles:
+	    active: dev
+	
+	---
+	spring:
+	  profiles: dev
+	  application:
+	    name: springcloud-config-dev
+	
+	---
+	spring:
+	  profiles: test
+	  application:
+	    name: springcloud-config-test
+	```
+
+2. 新建一个config-3344-module，导包
+
+	```xml
+	<!--web-->
+	<dependency>
+	    <groupId>org.springframework.boot</groupId>
+	    <artifactId>spring-boot-starter-web</artifactId>
+	</dependency>
+	<!--config-->
+	<dependency>
+	    <groupId>org.springframework.cloud</groupId>
+	    <artifactId>spring-cloud-config-server</artifactId>
+	    <version>2.1.1.RELEASE</version>
+	</dependency>
+	<!--actuator-->
+	<dependency>
+	    <groupId>org.springframework.boot</groupId>
+	    <artifactId>spring-boot-starter-actuator</artifactId>
+	</dependency>
+	<!-- Eureka-Client -->
+	<dependency>
+	    <groupId>org.springframework.cloud</groupId>
+	    <artifactId>spring-cloud-starter-eureka</artifactId>
+	    <version>1.4.6.RELEASE</version>
+	</dependency>
+	```
+
+3. 新建application.yml
+
+	```
+	server:
+	  port: 3344
+	spring:
+	  application:
+	    name: springcloud-config-server
+	  cloud:
+	    config:
+	      server:
+	        git:
+	          uri: https://github.com/juechen-zzz/springcloud-config-demo.git
+	```
+
+4. 主启动类加`@EnableConfigServer`注解
+
+5. 访问http://localhost:3344/application-dev.yml
+	![image-20210207181237530](../images/image-20210207181237530.png)
+
+### 8.4 客户端
+
+1. 在之前的 git 项目 springcloud-config-demo 下添加一个文件 config-client.yml
+
+	```yml
+	spring:
+	  profiles:
+	    active: dev
+	
+	---
+	
+	server:
+	  port: 8201
+	
+	spring:
+	  profiles: dev
+	  application:
+	    name: springcloud-provider-dept
+	
+	# eureka 配置，服务注册到哪里
+	eureka:
+	  client:
+	    service-url:
+	      defaultZone: http://eureka7001.com:7001/eureka/
+	
+	---
+	
+	server:
+	  port: 8202
+	
+	spring:
+	  profiles: test
+	  application:
+	    name: springcloud-provider-dept
+	
+	# eureka 配置，服务注册到哪里
+	eureka:
+	  client:
+	    service-url:
+	      defaultZone: http://eureka7001.com:7001/eureka/
+	```
+
+2. 在 springcloud 项目下创建子项目 springcloud-config-client-8201，在 pom.xml 添加如下依赖（注意这里 config 的依赖和服务端是不一样的）
+
+	```xml
+	<!--web-->
+	<dependency>
+	    <groupId>org.springframework.boot</groupId>
+	    <artifactId>spring-boot-starter-web</artifactId>
+	</dependency>
+	<!--cloud-config-->
+	<dependency>
+	    <groupId>org.springframework.cloud</groupId>
+	    <artifactId>spring-cloud-starter-config</artifactId>
+	    <version>2.1.1.RELEASE</version>
+	</dependency>
+	<!--actuator-->
+	<dependency>
+	    <groupId>org.springframework.boot</groupId>
+	    <artifactId>spring-boot-starter-actuator</artifactId>
+	</dependency>
+	```
+
+3. 创建两个配置文件 resources/bootstrap.yml 和 resources/application.yml 
+	bootstrap.yml 是系统级别的配置，application.yml 是应用级别的配置，客户端获取服务端配置信息一定要写在 bootstrap.yml 中。
+
+	```yml
+	# 系统级别的配置
+	spring:
+	  cloud:
+	    config:
+	      name: config-client   # 需要从 git 上读取的资源名称，不要后缀
+	      profile: dev          # 选择哪一个环境
+	      label: master         # 选择哪一个分支
+	      uri: http://localhost:3344    # 服务端的 uri
+	```
+
+	```yml
+	# 用户级别的配置
+	spring:
+	  application:
+	    name: springcloud-config-client-8201
+	```
+
+4. 测试。我们写一个 controller 类
+
+	```java
+	@RestController
+	public class ConfigClientController {
+	    @Value("${spring.application.name}")
+	    private String applicationName;
+	    @Value("${eureka.client.service-url.defaultZone}")
+	    private String eurekaServer;
+	    @Value("${server.port}")
+	    private String port;
+	
+	    @RequestMapping("/config")
+	    public String getConfig() {
+	        return "applicationName: " + applicationName + "\t" +
+	                "eurekaServer: " + eurekaServer + "\t" +
+	                "port: " + port;
+	    }
+	}
+	```
+
+5. 先启动 springcloud-config-server-3344，再启动 springcloud-config-client-8201，
+
+	1. 我们先访问 `http://localhost:3344/config-client-dev.yml`，可以看到能获取 git 仓库的信息。
+	2. 然后访问 `http://localhost:8201/config`，可以看到客户端也获取到了信息
+
