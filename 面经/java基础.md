@@ -257,31 +257,282 @@ JVM 内存共分为**虚拟机栈，堆，方法区，程序计数器，本地�
 		});
 		```
 
+
+
 ### 9 String、StringBuilder、StringBuffer区别
+
+这三个类的区别主要在两个方面：**运行速度**和**线程安全**
+
+* 运行速度：**StringBuilder > StringBuffer > String**（String最慢是因为它是字符串常量，另外两个是变量。String创建后是不可更改的，str = str + "11"实际上是重新创建了一个新的String，旧的被GC回收了）
+* 线程安全：**StringBuilder是线程不安全的，StringBuffer是线程安全的**
+	* 若一个StringBuffer对象在字符串缓冲区被多个线程使用时，StringBuffer很多方法带有synchronized关键字进行同步，可以保证线程安全
+
+
 
 ### 10 ArrayList、LinkedList、Vector的区别
 
-### 11 ArrayList和Vector的扩容机制
+**存储结构**
 
-### 12 HashMap的底层实现
+* ArrayList和Vector是基于数组实现的，LinkedList是基于链表实现的
+* ArrayList和Vector按照顺序将元素存储（下标0开始），删除完成后，需要使部分元素移位，默认初始容量为10
 
-### 13 ajax和form表单提交有啥不一样
+**线程安全**
 
-### 14 创建线程池、线程池的运行机制和拒绝策略
+* ArrayList不具有线程安全性，在单线程时，LinkedList也是线程不安全的，若在并发环境下使用，可以用Collections类中的静态方法synchronizedList()对它们进行调用
+* Vector是线程安全的，其大部分方法都包含synchronized，但是效率相对较低
 
-### 15 Lock和Sychronized的区别
+**扩容机制**
 
-### 16 synchronized的实现和机制，锁升级机制
+* ArrayList和Vector都是使用Object的数组形式存储的，若要扩容时，ArrayList扩充为原先**1.5**倍，Vector是**2**倍
+* Vector可以设置扩容增量（设置capacityIncrement为一个>0的数），ArrayList不行。
+* 原理：元素个数超过数组长度时，会产生一个新的数组，将原数组的数据复制过去
 
-### 17 关于锁了解多少，知道lock这个锁的底层原理（sync和volatile；CAS；无锁，偏向锁，轻量锁和重量锁）
+**CURD效率**
 
-### 18 乐观锁、悲观锁
+* ArrayList和Vector从指定的位置检索一个对象，或在集合的末尾插入、删除一个元素的时间复杂度是一样，$O(1)$
+* ArrayList和Vector在其他位置增加或者删除一个元素的时间复杂度是$O(n)$
+* LinkedList中，在插入、删除任何位置的元素所花费的时间都是一样的，时间复杂度都为$O(1)$
+* LinkedList在检索一个元素的时间复杂度为$O(n)$
 
-### 19 Java对象头前32位标识的含义
 
-### 20 线程池初始化的7大参数，各个组件的作用
 
-### 21 实现多线程同步的方式（继承Thread，实现Runnable，实现Callable）
+### 11 HashMap的底层实现
 
-### 22 知道ThreadLocal嘛？谈谈你对它的理解？（基于jdk1.8）
+- **JDK1.7及之前：数组+链表**
+- **JDK1.8：数组+链表+红黑树**
+
+
+
+**HashMap添加元素**
+
+当添加元素时，会通过哈希值和数组长度计算下标来定位元素应该put的位置（通常为使分布均匀，会使用取模，但实际并不是）。
+
+​		（1）计算出index，就将元素添加进去，会产生**哈希冲突**。（计算出的索引相同，但此索引此时有值）
+
+​		（2）此时，用第二种数据结构--**链表**，冲突的元素在该索引处以链表的形式保存。
+
+​		（3）当链表过长时，查询效率较低，时间复杂度会到$O(n)$。此时引入第三种数据结构--**红黑树**（红黑树是一颗接近平衡的二叉树，查询时间复杂度为$O(logn)）$）.==若链表不到一定长度，直接用红黑树是不行的，红黑树维护代价较高，每次插入一个数据都会打破红黑树的平衡性，需要每次都再平衡（左旋、右旋、重新着色）==
+
+
+
+**数组长度问题**
+
+* HashMap中数组的初始长度为16，默认加载因子为0.75
+
+* 若传入一个参数，则调用一个重载方法，即使用指定的初始值来创建HashMap，默认加载因子依旧是0.75
+
+	* 在方法中进行判断，若初始容量<0，则抛出异常；若大于最大容量（1<<30），就为最大容量
+
+	* 方法最后设置加载因子和一个`tableSizefor`方法，返回一个**大于输入参数且最近的2的整数次幂** 
+
+	* 该算法让最高位的1后面的位全变为1。最后再让结果n+1，即得到了2的整数次幂的值了。cap-1再赋值给n的目的是让找到的目标值大于或等于原值
+
+		```java
+		/**
+		* Returns a power of two size for the given target capacity.
+		*/
+		static final int tableSizeFor(int cap) {
+		    int n = cap - 1;
+		    n |= n >>> 1;
+		    n |= n >>> 2;
+		    n |= n >>> 4;
+		    n |= n >>> 8;
+		    n |= n >>> 16;
+		    return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
+		}
+		```
+
+* 为什么要2的整数幂？
+
+	* put方法和hash方法
+
+		```java
+		public V put(K key, V value) {
+			return putVal(hash(key), key, value, false, true);
+		}
+		
+		static final int hash(Object key) {
+		    int h;
+		    return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
+		}
+		```
+
+	* 上文提过，添加元素时索引下标可以取模得到，但是计算机的运行效率：加减 > 乘法 > 除法 > 取模。因为HashMap中要定位索引，并且数组一旦达到容量阈值就需要扩容，扩容就意味着要进行数组的移动，数组一旦移动，每移动一次都要重回计算索引，这个过程牵扯到大量元素的迁移，很影响效率。
+
+	* putVal方法，它是实现具体的put操作的方法
+
+		```java
+		    /**
+		     * Implements Map.put and related methods
+		     *
+		     * @param hash hash for key
+		     * @param key the key
+		     * @param value the value to put
+		     * @param onlyIfAbsent if true, don't change existing value
+		     * @param evict if false, the table is in creation mode.
+		     * @return previous value, or null if none
+		     */
+			final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
+		                   boolean evict) {
+		        Node<K,V>[] tab; Node<K,V> p; int n, i;
+		        //1. 如果当前table为空，新建默认大小的table
+		        if ((tab = table) == null || (n = tab.length) == 0)
+		            n = (tab = resize()).length;
+		        //2. 获取当前key对应的节点
+		        if ((p = tab[i = (n - 1) & hash]) == null)
+		            //3. 如果不存在，新建节点
+		            tab[i] = newNode(hash, key, value, null);
+		        else {
+		            //4. 存在节点
+		            Node<K,V> e; K k;
+		            //5. key的hash相同，key的引用相同或者key equals，则覆盖
+		            if (p.hash == hash &&
+		                ((k = p.key) == key || (key != null && key.equals(k))))
+		                e = p;
+		            //6. 如果当前节点是一个红黑树树节点，则添加树节点
+		            else if (p instanceof TreeNode)
+		                e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
+		            //7. 不是红黑树节点，也不是相同节点，则表示为链表结构
+		            else {
+		                for (int binCount = 0; ; ++binCount) {
+		                    //8. 找到最后那个节点
+		                    if ((e = p.next) == null) {
+		                        p.next = newNode(hash, key, value, null);
+		                        //9. 如果链表长度超过8转成红黑树
+		                        if (binCount >= TREEIFY_THRESHOLD - 1) // -1 for 1st
+		                            treeifyBin(tab, hash);
+		                        break;
+		                    }
+		                    //10.如果链表中有相同的节点，则覆盖
+		                    if (e.hash == hash &&
+		                        ((k = e.key) == key || (key != null && key.equals(k))))
+		                        break;
+		                    p = e;
+		                }
+		            }
+		            if (e != null) { // existing mapping for key
+		                V oldValue = e.value;
+		                //是否替换掉value值
+		                if (!onlyIfAbsent || oldValue == null)
+		                    e.value = value;
+		                afterNodeAccess(e);
+		                return oldValue;
+		            }
+		        }
+		        //记录修改次数
+		        ++modCount;
+		        //是否超过容量，超过需要扩容
+		        if (++size > threshold)
+		            resize();
+		        afterNodeInsertion(evict);
+		        return null;
+		    }
+		```
+
+	* 使用**与运算**`(n-1) & hash`取代**取模运算**`hash%length`，因为这两种方式记算出来的结果是一致的（n就是length），也就是`(length-1)&hash = hash%length`，例如：假设数组长度为4，哈希值为10（但是当数组的长=长度不为2的指数次幂时，两种方式计算的结果不一样，即`length-1)&hash ≠ hash&length`）
+
+		```java
+		(n-1) & hash = (4-1) & 10 = 00000011 & 00001010 = 00000010 = 2
+		hash % length = 10 % 4 = 2
+		```
+
+	* **总结：首先使用位运算来加快计算的效率，而要使用位运算，就需要数组-1然后与hash值保证其在数组范围内，只有当数组长度为2的指数次幂时，其计算得出的值才能和取模算法的值相等，并且保证能取到数组的每一位，减少哈希碰撞，不浪费大量的数组资源**
+
+
+
+**加载因子0.75**
+
+​		加载因子如果定的太大，比如1，这就意味着数组的每个空位都需要填满，即达到理想状态，不产生链表，但实际是不可能达到这种理想状态，如果一直等数组填满才扩容，虽然达到了最大的数组空间利用率，但会产生大量的哈希碰撞，同时产生更多的链表，显然不符合我们的需求。
+
+​		但如果设置的过小，比如0.5，这样一来保证了数组空间很充足，减少了哈希碰撞，这种情况下查询效率很高，但消耗了大量空间。
+
+​		因此，需要在时间和空间上做一个折中，选择最合适的负载因子以保证最优化，取到了0.75
+
+
+
+**链表长度>8则转成红黑树**
+
+```java
+* Because TreeNodes are about twice the size of regular nodes, we
+     * use them only when bins contain enough nodes to warrant use
+     * (see TREEIFY_THRESHOLD). And when they become too small (due to
+     * removal or resizing) they are converted back to plain bins.  In
+     * usages with well-distributed user hashCodes, tree bins are
+     * rarely used.  Ideally, under random hashCodes, the frequency of
+     * nodes in bins follows a Poisson distribution
+     * (http://en.wikipedia.org/wiki/Poisson_distribution) with a
+     * parameter of about 0.5 on average for the default resizing
+     * threshold of 0.75, although with a large variance because of
+     * resizing granularity. Ignoring variance, the expected
+     * occurrences of list size k are (exp(-0.5) * pow(0.5, k) /
+     * factorial(k)). The first values are:
+     *
+     * 0:    0.60653066
+     * 1:    0.30326533
+     * 2:    0.07581633
+     * 3:    0.01263606
+     * 4:    0.00157952
+     * 5:    0.00015795
+     * 6:    0.00001316
+     * 7:    0.00000094
+     * 8:    0.00000006
+     * more: less than 1 in ten million
+```
+
+​		这是一个概率论中的泊松分布，因为链表长度大于等于8时转成红黑树正是遵循泊松分布
+
+​		意思就是HashMap节点分布遵循泊松分布，按照泊松分布的计算公式计算出了链表中元素个数和概率的对照表，可以看到**链表中元素个数为8时的概率已经非常小**。
+
+​		**另一方面红黑树平均查找长度是log(n)，长度为8的时候，平均查找长度为3，如果继续使用链表，平均查找长度为8/2=4，这才有转换为树的必要**。链表长度如果是小于等于6，6/2=3，虽然速度也很快的，但是链表和红黑树之间的转换也很耗时。
+
+​		当然，虽然在hashmap底层有这种红黑树的结构，但是能产生这种结构的概率也不大，所以在 JDK1.7 到 JDK1.8 这其中HashMap的性能也只提高了7%~8% 左右
+
+
+
+### 12 ajax和form表单提交有啥不一样
+
+1. ajax在提交、请求、接收时，都是异步进行的，网页不需要刷新
+	form提交是新建一个页面，即使是提交给自己本身的页面，也是需要刷新的
+2. ajax提交时，是在后台新建一个请求
+	form表单是放弃本页面，再次申请
+3. ajax必须用js实现，不启动js的浏览器，无法完成
+	form是浏览器的功能，无论是否开启js，都可以提交表单
+4. ajax在提交、请求、接收时，整个过程都需要使用程序来对其数据进行处理
+	form提交时，是根据表单结构自动完成，不需要代码干预
+
+
+
+### 13 创建线程池、线程池的运行机制和拒绝策略
+
+
+
+
+
+### 14 Lock和Sychronized的区别
+
+### 15 synchronized的实现和机制，锁升级机制
+
+### 16 关于锁了解多少，知道lock这个锁的底层原理（sync和volatile；CAS；无锁，偏向锁，轻量锁和重量锁）
+
+### 17 乐观锁、悲观锁
+
+### 18 Java对象头前32位标识的含义
+
+### 19 线程池初始化的7大参数，各个组件的作用
+
+### 20 实现多线程同步的方式（继承Thread，实现Runnable，实现Callable）
+
+### 21 知道ThreadLocal嘛？谈谈你对它的理解？（基于jdk1.8）
+
+
+
+
+
+1. 面试有几面，问些什么，除了Java的知识会问别的嘛？
+2. 实习一般做些什么，实习的工资待遇情况
+3. 转正资格是一定有吗？还是说实习不一定有转正资格
+4. 转正需要额外做些什么？需要额外面试吗？
+5. 最终的工资组成是什么样的？十几薪？年终奖？
+6. 公司里做的Java项目是自研框架，还是正常的SSM、SpringBoot、SpringCloud这种
+7. 公司的真实工作强度？
 
