@@ -42,6 +42,10 @@ StringBuilder s = new StringBuilder();
 s.append(j);
 s.reverse();
 String s_end = s.toString();
+// 判定是否为数字或字母 
+Character.isLetterOrDigit(s.charAt(left))
+// 转小写
+Character.toLowerCase(s.charAt(left))
 ```
 
 # 3 HashMap

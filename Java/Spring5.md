@@ -151,6 +151,8 @@ public class MyTest {
 
 ## 4 IOC创建对象的方式
 
+<img src="../images/image-20210209170027575.png" alt="image-20210209170027575" style="zoom:150%;" />
+
 * 1 **使用无参构造创建对象，默认**
 
 * 2 若要使用**有参**
