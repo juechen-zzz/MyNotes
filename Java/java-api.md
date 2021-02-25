@@ -22,17 +22,15 @@ Integer.parseInt(a, 2)
 // 最大最小值
 Integer.MAX_VALUE
 // 创建
-int[] nums = new int[n];
 int[] nums = new int[]{1, 2, 3};
+// 复制
+int[] tmp = new int[nums.length + 2];
+System.arraycopy(nums, 0, tmp, 1, nums.length);
 ```
 
 # 2 字符串
 
 ```java
-// 取单个字符
-char c = s.charAt(index);
-// 判定是否相同
-s1.equals(s2);
 // 转换成char[]数组
 char[] d = s.toCharArray();
 // 取子串	[start, end)
@@ -46,18 +44,22 @@ String s_end = s.toString();
 Character.isLetterOrDigit(s.charAt(left))
 // 转小写
 Character.toLowerCase(s.charAt(left))
+// 分割，正则匹配连续的空白字符作为分隔符分割
+List<String> wordList = Arrays.asList(s.split("\\s+"));
+// 除去开头和末尾的空白字符
+s = s.trim();
+// 拼接
+String.join(" ", wordList);
 ```
 
 # 3 HashMap
 
 ```java
-// 创建
-HashMap<Integer, Integer> dic = new HashMap<>();
 // 输入输出
 dic.put(key, val);
 dic.get(key);
 // 若要修改，则必须覆盖
-dic.put(key, window.getOrDefault(key, 0) + 1);
+dic.put(key, dic.getOrDefault(key, 0) + 1);
 ```
 
 # 4 ArrayList + LinkedList
@@ -170,6 +172,6 @@ s.size();
 
 ```java
 List<Pair>[] edges = new List[stringNum];
-for (int i = 0; i < stringNum; i++){edges[i] = new ArrayList<Pair>();}
+for (int i = 0; i < stringNum; i++){edges[i] = new ArrayList<Pair>();
 ```
 

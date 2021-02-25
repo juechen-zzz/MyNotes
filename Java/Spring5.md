@@ -151,6 +151,8 @@ public class MyTest {
 
 ## 4 IOC创建对象的方式
 
+* **注册组件的四种方式**
+
 <img src="../images/image-20210209170027575.png" alt="image-20210209170027575" style="zoom:150%;" />
 
 * 1 **使用无参构造创建对象，默认**
@@ -178,7 +180,7 @@ public class MyTest {
 		</bean>
 		```
 
-* **总结：在配置文件加载的时候，容器中管理的对象就已经初始化了**
+* ==总结：在配置文件加载的时候，容器中管理的对象就已经初始化了==
 
 
 
@@ -222,7 +224,32 @@ public class MyTest {
 
 ### 6.1 构造器注入
 
-已讲(第4节)
+* 1 **使用无参构造创建对象，默认**
+
+* 2 若要使用**有参**
+
+	* ```xml
+		<bean id="user" class="com.komorebi.pojo.User">
+		    <!--1 下标赋值-->
+		    <constructor-arg index="0" value="komorebi"/>
+		</bean>
+		```
+
+	* ```xml
+		<bean id="user" class="com.komorebi.pojo.User">
+		    <!--2 类型赋值,不建议使用，若两个参数都为String则无效-->
+		    <constructor-arg type="java.lang.String" value="komorebi"/>
+		</bean>
+		```
+
+	* ```xml
+		<bean id="user" class="com.komorebi.pojo.User">
+		    <!--3 直接通过参数名设置-->
+		    <constructor-arg name="name" value="komorebi"/>
+		</bean>
+		```
+
+* ==总结：在配置文件加载的时候，容器中管理的对象就已经初始化了==
 
 ### 6.2 Set方式注入【重点】
 

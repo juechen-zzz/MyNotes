@@ -348,15 +348,21 @@ TRUNCATE `student`
 	* TRUNCATE会**重置自增列**，计数器会归零
 	* TRUNCATE不会影响事务
 
-### 3.3 DQL查询数据（最重点）
+<img src="../images/image-20210219153334967.png" alt="image-20210219153334967" style="zoom:67%;" />
 
-#### 3.3.1 DQL
+
+
+## 四、 DQL查询数据（最重点）
+
+### 4.1 DQL
 
 * data query language：数据查询语言
 * 所有的查询操作都用它
 * 数据库中最核心的语言，使用频率最高
 
-#### 3.3.2 指定查询字段
+### 4.2 select - 指定查询字段
+
+<img src="../images/image-20210222163536910.png" alt="image-20210222163536910" style="zoom:80%;" />
 
 ```SQL
 SELECT 字段 FROM 表
@@ -369,7 +375,7 @@ SELECT `studentno` AS 学号, `studentname` AS 姓名 FROM `student`
 SELECT CONCAT('姓名：', `studentname`) FROM `student`
 ```
 
-#### 3.3.3 distinct(去重)
+### 4.3 distinct - 去重
 
 * 去除select查询出来的结果中重复的数据，只显示一条
 
@@ -383,6 +389,7 @@ SELECT DISTINCT studentno from result; 		-- 去重
 * 数据库的列（表达式）
 
 ```SQL
+SELECT VERSION()
 SELECT 100*3-1 AS 计算结果;							 --计算表达式
 SELECT @@auto_increment_increment;				    --查询自增的步长
 
@@ -390,13 +397,15 @@ SELECT @@auto_increment_increment;				    --查询自增的步长
 SELECT studentno, studentresult+1 AS 提分后 FROM result;
 ```
 
-* 数据库中的表达式：文本值，列，Null，函数，计算表达式，系统变量... 
+* 数据库中的表达式：**文本值，列，Null，函数，计算表达式，系统变量...** 
 
-#### 3.3.4 where条件
+### 4.4 where - 条件
 
 作用：检索数据中符合条件的值  and  or  not
 
-#### 3.3.5 模糊查询
+<img src="../images/image-20210219160819942.png" alt="image-20210219160819942" style="zoom:80%;" />
+
+### 4.5 like - 模糊查询
 
 |   运算符    |       语法        |                 描述                  |
 | :---------: | :---------------: | :-----------------------------------: |
@@ -407,7 +416,9 @@ SELECT studentno, studentresult+1 AS 提分后 FROM result;
 |   **IN**    | a in (a1, a2, a3) |     假设a在这个范围里，那结果为真     |
 
 ```sql
--- like结合 % （代表0到任意个字符）  _ （一个字符）
+-- like结合 
+	--(1) % （代表0到任意个字符）
+    --(2) _ （一个字符）
 SELECT studentno, studentname from student 
 where studentname like '刘%'
 
@@ -416,11 +427,11 @@ select studentno, studentname from student
 where studentno in (1000, 1100);
 ```
 
-#### 3.3.6 联表查询
+### 4.6 join - 联表查询
 
 <img src="../images/image-20201118204416693.png" alt="image-20201118204416693" style="zoom: 25%;" />
 
-![image-20201118204518846](../images/image-20201118204518846.png)
+<img src="../images/image-20201118204518846.png" alt="image-20201118204518846" style="zoom:120%;" />
 
 ```sql
 -- Inner join
@@ -437,19 +448,19 @@ INNER JOIN subject sub
 ON r.subjectno = sub.subjectno
 ```
 
-| 操作       | 描述                                         |
-| ---------- | -------------------------------------------- |
-| Inner join | 如果表中至少有一个匹配，就返回行             |
-| Left join  | 即使右表中没有匹配，也会从左表中返回所有的行 |
-| Right join | 即使左表中没有匹配，也会从左表中返回所有的行 |
+| 操作       | 描述                                               |
+| ---------- | -------------------------------------------------- |
+| Inner join | 如果表中至少有一个匹配，就返回行                   |
+| Left join  | 即使右表中没有匹配，也会从左表中返回所有查询到的行 |
+| Right join | 即使左表中没有匹配，也会从右表中返回所有查询到的行 |
 
 * join on 连接查询     where  等值查询，join on用在多表，查完的结果是一张表，再用where筛选
 
-#### 3.3.7 自连接
+### 4.7 自连接
 
 * 自己的表和自己的表连接，**核心：一张表拆成两张一样的表即可**![image-20201118214407650](../images/image-20201118214407650.png)
 
-父类：
+父类（顶级ID）：
 
 | categoryid | categoryName |
 | ---------- | ------------ |
@@ -475,4 +486,96 @@ SELECT a.categoryname as 'father', b.categoryname as 'son'
 FROM category AS a, category AS b
 WHERE a.categoryid = b.pid;
 ```
+
+### 4.8 limit - 分页和排序
+
+分页：`limit `
+
+排序：`order by`
+
+* 升序ASC，降序DESC
+
+```sql
+select s.StudentNo, StudentName, SubjectName, StudentResult
+from student s
+inner join result r
+on s.StudentNo = r.StudentNo
+inner join subject sub
+on sub.SubjectNo = r.SubjectNo
+where SubjectName = '课程' and StudentResult>=80
+order by StudentResult desc
+limit 0,10;
+```
+
+### 4.9 子查询和嵌套查询
+
+where（值是计算出来的）
+
+本质：在where语句中嵌套一个子查询语句
+
+```sql
+select StudentNo, r.SubjectNo, StudentResult
+from result r
+inner join subject sub
+on r.SubjectNo=sub.SubjectNo
+where SubjectName = '课程'
+order by StudentResult desc
+
+select StudentNo, r.SubjectNo, StudentResult
+from result r
+where StudentNo = (select SubjectNo from subject where SubjectName = '课程')
+```
+
+### 4.10 groub by - 分组查询
+
+![image-20210222173058037](../images/image-20210222173058037.png)
+
+
+
+## 五、MySQL函数
+
+### 5.1 常用函数
+
+```sql
+-- 数学
+select ABC(-8)					-- 绝对值
+select CEILING(9.4)				-- 向上取整
+select FLOOR(9.4)				-- 向下取整
+select RAND()					-- 返回一个0-1之间的随机数
+select SIGN(0)					-- 判断一个数的符号
+
+-- 字符串
+select CHAR_LENGTH('一句话')	  -- 字符串长度
+select CONCAT('I', "AM")		-- 拼接字符串
+select INSERT('I am hero', 1, 2, "zhangsan")    -- 从某个位置替换某个长度的子串
+select LOWER('AA')				-- 转小写
+select UPPER('aa')				-- 转大写
+select INSTR('ABCD', 'B')	    -- 返回第一次出现子串的位置
+select REPLACE('abcd', 'b', 'e')-- 替换
+select SUBSTR('abcd', 1, 2)		-- 返回指定的子字符串
+select REVERSE('abcd')				-- 反转
+
+-- 时间
+select current_date();			-- 获取当前日期
+select curdate()				-- 获取当前日期
+select now()					-- 获取当前时间
+select year(now())				-- 获取（year mouth day hour minute second），直接替换
+
+-- 系统
+select system_user()
+select user()
+select version()
+```
+
+### 5.2 聚合函数
+
+| 函数名称 |                             描述                             |
+| :------: | :----------------------------------------------------------: |
+| count()  | select count(studentname) from student，统计表中数据，**只有指定列才会忽略null** |
+|  sum()   |       select sum(StudentResult) as ‘总和’ from result        |
+|  avg()   |                                                              |
+|  max()   |                                                              |
+|  min()   |                                                              |
+
+![image-20210222173058037](../images/image-20210222173058037.png)
 

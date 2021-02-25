@@ -69,10 +69,10 @@
 		* 实现Callable接口，需要返回值类型
 		* 重写call，需要抛出异常
 		* 创建目标对象
-		* 创建执行任务 ExecutorService ser = Executors.newFixedThreadPool(1);
-		* 提交执行：Future<Boolean> result1 = ser.submit(1);
-		* 获取结果：boolean r1 = result1.get();
-		* 关闭服务：ser.shutdownNow();
+		* 创建执行任务 `ExecutorService ser = Executors.newFixedThreadPool(1);`
+		* 提交执行：`Future<Boolean> result1 = ser.submit(1);`
+		* 获取结果：`boolean r1 = result1.get();`
+		* 关闭服务：`ser.shutdownNow();`
 
 <img src="../images/image-20200921100054583.png" alt="image-20200921100054583" style="zoom: 50%;" />
 
