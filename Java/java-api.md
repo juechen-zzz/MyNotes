@@ -10,8 +10,9 @@ Arrays.sort(intervals, new Comparator<int[]>(){
 
 // 数组部分排序
 Arrays.sort(nums, startIndex, endIndex+1);
-// ArrayList排序
+// ArrayList排序 反转
 Collections.sort(ans);
+Collections.reverse(tmp);
 // 二进制
 Integer.parseInt(a, 2)
 ```
@@ -60,6 +61,7 @@ dic.put(key, val);
 dic.get(key);
 // 若要修改，则必须覆盖
 dic.put(key, dic.getOrDefault(key, 0) + 1);
+containsValue
 ```
 
 # 4 ArrayList + LinkedList
@@ -127,6 +129,13 @@ se.add(n);
 se.remove(n);
 // 包含
 se.contains(n);
+// 取值
+List<String> list=new ArrayList<>(set);
+// 获取baiset集合数据
+for (Iterator iterator = set.iterator(); iterator.hasNext();) {
+    String string = (String) iterator.next();
+    System.out.println(string);
+}
 ```
 
 # 8 Stack

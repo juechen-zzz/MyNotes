@@ -145,6 +145,8 @@
 
 ![image-20201129091711490](../images/image-20201129091711490.png)
 
+
+
 ## 2 SpringMVC特性
 
 * 轻量级，简单易学
@@ -385,7 +387,7 @@
 
 * 控制器负责提供访问应用程序的行为，通常通过接口定义或注解两种方法实现
 * 控制器负责解析用户的请求并将其转换为一个模型
-* 在Spring MVC中一个控制器类可以包含多个方法
+* 在Spring MVC中，一个控制器类可以包含多个方法
 * 在Spring MVC中，对于Controller的配置方法有很多种
 
 ### 4.1 RestFul风格
@@ -492,11 +494,11 @@ public class ControllerTest1 implements Controller {
 
 通过设置ServletAPI , 不需要视图解析器 .
 
-1、通过HttpServletResponse进行输出
+1、通过`HttpServletResponse`进行输出
 
-2、通过HttpServletResponse实现重定向
+2、通过`HttpServletResponse`实现重定向
 
-3、通过HttpServletResponse实现转发
+3、通过`HttpServletRequest`实现转发
 
 ```java
 @Controller

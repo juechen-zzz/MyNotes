@@ -1218,7 +1218,7 @@ public class AnnotationPointCut {
 
 ## 13 声明式事务（重点）
 
-<img src="../images/image-20201128213649445.png" alt="image-20201128213649445" style="zoom: 50%;" />
+<img src="../images/image-20201128213649445.png" alt="image-20201128213649445" style="zoom: 67%;" />
 
 ### 13.1 事务
 
