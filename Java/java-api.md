@@ -1,3 +1,5 @@
+
+
 # 0 排序
 
 ```java
@@ -27,6 +29,8 @@ int[] nums = new int[]{1, 2, 3};
 // 复制
 int[] tmp = new int[nums.length + 2];
 System.arraycopy(nums, 0, tmp, 1, nums.length);
+// 克隆
+int[] nums2 = nums.clone();
 ```
 
 # 2 字符串
@@ -51,6 +55,17 @@ List<String> wordList = Arrays.asList(s.split("\\s+"));
 s = s.trim();
 // 拼接
 String.join(" ", wordList);
+// 比较两个字符型是否有重复字母的方法（位运算）
+for (int i = 0; i < words.length; i++) {
+    String word = words[i];
+    int num = 0;
+    for (int j = 0; j < word.length(); j++) {
+        int index = word.charAt(j) - 'a';
+        num = num | (1 << index);
+    }
+    wordToNum[i] = num;
+}
+if ((wordToNum[i] & wordToNum[j]) != 0)
 ```
 
 # 3 HashMap
@@ -82,6 +97,15 @@ res.isEmpty();
 res.size();
 // 判定有值
 res.contains(val);
+// LinkedList迭代器
+Iterator<Pair> iterator = data[h].iterator();
+while (iterator.hasNext()) {
+    Pair pair = iterator.next();
+    if (pair.getKey() == key) {
+        pair.setValue(value);
+        return;
+    }
+}
 ```
 
 # 5 Queue

@@ -2,7 +2,8 @@
 
 # SpringMVC
 
-* **MVC**：模型（**model**：dao和service层）、视图（**view**：jsp）、控制器（**controller**：servlet）的简写，是一种软件设计规范<img src="../images/image-20201125093837068.png" alt="image-20201125093837068" style="zoom:50%;" />
+* **MVC**：模型（**model**：dao和service层）、视图（**view**：jsp）、控制器（**controller**：servlet）的简写，是一种软件设计规范
+* <img src="../images/image-20201125093837068.png" alt="image-20201125093837068" style="zoom:50%;" />
 	* Model：数据模型，提供要展示的数据，因此包含数据和行为，可以认为是领域模型或JavaBean组件（包含数据和行为），不过现在一般都分离开来：Value Object(数据Dao)和服务层(行为Service)。也就是模型提供了数据查询和模型数据的状态更新等功能，包括数据和业务。
 	* View：负责进行模型的展示，一般就是我们见到的用户界面，客户想看到的东西
 	* Controller：接收用户请求，委托给模型进行处理（状态改变），处理完毕后把返回的模型数据返回给视图，由视图负责展示，也就是说控制器做了调度员的工作

@@ -2,7 +2,7 @@
 
 # 1 哈希表
 
-## 两数之和（0001）
+## 两数之和（0001 && 0167）
 
 > *给定一个整数数组 nums 和一个目标值 target，请你在该数组中找出和为目标值的那 两个 整数，并返回他们的数组下标。*
 >
@@ -26,6 +26,29 @@ class Solution {
             }
         }
         return new int[0];
+    }
+}
+```
+
+> *给定一个已按照 升序排列 的整数数组 numbers ，请你从数组中找出两个数满足相加之和等于目标数 target 。*
+
+```java
+class Solution {
+    public int[] twoSum(int[] numbers, int target) {
+        int left = 0, right = numbers.length - 1;
+        while (left < right) {
+            int sum = numbers[left] + numbers[right];
+            if (sum == target) {
+                return new int[]{left + 1, right + 1};
+            }
+            else if (sum < target) {
+                left++;
+            }
+            else {
+                right--;
+            }
+        }
+        return new int[]{-1, -1};
     }
 }
 ```
@@ -607,6 +630,25 @@ class Solution {
         }
 
         return tmp.next;
+    }
+}
+```
+
+## 相交链表（0160）
+
+> *编写一个程序，找到两个单链表相交的起始节点。*
+
+```java
+public class Solution {
+    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        if (headA == null || headB == null) {return null;}
+        ListNode curA = headA;
+        ListNode curB = headB;
+        while (curA != curB) {
+            curA = (curA != null ? curA.next : headB);
+            curB = (curB != null ? curB.next : headA);
+        }
+        return curA;
     }
 }
 ```
@@ -1385,6 +1427,52 @@ class Solution {
                 deque.pollFirst();
             }
         }
+    }
+}
+```
+
+## 翻转字符串中的单词（0151）
+
+> *给定一个字符串，逐个翻转字符串中的每个单词。*
+>
+> *示例 1：*
+>
+> *输入："the sky is blue"*
+>
+> *输出："blue is sky the"*
+
+```java
+class Solution {
+    public String reverseWords(String s) {
+        // 除去开头和末尾的空白字符
+        s = s.trim();
+        // 正则匹配连续的空白字符作为分隔符分割
+        List<String> wordList = Arrays.asList(s.split("\\s+"));
+        Collections.reverse(wordList);
+        return String.join(" ", wordList);
+    }
+}
+```
+
+## 比较版本号（0165）
+
+> *给你两个版本号 version1 和 version2 ，请你比较它们。*
+
+```java
+class Solution {
+    public int compareVersion(String version1, String version2) {
+        String[] nums1 = version1.split("\\.");
+        String[] nums2 = version2.split("\\.");
+        int n1 = nums1.length, n2 = nums2.length;
+
+        int i1, i2;
+        for (int i = 0; i < Math.max(n1, n2); i++) {
+            i1 = i < n1 ? Integer.parseInt(nums1[i]) : 0;
+            i2 = i < n2 ? Integer.parseInt(nums2[i]) : 0;
+            if (i1 != i2) {return i1 > i2 ? 1 : -1;}
+        }
+
+        return 0;
     }
 }
 ```
@@ -2475,7 +2563,7 @@ class Solution {
 }
 ```
 
-## 0150 逆波兰表达式求值
+## 逆波兰表达式求值（0150）
 
 > *根据 逆波兰表示法，求表达式的值。*
 >
@@ -2520,6 +2608,70 @@ class Solution {
             }
         }
         return stack.pop();
+    }
+}
+```
+
+## 乘积最大子数组（0152）
+
+> *给你一个整数数组 nums ，请你找出数组中乘积最大的连续子数组（该子数组中至少包含一个数字），并返回该子数组所对应的乘积。*
+
+```java
+class Solution {
+    public int maxProduct(int[] nums) {
+        int n = nums.length;
+        int[] maxDp = new int[n];
+        int[] minDp = new int[n];
+        maxDp[0] = nums[0];
+        minDp[0] = nums[0];
+
+        int ans = nums[0];
+        for (int i = 1; i < n; i++) {
+            maxDp[i] = Math.max(nums[i], Math.max(nums[i] * maxDp[i - 1], nums[i] * minDp[i - 1]));
+            minDp[i] = Math.min(nums[i], Math.min(nums[i] * maxDp[i - 1], nums[i] * minDp[i - 1]));
+            ans = Math.max(ans, maxDp[i]);
+        }
+
+        return ans;
+    }
+}
+```
+
+## 寻找峰值（0162）
+
+> *峰值元素是指其值大于左右相邻值的元素。*
+>
+> *给你一个输入数组 nums，找到峰值元素并返回其索引。数组可能包含多个峰值，在这种情况下，返回 任何一个峰值 所在位置即可。*
+>
+> *你可以假设 nums[-1] = nums[n] = -∞ 。*
+
+```java
+public class Solution {
+    public int findPeakElement(int[] nums) {
+        for (int i = 0; i < nums.length - 1; i++) {
+            if (nums[i] > nums[i + 1]) {return i;}
+        }
+        return nums.length - 1;
+    }
+}
+```
+
+## 阶乘后的零（0172）
+
+> *给定一个整数 n，返回 n! 结果尾数中零的数量。*
+
+```java
+class Solution {
+    public int trailingZeroes(int n) {
+        int count = 0;
+        for (int i = 5; i <= n; i += 5) {
+            int currentFactor = i;
+            while (currentFactor % 5 == 0) {
+                count++;
+                currentFactor /= 5;
+            }
+        }
+        return count;
     }
 }
 ```
@@ -3161,6 +3313,32 @@ class Solution {
             }
         }
         return lower ? left : right;
+    }
+}
+```
+
+## 寻找旋转排序数组中的最小值（0153）
+
+> *假设按照升序排序的数组在预先未知的某个点上进行了旋转。例如，数组 [0,1,2,4,5,6,7] 可能变为 [4,5,6,7,0,1,2] 。*
+>
+> *请找出其中最小的元素。*
+
+```java
+class Solution {
+    public int findMin(int[] nums) {
+        int left = 0;
+        int right = nums.length - 1;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] < nums[right]) {
+                right = mid;
+            } else if (nums[mid] > nums[right]) {
+                left = mid + 1;
+            } else {
+                right -= 1;
+            }
+        }
+        return nums[left];
     }
 }
 ```
@@ -3818,5 +3996,195 @@ class Solution {
         return visited.get(node);
     }
 }
+```
+
+
+
+# 10 数据结构
+
+## LRU缓存机制（0146）
+
+> *运用你所掌握的数据结构，设计和实现一个 LRU (最近最少使用) 缓存机制 。*
+>
+> *实现 LRUCache 类：*
+>
+> *LRUCache(int capacity) 以正整数作为容量 capacity 初始化 LRU 缓存*
+>
+> *int get(int key) 如果关键字 key 存在于缓存中，则返回关键字的值，否则返回 -1 。*
+>
+> *void put(int key, int value) 如果关键字已经存在，则变更其数据值；如果关键字不存在，则插入该组「关键字-值」。当缓存容量达到上限时，它应该在写入新数据之前删除最久未使用的数据值，从而为新的数据值留出空间。*
+>
+> 
+>
+> *示例：*
+>
+> *输入*
+>
+> *["LRUCache", "put", "put", "get", "put", "get", "put", "get", "get", "get"]*
+>
+> *[[2], [1, 1], [2, 2], [1], [3, 3], [2], [4, 4], [1], [3], [4]]*
+>
+> *输出*
+>
+> *[null, null, null, 1, null, -1, null, -1, 3, 4]*
+
+```java
+/**
+ * Your LRUCache object will be instantiated and called as such:
+ * LRUCache obj = new LRUCache(capacity);
+ * int param_1 = obj.get(key);
+ * obj.put(key,value);
+ */
+public class LRUCache {
+    class DLinkedNode {
+        int key;
+        int value;
+        DLinkedNode prev;
+        DLinkedNode next;
+        public DLinkedNode() {}
+        public DLinkedNode(int _key, int _value) {key = _key; value = _value;}
+    }
+
+    private Map<Integer, DLinkedNode> cache = new HashMap<Integer, DLinkedNode>();
+    private int size;
+    private int capacity;
+    private DLinkedNode head, tail;
+
+    public LRUCache(int capacity) {
+        this.size = 0;
+        this.capacity = capacity;
+        // 使用伪头部和伪尾部节点
+        head = new DLinkedNode();
+        tail = new DLinkedNode();
+        head.next = tail;
+        tail.prev = head;
+    }
+
+    public int get(int key) {
+        DLinkedNode node = cache.get(key);
+        if (node == null) {
+            return -1;
+        }
+        // 如果 key 存在，先通过哈希表定位，再移到头部
+        moveToHead(node);
+        return node.value;
+    }
+
+    public void put(int key, int value) {
+        DLinkedNode node = cache.get(key);
+        if (node == null) {
+            // 如果 key 不存在，创建一个新的节点
+            DLinkedNode newNode = new DLinkedNode(key, value);
+            // 添加进哈希表
+            cache.put(key, newNode);
+            // 添加至双向链表的头部
+            addToHead(newNode);
+            ++size;
+            if (size > capacity) {
+                // 如果超出容量，删除双向链表的尾部节点
+                DLinkedNode tail = removeTail();
+                // 删除哈希表中对应的项
+                cache.remove(tail.key);
+                --size;
+            }
+        }
+        else {
+            // 如果 key 存在，先通过哈希表定位，再修改 value，并移到头部
+            node.value = value;
+            moveToHead(node);
+        }
+    }
+
+    private void addToHead(DLinkedNode node) {
+        node.prev = head;
+        node.next = head.next;
+        head.next.prev = node;
+        head.next = node;
+    }
+
+    private void removeNode(DLinkedNode node) {
+        node.prev.next = node.next;
+        node.next.prev = node.prev;
+    }
+
+    private void moveToHead(DLinkedNode node) {
+        removeNode(node);
+        addToHead(node);
+    }
+
+    private DLinkedNode removeTail() {
+        DLinkedNode res = tail.prev;
+        removeNode(res);
+        return res;
+    }
+}
+```
+
+## 最小栈（0155）
+
+> *设计一个支持 push ，pop ，top 操作，并能在常数时间内检索到最小元素的栈。*
+>
+> *push(x) —— 将元素 x 推入栈中。*
+>
+> *pop() —— 删除栈顶的元素。*
+>
+> *top() —— 获取栈顶元素。*
+>
+> *getMin() —— 检索栈中的最小元素。*
+>
+>  
+>
+> *示例:*
+>
+> *输入：*
+>
+> *["MinStack","push","push","push","getMin","pop","top","getMin"]*
+>
+> *[[],[-2],[0],[-3],[],[],[],[]]*
+>
+> *输出：*
+>
+> *[null,null,null,null,-3,null,0,-2]*
+
+```java
+class MinStack {
+    Deque<Integer> stack;
+
+    /** initialize your data structure here. */
+    public MinStack() {
+        stack = new LinkedList<>();
+    }
+    
+    public void push(int x) {
+        stack.offerLast(x);
+    }
+    
+    public void pop() {
+        stack.pollLast();
+    }
+    
+    public int top() {
+        return stack.peekLast();
+    }
+    
+    public int getMin() {
+        int minValue = Integer.MAX_VALUE;
+        for (int n : stack) {
+            if (n < minValue) {
+                minValue = n;
+            }
+        }
+        return minValue;
+    }
+}
+
+/**
+ * Your MinStack object will be instantiated and called as such:
+ * MinStack obj = new MinStack();
+ * obj.push(x);
+ * obj.pop();
+ * int param_3 = obj.top();
+ * int param_4 = obj.getMin();
+ */
 ```
 

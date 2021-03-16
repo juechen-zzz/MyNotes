@@ -33,7 +33,7 @@ nvidia-docker run -itd --net host --shm-size 31G -w /home/ --name [容器名] -v
 
 ```shell
 docker attach [容器名]								# 退出挂断
-docker exec -it [容器名] /bin/bash/	# 退出不挂断
+docker exec -it [容器名] /bin/bash/	            # 退出不挂断
 ```
 
 * **停止**
