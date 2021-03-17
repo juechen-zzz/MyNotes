@@ -38,6 +38,7 @@ int[] nums2 = nums.clone();
 ```java
 // 转换成char[]数组
 char[] d = s.toCharArray();
+String ans = String.valueOf(d);
 // 取子串	[start, end)
 String s1 = s.substring(start, end);
 // sb
@@ -77,6 +78,10 @@ dic.get(key);
 // 若要修改，则必须覆盖
 dic.put(key, dic.getOrDefault(key, 0) + 1);
 containsValue
+// 遍历
+for (Map.Entry<Integer, Integer> entry : countMap.entrySet()) {
+	int num = entry.getKey(), count = entry.getValue();
+}
 ```
 
 # 4 ArrayList + LinkedList

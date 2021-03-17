@@ -195,6 +195,9 @@ rabbitmqctl change_password komorebi 654321
 2. `monitoring`：监控者，登录控制台、查看所有信息
 3. `policymaker`：策略制定者，登录控制台、指定策略
 4. `management`：普通管理员，登录控制台
+5. `none`：不能访问management plugin
+
+<img src="../images/image-20210316140211688.png" alt="image-20210316140211688" style="zoom:50%;" />
 
 ```
 rabbitmqctl.bat set_permissions -p / admin ".*" ".*" ".*"
@@ -211,4 +214,139 @@ docker images
 docker ps -a
 docker start IDXXX
 ```
+
+###  3.5 运行流程
+
+ <img src="../images/image-20210316155635847.png" alt="image-20210316155635847" style="zoom: 67%;" />
+
+
+
+## 四、配置
+
+### 4.1 快速开始（Simple模式）
+
+1. 新建maven项目
+
+2. 导入依赖
+
+	```xml
+	<dependency>
+	    <groupId>com.rabbitmq</groupId>
+	    <artifactId>amqp-client</artifactId>
+	    <version>5.10.0</version>
+	</dependency>
+	```
+
+3. 新建`Producer`
+
+	```java
+	public class Producer {
+	    public static void main(String[] args) throws IOException, TimeoutException {
+	        // 所有的中间件技术都是基于tcp/ip协议基础之上构建新型的协议规范，只不过rabbitmq遵循的是amqp
+	
+	        // 1：创建连接工程
+	        ConnectionFactory connectionFactory = new ConnectionFactory();
+	        connectionFactory.setHost("47.110.157.73");
+	        connectionFactory.setPort(5672);
+	        connectionFactory.setUsername("komorebi");
+	        connectionFactory.setPassword("123456");
+	        connectionFactory.setVirtualHost("/");
+	
+	        // 2：创建连接Connection
+	        Connection connection = connectionFactory.newConnection("生产者");
+	
+	        // 3：通过连接获取通道Channel
+	        Channel channel = connection.createChannel();
+	
+	        // 4：通过通道创建交换机，声明队列，绑定关系，路由Key，发送消息和接收消息
+	        String queueName = "queue1";
+	        /**
+	         * @params1 队列的名称
+	         * @params2 是否要持久化durable=false
+	         * @params3 排他性，是否是独占
+	         * @params4 是否自动删除，随着最后一个消费者消息完毕后是否把队列自动删除
+	         * @params5 携带附属参数
+	         */
+	        channel.queueDeclare(queueName, false, false, false, null);
+	
+	        // 5：发送消息内容
+	        String message = "hello rabbitmq";
+	
+	        // 6：发送消息给队列queue
+	        /**
+	         * @params1：交换机
+	         * @params2：队列，路由key
+	         * @params3：消息的状态控制
+	         * @params4：消息主题
+	         */
+	        channel.basicPublish("", queueName, null, message.getBytes());
+	        System.out.println("消息发送成功");
+	
+	        // 7：关闭连接
+	        if (channel != null && channel.isOpen()) {
+	            channel.close();
+	        }
+	
+	        // 8：关闭通道
+	        if (connection != null && connection.isOpen()) {
+	            connection.close();
+	        }
+	    }
+	}
+	```
+
+4. 新建`Consumer`
+
+	```java
+	public class Consumer {
+	    public static void main(String[] args) throws IOException, TimeoutException {
+	        // 所有的中间件技术都是基于tcp/ip协议基础之上构建新型的协议规范，只不过rabbitmq遵循的是amqp
+	
+	        // 1：创建连接工程
+	        ConnectionFactory connectionFactory = new ConnectionFactory();
+	        connectionFactory.setHost("47.110.157.73");
+	        connectionFactory.setPort(5672);
+	        connectionFactory.setUsername("komorebi");
+	        connectionFactory.setPassword("123456");
+	        connectionFactory.setVirtualHost("/");
+	
+	        // 2：创建连接Connection
+	        Connection connection = connectionFactory.newConnection("消费者");
+	
+	        // 3：通过连接获取通道Channel
+	        Channel channel = connection.createChannel();
+	
+	        // 4：通过通道创建交换机，声明队列，绑定关系，路由Key，发送消息和接收消息
+	        channel.basicConsume("queue1", true, new DeliverCallback() {
+	            public void handle(String s, Delivery message) throws IOException {
+	                System.out.println("收到消息是" + new String(message.getBody(), "UTF-8"));
+	            }
+	        }, new CancelCallback() {
+	            public void handle(String s) throws IOException {
+	                System.out.println("接收失败了...");
+	            }
+	        });
+	        System.out.println("开始接收消息");
+	        System.in.read();
+	
+	        // 5：关闭连接
+	        if (channel != null && channel.isOpen()) {
+	            channel.close();
+	        }
+	
+	        // 6：关闭通道
+	        if (connection != null && connection.isOpen()) {
+	            connection.close();
+	        }
+	    }
+	}
+	```
+
+5. ![image-20210316153614933](../images/image-20210316153614933.png)
+
+
+
+###  4.2 RabbitMQ支持消息的模式（7种）
+
+[官方教程](https://www.rabbitmq.com/getstarted.html)
 
