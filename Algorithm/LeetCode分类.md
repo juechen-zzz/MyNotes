@@ -2,7 +2,7 @@
 
 # 1 哈希表
 
-## 两数之和（0001 && 0167）
+## 两数之和
 
 > *给定一个整数数组 nums 和一个目标值 target，请你在该数组中找出和为目标值的那 两个 整数，并返回他们的数组下标。*
 >
@@ -30,30 +30,7 @@ class Solution {
 }
 ```
 
-> *给定一个已按照 升序排列 的整数数组 numbers ，请你从数组中找出两个数满足相加之和等于目标数 target 。*
-
-```java
-class Solution {
-    public int[] twoSum(int[] numbers, int target) {
-        int left = 0, right = numbers.length - 1;
-        while (left < right) {
-            int sum = numbers[left] + numbers[right];
-            if (sum == target) {
-                return new int[]{left + 1, right + 1};
-            }
-            else if (sum < target) {
-                left++;
-            }
-            else {
-                right--;
-            }
-        }
-        return new int[]{-1, -1};
-    }
-}
-```
-
-## 有效的数独（0036）
+## 有效的数独
 
 > *判断一个 9x9 的数独是否有效。只需要根据以下规则，验证已经填入的数字是否有效即可。*
 >
@@ -227,7 +204,7 @@ class Solution {
 }
 ```
 
-## 删除链表倒数第N个节点（0019）
+## 删除链表倒数第N个节点
 
 > *给定一个链表，删除链表的倒数第 n 个节点，并且返回链表的头结点。*
 >
@@ -258,7 +235,7 @@ class Solution {
 }
 ```
 
-## 合并K个升序链表（0021 && 0023）
+## 合并K个升序链表
 
 > *给你一个链表数组，每个链表都已经按升序排列。*
 >
@@ -485,8 +462,6 @@ class Solution {
     }
 }
 ```
-
-
 
 ## 分隔链表（0086）
 
@@ -4407,9 +4382,28 @@ class Solution {
 }
 ```
 
-> 中序（栈）
+> 前序+中序（栈）
 
 ```java
+class Solution {
+    public List<Integer> preorderTraversal(TreeNode root) {
+        List<Integer> ans = new ArrayList<>();
+        if (root == null) {return ans;}
+
+        Stack<TreeNode> stack = new Stack<>();
+        TreeNode node = root;
+        while (!stack.isEmpty() || node != null) {
+            while (node != null) {
+                ans.add(node.val);
+                stack.push(node);
+                node = node.left;
+            }
+            node = stack.pop();
+            node = node.right;
+        }
+        return ans;
+    }
+}
 class Solution {
     public List<Integer> inorderTraversal(TreeNode root) {
         List<Integer> ans = new ArrayList<>();
