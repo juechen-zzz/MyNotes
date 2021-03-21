@@ -82,6 +82,9 @@ containsValue
 for (Map.Entry<Integer, Integer> entry : countMap.entrySet()) {
 	int num = entry.getKey(), count = entry.getValue();
 }
+// 遍历
+for (int node : graph.keySet()) 
+for (int num : dist.values())
 ```
 
 # 4 ArrayList + LinkedList
@@ -95,7 +98,8 @@ res1.remove(index);
 res2.addFirst(val);	// 在前面加
 res2.add(val);		// 在后面加
 res2.removeFirst();
-res2.removeLast();
+res2removeLast();
+ans.add(Arrays.asList(a, b));
 // 判定是否为空
 res.isEmpty();
 // 大小

@@ -3664,6 +3664,25 @@ class Solution {
 }
 ```
 
+> *给你一个由 不同 整数组成的数组 nums ，和一个目标整数 target 。请你从 nums 中找出并返回总和为 target 的元素组合的个数。*
+
+```java
+class Solution {
+    public int combinationSum4(int[] nums, int target) {
+        int[] dp = new int[target + 1];
+        dp[0] = 1;
+        for (int i = 1; i <= target; i++) {
+            for (int x : nums) {
+                if (i >= x) {
+                    dp[i] += dp[i - x];
+                }
+            }
+        }
+        return dp[target];
+    }
+}
+```
+
 ## 组合（0077）
 
 > *给定两个整数 n 和 k，返回 1 ... n 中所有可能的 k 个数的组合。*
@@ -4352,6 +4371,44 @@ class Solution {
             }
         }
         return right + 1;
+    }
+}
+```
+
+## 有序数组中第K小的元素（0378）
+
+> *给你一个 n x n 矩阵 matrix ，其中每行和每列元素均按升序排序，找到矩阵中第 k 小的元素。*
+
+```java
+class Solution {
+    public int kthSmallest(int[][] matrix, int k) {
+        int n = matrix.length;
+        int left = matrix[0][0];
+        int right = matrix[n - 1][n - 1];
+        while (left < right) {
+            int mid = left + ((right - left) >> 1);
+            if (check(matrix, mid, k, n)) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return left;
+    }
+
+    public boolean check(int[][] matrix, int mid, int k, int n) {
+        int i = n - 1;
+        int j = 0;
+        int num = 0;
+        while (i >= 0 && j < n) {
+            if (matrix[i][j] <= mid) {
+                num += i + 1;
+                j++;
+            } else {
+                i--;
+            }
+        }
+        return num >= k;
     }
 }
 ```
