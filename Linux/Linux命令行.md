@@ -17,6 +17,7 @@ scp -P port user@XXX:Desktop/123.txt 123.txt 	# 远程复制，-r可以复制文
 scp -r demp user@XXX:Desktop
 #########################################################################
 ps au												# a查看全部进程，u显示进程详细状态
+ps -ef|grep 进程ID
 top 												# 动态查看进程，退出需要按q
 kill -9 进程号
 find [路径] -name "*.py"
