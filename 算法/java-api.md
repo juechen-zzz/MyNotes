@@ -1,70 +1,22 @@
-```java
-// 交互式模板
-public static void main(String[] args) {
-    Scanner scanner = new Scanner(System.in);
-    
-    String str1 = scanner.nextLine();
-    String str2 = scanner.nextLine();
-
-    System.out.println(find(str1,str2));
-}
-
-public static int find(String str1,String str2){
-    int a = 0;
-    int t = 0;
-    for(int i =0; i< str1.length();i++){
-        if(str1.charAt(i) =='A' && str2.charAt(i)!='A'){
-            a++;
-        }
-        if(str1.charAt(i) =='T' && str2.charAt(i)!='T'){
-            t++;
-        }
-    }
-    return Math.max(a,t);
-}
-
-public static void main(String[] args) {
-    Scanner scanner = new Scanner(System.in);
-    int len = Integer.parseInt(scanner.nextLine());
-    int[] ans = new int[len];
-    //int len = scanner.nextInt();
-    for (int i = 0; i < len; i++) {
-        String[] array = scanner.nextLine().split(" ");
-        int n = Integer.parseInt(array[0]);
-        int k = Integer.parseInt(array[1]);
-        String[] nums = scanner.nextLine().split(" ");
-        int[] nums2 = new int[nums.length];
-        for (int j = 0; j < nums.length; j++) {
-            nums2[j] = Integer.parseInt(nums[j]);
-        }
-        ans[i] = find(n, k, nums2);
-    }
-
-    for (int i = 0; i < len; i++) {
-        System.out.println(ans[i]);
-    }
-}
-```
-
 # 0 排序
 
 ```java
 // 排序自定义(按照二维数组的第一维排序， 第一维相同则按照第二维排序)
-Arrays.sort(intervals, new Comparator<int[]>(){
-            public int compare(int[] a, int[] b) {
-                return a[0] == b[0] ? a[1] - b[1] : a[0] - b[0];
-            }
-        });
+Arrays.sort(nums2, (a, b) -> a[0] == b[0] ? a[1] - b[1] : a[0] - b[0]);
 
 // 数组部分排序
 Arrays.sort(nums, startIndex, endIndex+1);
+Arrays.sort(points, Collections.reverseOrder());
+
 // ArrayList排序 反转
 Collections.sort(ans);
 Collections.reverse(tmp);
+
 //把其他进制字符串key，转成10进制整数
 Integer.parseInt(a, 2)
 Integer.parseInt(a, 8)
 Integer.parseInt(a, 16)
+    
 //把10进制keys转成其余进制
 Integer.toBinaryString(num)
 Integer.toHexString(num);
@@ -126,19 +78,31 @@ return (nums1 & nums2) != 0;
 # 3 HashMap
 
 ```java
-// 输入输出
-dic.put(key, val);
-dic.get(key);
-// 若要修改，则必须覆盖
-dic.put(key, dic.getOrDefault(key, 0) + 1);
-containsValue
-// 遍历
+// 遍历 1
 for (Map.Entry<Integer, Integer> entry : countMap.entrySet()) {
 	int num = entry.getKey(), count = entry.getValue();
 }
-// 遍历
+// 遍历 2
 for (int node : graph.keySet()) 
 for (int num : dist.values())
+// 排序1 key 降序
+private static void sortMapByKey(Map<Integer, String> map) {
+    Set set = map.keySet();
+    Object[] arr = set.toArray();
+    Arrays.sort(arr, Collections.reverseOrder());
+    for(Object key : arr){
+        System.out.println(key  + "--" + map.get(key));
+    }
+}
+// 排序2 value 降序
+private static void sortMapByValue1(Map<String, Integer> map) {
+    List<Map.Entry<String, Integer>> curList = new ArrayList<>(map.entrySet());
+    curList.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
+
+    for (int i = 0; i < curList.size(); i++) {
+        System.out.println(curList.get(i).getKey() + "--" + curList.get(i).getValue());
+    }
+}
 ```
 
 # 4 ArrayList + LinkedList
@@ -248,11 +212,7 @@ s.size();
 // 创建
 PriorityQueue<Integer> pq = new PriorityQueue<>();						// 最小堆
 PriorityQueue<Integer> pq = new PriorityQueue<>((a, b) -> b - a);		// 最大堆
-PriorityQueue<int[]> pq = new PriorityQueue<>(new Comparator<int[]>() {
-    public int compare(int[] pair1, int[] pair2) {
-        return pair1[0] != pair2[0] ? pair2[0] - pair1[0] : pair1[1] - pair2[1];
-    }
-});
+PriorityQueue<int[]> pq = new PriorityQueue<>((pair1, pair2) -> pair1[0] != pair2[0] ? pair2[0] - pair1[0] : pair1[1] - pair2[1]);
 // 添加删除
 pq.add(n);
 pq.offer(n);

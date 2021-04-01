@@ -2,7 +2,9 @@
 
 ## Java基础知识点
 
-![image-20210302162620768](../images/image-20210302162620768.png)
+<img src="../images/image-20210329143133371.png" alt="image-20210329143133371" style="zoom:50%;" />
+
+<img src="../images/image-20210302162620768.png" alt="image-20210302162620768" style="zoom:67%;" />
 
 ArrayList：随机访问元素快，但是在中间插入和移除比较慢
 
@@ -14,23 +16,80 @@ TreeSet：将元素存储红-黑树结构中，所以存储的结果是有顺序
 
 
 
-### 1 抽象类和接口的区别
+### 1 抽象类、接口、重载和重写
 
 * 核心：**一个类只能继承一个抽象类，但可以实现多个接口**
+
 * 类含有抽象方法，为抽象类，用abstract修饰
 	* 不能用来创建对象
 	* 继承抽象类的类必须为抽象方法提供定义，否则也为抽象类
 	* 可以拥有成员变量和普通成员方法，抽象方法必须为public或protected
+	
 * 接口是对行为的抽象，是用interface修饰
 	* 可以含有变量和方法，但会被隐式指定为public static final变量和public abstract方法，且变量必须给初值
 	* 接口中的方法必须为抽象方法，一般情况下不在接口中定义变量
+	
+* **重载和重写**
+
+	* 重写是子类对父类的允许访问的方法的实现过程进行重新编写, **返回值和形参都不能改变**。**即外壳不变，核心重写！**
+
+		重写的好处在于子类可以根据需要，定义特定于自己的行为。 也就是说子类能够根据需要实现父类的方法。
+
+		重写方法不能抛出新的检查异常或者比被重写方法申明更加宽泛的异常。例如： 父类的一个方法申明了一个检查异常 IOException，但是在重写这个方法的时候不能抛出 Exception 异常，因为 Exception 是 IOException 的父类，只能抛出 IOException 的子类异常。
+
+	* 重载(overloading) 是在一个类里面，方法名字相同，而参数不同。**返回类型可以相同也可以不同。**
+
+		每个重载的方法（或者构造函数）都必须有一个独一无二的参数类型列表。
+
+		最常用的地方就是构造器的重载。
+
+		<img src="../images/image-20210326154258576.png" alt="image-20210326154258576" style="zoom:50%;" />
 
 
 
-### 2 JVM内存结构
+### 2 双亲委派机制
+
+<img src="../images/image-20210329143413713.png" alt="image-20210329143413713" style="zoom:50%;" />
+
+​       Java虚拟机对class文件采用的时**按需加载**的方式，也就是说当需要使用这个类的时候才会将它的class文件加载到内存当中生成class对象，而且加载某个类的class文件是，Java采用的是**双亲委派机制**，即把请求交由其父类处理，他是一种任务委派机制。
+
+ **工作原理**
+
+1. 如果一个类加载器收到了类加载请求，它并不会自己先去加载，而是把这个请求委托给父类加载器去执行；
+2. 如果父类加载器还存在其父类加载器，则会进一步向上委托，依次递归，请求最终将到达顶层的启动类加载器。
+3. 如果父类加载器可以完成类加载任务，就成功返回，倘若父类加载器无法完成加载任务，子加载器才会尝试自己去加载，这就是双亲委派模式
+
+Java虚拟机对class文件采用的时**按需加载**的方式，也就是说当需要使用这个类的时候才会将它的class文件加载到内存当中生成class对象，而且加载某个类的class文件是，Java采用的是**双亲委派机制**，即把请求交由其父类处理，他是一种任务委派机制。
+
+**优点**
+
+- 避免类的重复加载
+- 保护程序安全，防止核心API被随意篡改
+
+- - 自定义类：Java.lang.String
+	- 自定义类：Java.lang.Bwang
+
+ **沙箱安全机制**
+
+自定义String类，但是在加载自定义String类的时候会率先使用引导类加载器加载，而引导类加载器在加载过程中会加载JDK自带的文件，报错信息说没有main方法，是因为加载的是rt.jar包中的String类，这样可以保证对Java核心API的源代码保护，这就是沙箱安全机制
+
+
+
+### 3 JVM内存结构
 
 JVM 内存共分为**虚拟机栈，堆，方法区，程序计数器，本地方法栈**五个部分
 
+* **堆(线程共享)**
+
+	* <u>被所有线程**共享**的一块内存区域，在虚拟机启动的时候创建，用于**存放对象实例**</u>
+	* 当堆中没有内存可分配给实例，也无法再扩展时，则抛出OutOfMemoryError异常。
+* **方法区(线程共享)**：==1.8后变更为元空间==
+  * <u>被所有线程共享的一块内存区域，用于存储已经被虚拟机加载的**类信息、常量、静态变量**等</u>
+  * 这个区域的内存回收目标主要针对常量池的回收和堆类型的卸载
+  * 替换原因
+  	* 整个永久代有⼀个 JVM 本身设置固定⼤⼩上限，⽆法进⾏调整，⽽元空间使⽤的是直接内 存，受本机可⽤内存的限制，虽然元空间仍旧可能溢出，但是⽐原来出现的⼏率会更⼩。
+  	* 元空间⾥⾯存放的是类的元数据，这样加载多少类的元数据就不由 ⽽由系统的实际可⽤空间来控制，这样能加载的类就更多了
+  	* 在 JDK8，合并 HotSpot 和 JRockit 的代码时, JRockit 从来没有⼀个叫永久代的东⻄, 合并 之后就没有必要额外的设置这么⼀个永久代的地⽅了。
 * **虚拟机栈(线程私有)**
 
 	* <u>每个方法在执行的时候会创建一个栈帧，存储**局部变量、操作数、动态链接和方法返回地址**</u>
@@ -38,17 +97,6 @@ JVM 内存共分为**虚拟机栈，堆，方法区，程序计数器，本地�
 	* 通常所说的栈，一般指虚拟机栈中的局部变量部分，局部变量所需内存在编译期间完成分配
 		* 若线程请求的栈深度大于虚拟机所允许的深度，则StackOverflowError
 		* 若虚拟机栈可动态扩展，扩展到无法申请足够的内存，则OutOfMemoryError
-
-* **堆(线程共享)**
-
-	* <u>被所有线程**共享**的一块内存区域，在虚拟机启动的时候创建，用于**存放对象实例**</u>
-	* 当堆中没有内存可分配给实例，也无法再扩展时，则抛出OutOfMemoryError异常。
-
-* **方法区(线程共享)**
-
-	* <u>被所有线程共享的一块内存区域，用于存储已经被虚拟机加载的**类信息、常量、静态变量**等</u>
-	* 这个区域的内存回收目标主要针对常量池的回收和堆类型的卸载
-
 * **程序计数器(线程私有)**
 
 	* 线程私有
@@ -60,14 +108,13 @@ JVM 内存共分为**虚拟机栈，堆，方法区，程序计数器，本地�
 
 	* 是当前线程执行字节码的行号指示器，每条线程都有一个独立的程序计数器，也称线程私有的内存
 	* 字节码解释器工作时就是通过改变这个计数器的值来选取下一条需要执行的字节码指令，分支、循环、跳转、异常处理、线程恢复等基础功能都需要依赖这个计数器来完成。
-
 * **本地方法栈(线程私有)**
 
 	* <u>和虚拟机栈类似，主要为虚拟机使用到的**Native方法**服务。也会抛出StackOverflowError 和OutOfMemoryError。</u>
 
 
 
-### 3 Java内存模型
+### 4 Java内存模型
 
 * Java 线程之间的通信由 Java 内存模型控制，JMM 决定一个线程对共享变量的写入何时对另一个线程可见。
 * 从抽象的角度来看，JMM 定义了线程和主内存之间的抽象关系：线程之间的共享变量存储在主内存（main memory）中，每个线程都有一个私有的本地内存（local memory），本地内存中存储了该线程以读 / 写共享变量的副本。本地内存是 JMM 的一个抽象概念，并不真实存在。它涵盖了缓存，写缓冲区，寄存器以及其他的硬件和编译器优化。
@@ -81,7 +128,7 @@ JVM 内存共分为**虚拟机栈，堆，方法区，程序计数器，本地�
 
 
 
-### 4 垃圾回收机制（GC）
+### 5 垃圾回收机制（GC）
 
 * （1）什么是垃圾？
 	* 对于java对象而言，没有被其他对象所引用，则该对象就是无用的
@@ -100,6 +147,13 @@ JVM 内存共分为**虚拟机栈，堆，方法区，程序计数器，本地�
 			* 方法区中的类静态属性引用对象
 			* 本地方法栈中的引用对象
 			* 活跃线程中的引用对象
+	* 垃圾回收器：
+		* **Serial 收集器**：Serial（串⾏）收集器是最基本、历史最悠久的垃圾收集器了。⼤家看名字就知道这个收集器是 ⼀个单线程收集器了。它的 “单线程” 的意义不仅仅意味着它只会使⽤⼀条垃圾收集线程去完成 垃圾收集⼯作，更重要的是它在进⾏垃圾收集⼯作的时候必须暂停其他所有的⼯作线程（ "Stop The World" ），直到它收集结束。**新⽣代采⽤复制算法，⽼年代采⽤标记-整理算法。**
+		* **ParNew 收集器**：ParNew 收集器其实就是 Serial 收集器的多线程版本，除了使⽤多线程进⾏垃圾收集外，其余⾏ 为（控制参数、收集算法、回收策略等等）和 Serial 收集器完全⼀样。**新⽣代采⽤复制算法，⽼年代采⽤标记-整理算法。**
+		* **Parallel Scavenge 收集器**：Parallel Scavenge 收集器关注点是吞吐量（⾼效率的利⽤ CPU）。CMS 等垃圾收集器的关注点更多的是⽤户线程的停顿时间（提⾼⽤户体验）。**新⽣代采⽤复制算法，⽼年代采⽤标记-整理算法。**
+		* **Serial Old 收集器**：Serial 收集器的⽼年代版本，它同样是⼀个单线程收集器。它主要有两⼤⽤途：⼀种⽤途是在 JDK1.5 以及以前的版本中与 Parallel Scavenge 收集器搭配使⽤，另⼀种⽤途是作为 CMS 收集 器的后备⽅案。
+		* **Parallel Old 收集器**：Parallel Scavenge 收集器的⽼年代版本。使⽤多线程和“标记-整理”算法。在注重吞吐量以及 CPU 资源的场合，都可以优先考虑 Parallel Scavenge 收集器和 Parallel Old 收集器。
+		* **CMS 收集器**：⼀种以获取最短回收停顿时间为⽬标的收集器。它⾮常符合在注重⽤户体验的应⽤上使⽤。CMS（Concurrent Mark Sweep）收集器是 HotSpot 虚拟机第⼀款真正意义上的并发收集器，它第⼀次实现了让垃圾收集线程与⽤户线程（基本上）同时⼯作。
 * （3）四种垃圾回收算法：**标记清除算法**、**复制算法**、**标记整理算法**以及**分代回收算法**
 	* 标记清除算法
 		* 分为两个阶段：标记--清除
@@ -117,11 +171,11 @@ JVM 内存共分为**虚拟机栈，堆，方法区，程序计数器，本地�
 		* 根据具体的情况选择具体的垃圾回收算法。一般将 java 堆分为新生代和老年代，这样就可以根据各个年代的特点选择合适的垃圾收集算法。
 		* 新生代：复制算法
 		* 老年代：标记清除算法 或 标记整理算法
-* <img src="../images/image-20210118203629572.png" alt="image-20210118203629572" style="zoom:50%;" />
+* ![image-20210329151802481](../images/image-20210329151802481.png)
 
 
 
-### 5 反射
+### 6 反射
 
 * 定义：在运行状态中，对于任意一个类，都能够获取这个类的所有属性和方法，对于任意一个对象，都能够调用它的任意一个方法和属性（包括私有方法和属性），这种动态获取的信息以及动态调用对象的功能叫反射机制。
 
@@ -163,10 +217,10 @@ JVM 内存共分为**虚拟机栈，堆，方法区，程序计数器，本地�
 
 
 
-### 6 异常处理
+### 7 异常处理
 
 * 定义：异常是一个事件，发生在程序运行期间，干扰了正常的指令流程。Java通过Throwable类的众多子类描述各种不同的异常。因而，Java异常都是对象，是Throwable子类的实例，描述了出现在一段编码中的错误条件。
-	<img src="../images/image-20210121211104480.png" alt="image-20210121211104480" style="zoom: 50%;" />
+	<img src="../images/image-20210121211104480.png" alt="image-20210121211104480" style="zoom: 67%;" />
 	* 错误（Error）：Error类及其子类，代表了JVM本身的错误，很少出现
 	* 异常（Exception）：代表程序运行时发生的各种不期望发生的事件，可以被Java异常处理机制使用，是异常处理的核心
 * 根据**Javac对异常的处理要求**，将异常分为两类：
@@ -190,88 +244,11 @@ JVM 内存共分为**虚拟机栈，堆，方法区，程序计数器，本地�
 
 
 
-### 7 Log4j
+### 8 String、StringBuilder、StringBuffer区别
 
-* 在项目的classpath下或者resource下新建log4j.properties
-
-	```properties
-	#将等级为DEBUG的日志信息输出到console和file这两个目的地，console和file的定义在下面的代码
-	log4j.rootLogger=DEBUG,console,file
-	
-	#控制台输出的相关设置
-	log4j.appender.console = org.apache.log4j.ConsoleAppender
-	log4j.appender.console.Target = System.out
-	log4j.appender.console.Threshold=DEBUG											# 指定日志消息的输出最低层次。
-	log4j.appender.console.layout = org.apache.log4j.PatternLayout
-	log4j.appender.console.layout.ConversionPattern=[%]-%m%n
-	
-	#文件输出的相关设置
-	log4j.appender.file = org.apache.log4j.RollingFileAppender
-	log4j.appender.file.File=./log/komorebi.log
-	log4j.appender.file.MaxFileSize=10mb
-	log4j.appender.file.Threshold=DEBUG
-	log4j.appender.file.layout=org.apache.log4j.PatternLayout
-	log4j.appender.file.layout.ConversionPattern=[%p][%d{yy-MM-dd}][%c]%m%n
-	
-	#日志输出级别
-	log4j.logger.org.mybatis=DEBUG
-	log4j.logger.java.sql=DEBUG
-	log4j.logger.java.sql.Statement=DEBUG
-	log4j.logger.java.sql.ResultSet=DEBUG
-	log4j.logger.java.sql.PreparedStatement=DEBUG
-	```
-
-* log4j中有三个重要组件：Logger、Appender和Layout
-
-	* 允许存在多个Logger，名字大小写敏感，且具有继承关系。有一个称为Root，永远存在且不能通过名字检索或引用，可以通过Logger.getRootLogger()，其余Logger.getLogger
-	* Appender则指明将所有的log信息存放到什么地方，支持console file gui等
-	* Layout是控制Log信息的输出方式，格式化输出，有三种
-		* HTMLLayout：格式化日志输出为HTML表格形式
-		* SimpleLayout：打印三项内容：级别-信息
-		* PatternLayout：根据指定的转换模式格式化日志输出
-
-* 日志级别
-
-	A：off     最高等级，用于关闭所有日志记录。
-	B：fatal    指出每个严重的错误事件将会导致应用程序的退出。
-	C：error   指出虽然发生错误事件，但仍然不影响系统的继续运行。
-	D：warm   表明会出现潜在的错误情形。
-	E：info     一般和在粗粒度级别上，强调应用程序的运行全程。
-	F：debug   一般用于细粒度级别上，对调试应用程序非常有帮助。
-	G：all      最低等级，用于打开所有日志记录。
-
-
-
-### 8 lambda表达式
-
-* lambda表达式实质上是一个**匿名方法**，但该方法并非独立执行，而是用于**实现由函数式接口定义的唯一抽象方法**
-
-	* 函数式接口是仅含一个抽象方法的接口，可以指定Object定义的任何共有方法
-	* 每个lambda表达式背后必定有一个函数式接口
-
-* 使用lambda表达式时，会创建实现函数式接口的一个匿名类实例，可以将lambda表达式视为一个对象，将其作为参数传递
-
-* 两种形式：
-
-	* 包含单独表达式：parameters -> an expression;
-
-		```java
-		list.forEach(item -> System.out.println(item));
-		```
-
-	* 包含代码块：parameters -> {expressions};
-
-		```java
-		list.forEach(item -> {
-			int numA = item.getNumA();
-			int numB = item.getNumB();
-			System.out.println(numsA + numB);
-		});
-		```
-
-
-
-### 9 String、StringBuilder、StringBuffer区别
+> String 类中使⽤ final 关键字修饰字符数组来保存字符串， private final char value[] ，所以 String 对象是不可变的。
+>
+> StringBuilder 与 StringBuffer 都继承⾃ AbstractStringBuilder 类，在 AbstractStringBuilder 中 也是使⽤字符数组保存字符串 char[]value 但是没有⽤ final 关键字修饰，所以这两种对象都是可 变的
 
 这三个类的区别主要在两个方面：**运行速度**和**线程安全**
 
@@ -281,11 +258,11 @@ JVM 内存共分为**虚拟机栈，堆，方法区，程序计数器，本地�
 
 
 
-### 10 ArrayList、LinkedList、Vector的区别
+### 9 ArrayList、LinkedList、Vector的区别
 
 **存储结构**
 
-* ArrayList和Vector是基于数组实现的，LinkedList是基于链表实现的
+* ArrayList和Vector是基于Object数组实现的，LinkedList是基于双向链表实现的
 * ArrayList和Vector按照顺序将元素存储（下标0开始），删除完成后，需要使部分元素移位，默认初始容量为10
 
 **线程安全**
@@ -308,7 +285,7 @@ JVM 内存共分为**虚拟机栈，堆，方法区，程序计数器，本地�
 
 
 
-### 11 HashMap的底层实现
+### 10.1 HashMap的底层实现
 
 - **JDK1.7及之前：数组+链表**
 - **JDK1.8：数组+链表+红黑树**
@@ -522,8 +499,21 @@ public int hashCode() {
 ​		当然，虽然在hashmap底层有这种红黑树的结构，但是能产生这种结构的概率也不大，所以在 JDK1.7 到 JDK1.8 这其中HashMap的性能也只提高了7%~8% 左右
 
 * `HashSet`底层也是`HashMap`，即所有的key对应的值都是`Present`
+* hashCode() 与equals()的相关规定：
 
-**ConcurrentHashMap**
+	1. 如果两个对象相等，则 hashcode ⼀定也是相同的
+
+	2. 两个对象相等,对两个 equals() ⽅法返回 true
+
+	3. 两个对象有相同的 hashcode 值，它们也不⼀定是相等的
+
+	4. 综上， equals() ⽅法被覆盖过，则 hashCode() ⽅法也必须被覆盖
+
+	5. hashCode() 的默认⾏为是对堆上的对象产⽣独特值。如果没有重写 hashCode() ，则该 class 的两个对象⽆论如何都不会相等（即使这两个对象指向相同的数据）。
+
+
+
+### 10.2 ConcurrentHashMap的底层实现
 
 在多线程环境下，使用HashMap进行put操作时会存在丢失数据的情况，因此使用`ConcurrentHashMap`代替`HashMap`
 
@@ -545,14 +535,110 @@ public int hashCode() {
 	在ConcurrentHashMap中主要通过**锁分段**技术实现上述目标。
 	JDK1.7版本锁的粒度是基于**Segment**的，包含多个HashEntry，而JDK1.8**锁的粒度就是HashEntry**（首节点）
 
-	​		在Java7中，ConcurrentHashMap由Segment数组结构和HashEntry数组组成。Segment是一种可重入锁，是一种数组和链表的结构，一个Segment中包含一个HashEntry数组，每个HashEntry又是一个链表结构。正是通过Segment分段锁，ConcurrentHashMap实现了高效率的并发。
+	​		在Java7中，ConcurrentHashMap由Segment数组结构和HashEntry数组组成。Segment是一种可重入锁，是一种数组和链表的结构，一个Segment中包含一个HashEntry数组，每个HashEntry又是一个链表结构。正是通过Segment分段锁，ConcurrentHashMap实现了高效率的并发。（通过 key 定位到 Segment，之后在对应的 Segment 中进行具体的 pu）
 
 	​		在Java8中，ConcurrentHashMap去除了Segment分段锁的数据结构，主要是基于CAS操作保证保证数据的获取以及使用synchronized关键字对相应数据段加锁实现了主要功能，这进一步提高了并发性。同时同时为了提高哈希碰撞下的寻址性能，Java 8在链表长度超过一定阈值(8)时将链表（寻址时间复杂度为O(N)）转换为红黑树（寻址时间复杂度为O(long(N)))。
-
-
 	
+* put流程
 
-### 12 HashMap 和 Hashtable 的区别
+     * put函数底层调用了putVal进行数据的插入，对于putVal函数的流程大体如下。
+
+     　　① 判断存储的key、value是否为空，若为空，则抛出异常，否则，进入步骤②
+
+     　　② 计算key的hash值，随后进入无限循环，该无限循环可以确保成功插入数据，若table表为空或者长度为0，则初始化table表，否则，进入步骤③
+
+     　　③ 根据key的hash值取出table表中的结点元素，若取出的结点为空（该桶为空），则使用CAS将key、value、hash值生成的结点放入桶中。否则，进入步骤④
+
+     　　④ 若该结点的的hash值为MOVED，则对该桶中的结点进行转移，否则，进入步骤⑤
+
+     　　⑤ 对桶中的第一个结点（即table表中的结点）进行加锁，对该桶进行遍历，桶中的结点的hash值与key值与给定的hash值和key值相等，则根据标识选择是否进行更新操作（用给定的value值替换该结点的value值），若遍历完桶仍没有找到hash值与key值和指定的hash值与key值相等的结点，则直接新生一个结点并赋值为之前最后一个结点的下一个结点。进入步骤⑥
+
+     　　⑥ 若binCount值达到红黑树转化的阈值，则将桶中的结构转化为红黑树存储，最后，增加binCount的值。
+
+     * ```java
+          final V putVal(K key, V value, boolean onlyIfAbsent) {
+                  if (key == null || value == null) throw new NullPointerException(); // 键或值为空，抛出异常
+                  // 键的hash值经过计算获得hash值
+                  int hash = spread(key.hashCode());
+                  int binCount = 0;
+                  for (Node<K,V>[] tab = table;;) { // 无限循环
+                      Node<K,V> f; int n, i, fh;
+                      if (tab == null || (n = tab.length) == 0) // 表为空或者表的长度为0
+                          // 初始化表
+                          tab = initTable();
+                      else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) { // 表不为空并且表的长度大于0，并且该桶不为空
+                          if (casTabAt(tab, i, null,
+                                       new Node<K,V>(hash, key, value, null))) // 比较并且交换值，如tab的第i项为空则用新生成的node替换
+                              break;                   // no lock when adding to empty bin
+                      }
+                      else if ((fh = f.hash) == MOVED) // 该结点的hash值为MOVED
+                          // 进行结点的转移（在扩容的过程中）
+                          tab = helpTransfer(tab, f);
+                      else {
+                          V oldVal = null;
+                          synchronized (f) { // 加锁同步
+                              if (tabAt(tab, i) == f) { // 找到table表下标为i的节点
+                                  if (fh >= 0) { // 该table表中该结点的hash值大于0
+                                      // binCount赋值为1
+                                      binCount = 1;
+                                      for (Node<K,V> e = f;; ++binCount) { // 无限循环
+                                          K ek;
+                                          if (e.hash == hash &&
+                                              ((ek = e.key) == key ||
+                                               (ek != null && key.equals(ek)))) { // 结点的hash值相等并且key也相等
+                                              // 保存该结点的val值
+                                              oldVal = e.val;
+                                              if (!onlyIfAbsent) // 进行判断
+                                                  // 将指定的value保存至结点，即进行了结点值的更新
+                                                  e.val = value;
+                                              break;
+                                          }
+                                          // 保存当前结点
+                                          Node<K,V> pred = e;
+                                          if ((e = e.next) == null) { // 当前结点的下一个结点为空，即为最后一个结点
+                                              // 新生一个结点并且赋值给next域
+                                              pred.next = new Node<K,V>(hash, key,
+                                                                        value, null);
+                                              // 退出循环
+                                              break;
+                                          }
+                                      }
+                                  }
+                                  else if (f instanceof TreeBin) { // 结点为红黑树结点类型
+                                      Node<K,V> p;
+                                      // binCount赋值为2
+                                      binCount = 2;
+                                      if ((p = ((TreeBin<K,V>)f).putTreeVal(hash, key,
+                                                                     value)) != null) { // 将hash、key、value放入红黑树
+                                          // 保存结点的val
+                                          oldVal = p.val;
+                                          if (!onlyIfAbsent) // 判断
+                                              // 赋值结点value值
+                                              p.val = value;
+                                      }
+                                  }
+                              }
+                          }
+                          if (binCount != 0) { // binCount不为0
+                              if (binCount >= TREEIFY_THRESHOLD) // 如果binCount大于等于转化为红黑树的阈值
+                                  // 进行转化
+                                  treeifyBin(tab, i);
+                              if (oldVal != null) // 旧值不为空
+                                  // 返回旧值
+                                  return oldVal;
+                              break;
+                          }
+                      }
+                  }
+                  // 增加binCount的数量
+                  addCount(1L, binCount);
+                  return null;
+              }
+          ```
+
+          
+
+### 11 HashMap 和 Hashtable 的区别
 
 1. 线程是否安全：
 
@@ -565,82 +651,7 @@ public int hashCode() {
 
 
 
-### 13 ajax和form表单提交有啥不一样
-
-1. ajax在提交、请求、接收时，都是异步进行的，网页不需要刷新
-	form提交是新建一个页面，即使是提交给自己本身的页面，也是需要刷新的
-2. ajax提交时，是在后台新建一个请求
-	form表单是放弃本页面，再次申请
-3. ajax必须用js实现，不启动js的浏览器，无法完成
-	form是浏览器的功能，无论是否开启js，都可以提交表单
-4. ajax在提交、请求、接收时，整个过程都需要使用程序来对其数据进行处理
-	form提交时，是根据表单结构自动完成，不需要代码干预
-
-
-
-### 14 创建线程池、线程池的运行机制和拒绝策略
-
-​		线程是进程划分成的更⼩的运⾏单位,⼀个进程在其执⾏的过程中可以产⽣多个线程。线 程和进程最⼤的不同在于基本上各进程是独⽴的，⽽各线程则不⼀定，因为同⼀进程中的线程极 有可能会相互影响。线程执⾏开销⼩，但不利于资源的管理和保护；⽽进程正相反。
-
-**创建线程池七大参数**
-
-* `corePoolSzie`：线程池核心线程大小（即使这些线程处于空闲，也不会被销毁）
-* `maximumPoolSize`：线程池最大线程数量
-* `keepAliveTime`：空闲线程存活时间
-* `unit`：空间线程存活时间单位
-* `workQueue`：工作队列
-	* `ArrayBlockingQueue`：基于数组的有界阻塞队列，FIFO排序
-	* `LinkedBlockingQuene`：基于链表的无界阻塞队列
-	* `SynchronousQuene`：一个不缓存任务的阻塞队列
-	* `PriorityBlockingQueue`：具有优先级的无界阻塞队列
-* `threadFactory`：线程工厂，用来设定线程名、是否为daemon线程等
-* `handler`：拒绝策略
-
-**运行机制**
-
-![image-20210217100606020](../images/image-20210217100606020.png)
-
-1、在创建了线程池后，等待提交过来的任务请求。
-
-2、当调用execute()方法添加一个任务请求，线程池会做如下判断：
-
-- 如果正在运行的线程数小于或者等于corePoolSize，那么马上会创建线程运行这个任务；
-- 如果正在运行的线程数大于corePoolSize，那么会将这个任务放入阻塞队列；
-- 如果这时候队列满了并且正在运行的线程数量还小于maximumPoolSize，那么还是要创建非核心线程运行这个任务；
--  如果队列满了并且线程数大于或者等于maximumPoolSize，那么会启动饱和拒绝策略来执行。
-
-3、当一个线程完成时，它会从队列中取下一个任务来执行。
-
-4、当一个线程无事可做，且超过一定的时间（keepAliveTime）时，线程池会判断：
-
-​    如果当前运行的线程数大于corePoolSize，那么这个线程会停掉。
-
-​    所以线程池的所有任务完成后，它最终会收缩到corePoolSize的大小。
-
-**拒绝策略**
-
--  **AbortPolicy**（默认） 直接抛出RejectedExecutionException异常阻止系统正常运行。
--  **CallerRunsPolicy**   “调用者运行”一种调节机制，该策略既不会丢弃任务，也不会抛出异常，而是将某些任务回退给调用者，从而降低新任务的流量。
--  **DiscardOldestPolicy**  抛弃队列中等待最久的任务，然后把当前任务加入队列中尝试再次提交当前任务。  
--  **DiscardPolicy**  直接丢弃任务，不予任何处理也不抛出异常。如果允许任务丢失，这是最好的一种方案。
-
-**核心线程是否被回收**
-
-在`ThreadPoolExecutor`中有一个属性`allowCoreThreadTimeOut`（默认false），即核心线程创建后不会被回收，可置为true
-
-**核心线程何时创建**
-
-默认情况下当任务到来时才会创建核心线程，不过`ThreadPoolExecutor`中有两个方法可以提前创建核心线程，
-
-​		一个是`preStartAllCoreThread()`它会启动所有核心线程，
-
-​		另一个是`preStartCoreThread()`,这一个的返回值是boolean类型，
-
-如果所有的核心线程均已被启动则会返回false，如果一个核心线程启动成功将返回true。
-
-
-
-### 15 Lock、Sychronized和volatile的区别
+### 12 Lock、Sychronized和volatile的区别
 
 1. `Synchronized`是内置关键字，`Lock`是个java类
 2. `Synchronized`无法判断是否获取锁的状态，`Lock`可以判断是否获取到锁
@@ -689,17 +700,18 @@ Java通过volatile, synchronized保证线程间操作的有序性
 
 
 
-### 16 synchronized的实现和机制，锁升级机制
+### 13 synchronized的实现和机制，锁升级机制
 
 ​		synchronized可用来给对象和方法或者代码块加锁，当它锁定一个方法或者一个代码块的时候，同一时刻最多只有一个线程执行这段代码。
 
 synchronized有三种应用方式：
 
-* 作用于实例方法，当前实例加锁，进入同步代码前要获得当前实例的锁；
-* 作用于静态方法，当前类加锁，进去同步代码前要获得当前类对象的锁；
-* 作用于代码块，对括号里配置的对象加锁
+* 作用于**实例方法**，当前实例加锁，进入同步代码前要获得当前实例的锁；
+* 作用于**静态方法**，当前类加锁，进去同步代码前要获得当前类对象的锁；
+* 作用于**代码块**，对括号里配置的对象加锁
+* **锁的升级的目的**：锁升级是为了减低了锁带来的性能消耗。在 Java 6 之后优化 synchronized 的实现方式，使用了偏向锁升级为轻量级锁再升级到重量级锁的方式，从而减低了锁带来的性能消耗。
 
-![image-20210213090249072](../images/image-20210213090249072.png)
+<img src="../images/image-20210213090249072.png" alt="image-20210213090249072" style="zoom:50%;" />
 
 ​		初次执行到synchronized代码块的时候，锁对象变成偏向锁。线程执行并不会主动释放锁。第二次到达代码块的时候，线程会判断之前的线程是不是自己，如果是自己的话，由于前面没有释放锁的操作，这里也就不用重新加锁，就没有加锁、解锁的开销了。
 
@@ -707,11 +719,11 @@ synchronized有三种应用方式：
 
 
 
-### 17 关于锁了解多少，知道lock这个锁的底层原理（乐观锁、悲观锁；sync和volatile；CAS；无锁，偏向锁，轻量锁和重量锁）
+### 14 关于锁了解多少，知道lock这个锁的底层原理（乐观锁、悲观锁；sync和volatile；CAS；无锁，偏向锁，轻量锁和重量锁）
 
 https://tech.meituan.com/2018/11/15/java-lock.html
 
-![image-20210214110122849](../images/image-20210214110122849.png)
+<img src="../images/image-20210214110122849.png" alt="image-20210214110122849" style="zoom:50%;" />
 
 **乐观锁和悲观锁**
 
@@ -759,7 +771,7 @@ https://tech.meituan.com/2018/11/15/java-lock.html
 
 **死锁**
 
-​		死锁是指两个或两个以上的进程在执行过程中，由于竞争资源或者由于彼此通信而造成的一种阻塞的现象，若无外力作用，它们都将无法推进下去。此时称系统处于死锁状态或系统产生了死锁，这些永远在互相等待的进程称为死锁进程。
+​		死锁是指**两个或两个以上的进程**在执行过程中，由于竞争资源或者由于彼此通信而造成的一种阻塞的现象，若无外力作用，它们都将无法推进下去。此时称系统处于死锁状态或系统产生了死锁，这些永远在互相等待的进程称为死锁进程。
 
 死锁的四个条件：
 
@@ -780,27 +792,80 @@ https://tech.meituan.com/2018/11/15/java-lock.html
 
 
 
-### 18 Java对象头前32位标识的含义
+### 15 创建线程池、线程池的运行机制和拒绝策略
 
-由于Java面向对象的思想，在JVM中需要大量存储对象，为实现一些功能，需要在对象中添加一些标记字段用于增强对象功能
+https://tech.meituan.com/2020/04/02/java-pooling-pratice-in-meituan.html
 
-![image-20210216090810183](../images/image-20210216090810183.png)
+**创建方式**
 
-**Mark Word**：用来存储对象自身的运行时数据，类似于hashcode、gc分代年龄等
+- 通过构造⽅法实现`ThreadPoolExecutor`
+- ThreadPoolExecutor实现的顶层接口是Executor，顶层接口Executor提供了一种思想：将任务提交和任务执行进行解耦。用户无需关注如何创建线程，如何调度线程来执行任务，用户只需提供Runnable对象，将任务的运行逻辑提交到执行器(Executor)中，由Executor框架完成线程的调配和任务的执行部分。
+- ExecutorService接口增加了一些能力：
+	- 扩充执行任务的能力，补充可以为一个或一批异步任务生成Future的方法；
+	- 提供了管控线程池的方法，比如停止线程池的运行。
+- AbstractExecutorService则是上层的抽象类，将执行任务的流程串联了起来，保证下层的实现只需关注一个执行任务的方法即可。
+- 最下层的实现类ThreadPoolExecutor实现最复杂的运行部分，ThreadPoolExecutor将会一方面维护自身的生命周期，另一方面同时管理线程和任务，使两者良好的结合从而执行并行任务。
+- 线程池在内部实际上构建了一个生产者消费者模型，将线程和任务两者解耦，并不直接关联，从而良好的缓冲任务，复用线程。线程池的运行主要分成两部分：任务管理、线程管理。任务管理部分充当生产者的角色，当任务提交后，线程池会判断该任务后续的流转：（1）直接申请线程执行该任务；（2）缓冲到队列中等待线程执行；（3）拒绝该任务。线程管理部分是消费者，它们被统一维护在线程池内，根据任务请求进行线程的分配，当线程执行完任务后则会继续获取新的任务去执行，最终当线程获取不到任务的时候，线程就会被回收。
 
-![image-20210216091259899](../images/image-20210216091259899.png)
+**创建线程池七大参数**
 
-* **biased_lock**：对象是否启用偏向锁标记，只占1个二进制位。为1时表示对象启用偏向锁，为0时表示对象没有偏向锁。
-* **age**：4位的Java对象年龄。在GC中，如果对象在Survivor区复制一次，年龄增加1。当对象达到设定的阈值时，将会晋升到老年代。默认情况下，并行GC的年龄阈值为15，并发GC的年龄阈值为6。由于age只有4位，所以最大值为15，这就是`-XX:MaxTenuringThreshold`选项最大值为15的原因。
-* **identity_hashcode**：25位的对象标识Hash码，采用延迟加载技术。调用方法`System.identityHashCode()`计算，并会将结果写到该对象头中。当对象被锁定时，该值会移动到管程Monitor中。
-* **thread**：持有偏向锁的线程ID。
-* **epoch**：偏向时间戳。
-* **ptr_to_lock_record**：指向栈中锁记录的指针。
-* **ptr_to_heavyweight_monitor**：指向管程Monitor的指针。
+- `corePoolSzie`：线程池核心线程大小（即使这些线程处于空闲，也不会被销毁）
+- `maximumPoolSize`：线程池最大线程数量
+- `keepAliveTime`：空闲线程存活时间
+- `unit`：空间线程存活时间单位
+- `workQueue`：工作队列
+	- `ArrayBlockingQueue`：基于数组的有界阻塞队列，FIFO排序
+	- `LinkedBlockingQuene`：基于链表的无界阻塞队列
+	- `SynchronousQuene`：一个不缓存任务的阻塞队列
+	- `PriorityBlockingQueue`：具有优先级的无界阻塞队列
+- `threadFactory`：线程工厂，用来设定线程名、是否为daemon线程等
+- `handler`：拒绝策略
+
+**运行机制**
+
+![image-20210217100606020](file:///Users/nihaopeng/个人/Git/MyNotes/images/image-20210217100606020.png?lastModify=1617002668)
+
+1、在创建了线程池后，等待提交过来的任务请求。
+
+2、当调用execute()方法添加一个任务请求，线程池会做如下判断：
+
+- 如果正在运行的线程数小于或者等于corePoolSize，那么马上会创建线程运行这个任务；
+- 如果正在运行的线程数大于corePoolSize，那么会将这个任务放入阻塞队列；
+- 如果这时候队列满了并且正在运行的线程数量还小于maximumPoolSize，那么还是要创建非核心线程运行这个任务；
+- 如果队列满了并且线程数大于或者等于maximumPoolSize，那么会启动饱和拒绝策略来执行。
+
+3、当一个线程完成时，它会从队列中取下一个任务来执行。
+
+4、当一个线程无事可做，且超过一定的时间（keepAliveTime）时，线程池会判断：
+
+​    如果当前运行的线程数大于corePoolSize，那么这个线程会停掉。
+
+​    所以线程池的所有任务完成后，它最终会收缩到corePoolSize的大小。
+
+**拒绝策略**
+
+- **AbortPolicy**（默认） 直接抛出RejectedExecutionException异常阻止系统正常运行。
+- **CallerRunsPolicy**   “调用者运行”一种调节机制，该策略既不会丢弃任务，也不会抛出异常，而是将某些任务回退给调用者，从而降低新任务的流量。
+- **DiscardOldestPolicy**  抛弃队列中等待最久的任务，然后把当前任务加入队列中尝试再次提交当前任务。  
+- **DiscardPolicy**  直接丢弃任务，不予任何处理也不抛出异常。如果允许任务丢失，这是最好的一种方案。
+
+**核心线程是否被回收**
+
+在`ThreadPoolExecutor`中有一个属性`allowCoreThreadTimeOut`（默认false），即核心线程创建后不会被回收，可置为true
+
+**核心线程何时创建**
+
+默认情况下当任务到来时才会创建核心线程，不过`ThreadPoolExecutor`中有两个方法可以提前创建核心线程，
+
+​		一个是`preStartAllCoreThread()`它会启动所有核心线程，
+
+​		另一个是`preStartCoreThread()`,这一个的返回值是boolean类型，
+
+如果所有的核心线程均已被启动则会返回false，如果一个核心线程启动成功将返回true。
 
 
 
-### 19 实现多线程同步的方式（继承Thread，实现Runnable，实现Callable）
+### 16 实现多线程的方式（继承Thread，实现Runnable，实现Callable）
 
 1 **继承Thread类**
 
@@ -853,9 +918,38 @@ https://tech.meituan.com/2018/11/15/java-lock.html
 
 <img src="../images/image-20200921100054583.png" alt="image-20200921100054583" style="zoom: 50%;" />
 
+* Runnable 接⼝不会返回结果或抛出检查异常，但是 Callable 接⼝ 可以。
 
 
-### 20 知道ThreadLocal嘛？谈谈你对它的理解？（基于jdk1.8）
+
+### 17 多线程的调用方法
+
+**sleep() 和 wait() 有什么区别？**
+
+- 类的不同：sleep() 来自 Thread，wait() 来自 Object。
+- 释放锁：sleep() 不释放锁；wait() 释放锁。
+- 用法不同：wait() ⽅法被调⽤后，线程不会⾃动苏醒，需要别的线程调⽤同⼀个对象上的 者 notifyAll() ⽅法。 sleep() ⽅法执⾏完成后，线程会⾃动苏醒。或者可以使⽤ timeout) 超时后线程会⾃动苏醒。
+
+**notify()和 notifyAll()有什么区别？**
+
+* notifyAll()会唤醒所有的线程，notify()之后唤醒一个线程。notifyAll() 调用后，会将全部线程由等待池移到锁池，然后参与锁的竞争，竞争成功则继续执行，如果不成功则留在锁池等待锁被释放后再次参与竞争。而 notify()只会唤醒一个线程，具体唤醒哪一个线程由虚拟机控制。
+
+**run() 和 start() 有什么区别？**
+
+* start() 方法用于启动线程，run() 方法用于执行线程的运行时代码。run() 可以重复调用，而 start() 只能调用一次。
+* 调⽤ start() ⽅法⽅可启动线程并使线程进⼊就绪状态，直接执⾏ 以多线程的⽅式执⾏。
+
+**submit() 和 execute() 方法有什么区别？**
+
+- execute()：只能执行 Runnable 类型的任务。
+- submit()：可以执行 Runnable 和 Callable 类型的任务。
+- Callable 类型的任务可以获取执行的返回值，而 Runnable 执行无返回值。
+- execute() ⽅法⽤于提交不需要返回值的任务，所以⽆法判断任务是否被线程池执⾏成功与否；
+- submit() ⽅法⽤于提交需要返回值的任务。线程池会返回⼀个Future 类型的对象，通过 这个 Future 对象可以判断任务是否执⾏成功，并且可以通过 Future 的 get() ⽅法来获取 返回值， get() ⽅法会阻塞当前线程直到任务完成，⽽使⽤ getlong timeoutTimeUnit unit ⽅法则会阻塞当前线程⼀段时间后⽴即返回，这时候有可能任务没有执⾏完。
+
+
+
+### 18 知道ThreadLocal嘛？谈谈你对它的理解？（基于jdk1.8）
 
 **ThreadLocal是用在多线程的场景的！**
 
@@ -865,60 +959,28 @@ https://tech.meituan.com/2018/11/15/java-lock.html
 	* 每个线程往`ThreadLocal`中读写数据是线程隔离，互相之间不会影响的，所以`ThreadLocal`**无法解决共享对象的更新问题**
 * **一个ThreadLocal只能存储一个Object对象，如果需要存储多个Object对象那么就需要多个ThreadLocal！**
 
+**源码**
 
+* `Thread `类中有⼀个 `threadLocals` 和 ⼀个` inheritableThreadLocals `变量，它们都是 `ThreadLocalMap` 类型的变量,我把 `ThreadLocalMap `理解为 `ThreadLocal `类实现的定制化的` HashMap `。默认情况下这两个变量都 是 null，只有当前线程调⽤` ThreadLocal `类的 `set` 或` get `⽅法时才创建它们，实际上调⽤这两 个⽅法的时候，调⽤的是 `ThreadLocalMap` 类对应的` get() `、 `set() `⽅法。
+* 最终的变量是放在了当前线程的` ThreadLocalMap` 中，并不是存在 `ThreadLocal` 上， `ThreadLocal `可以理解为只是 `ThreadLocalMap` 的封装，传递了变量值。`ThrealLocal `类中可以通过` Thread.currentThread() `获取到当前线程对象后，直接通过 `getMap(Thread t)` 可以访问到该线程的 `ThreadLocalMap` 对象。`ThreadLocal `内部维护的是⼀个类似`Map ` 的 `ThreadLocalMap `对象，值为` Object `对象。
+* ⽐如我们在同⼀个线程中声明了两个` ThreadLocal` 对象的话，会使⽤` Thread `内部都是使⽤仅有 那个` ThreadLocalMap` 存放数据的， `ThreadLocalMap `的 `key `就是 `ThreadLocal `对象，`value `就是 `ThreadLocal` 对象调⽤ `set `⽅法设置的值。
 
-### 21 Get和Post区别
+**内存泄漏**
 
-GET请注意，查询字符串（名称/值对）是在 GET 请求的 URL 中发送的：/test/demo_form.asp?name1=value1&name2=value2
-
-1. GET 请求可被缓存
-
-2. GET 请求保留在浏览器历史记录中
-
-3. GET 请求可被收藏为书签
-
-4. GET 请求不应在处理敏感数据时使用
-
-5. GET 请求有长度限制
-
-6. GET 请求只应当用于取回数据   
-
-POST 方法（POST）请注意，查询字符串（名称/值对）是在 POST 请求的 HTTP 消息主体中发送的：POST /test/demo_form.asp HTTP/1.1Host: w3schools.comname1=value1&name2=value2
-
-1. POST 请求不会被缓存
-2. POST 请求不会保留在浏览器历史记录中
-3. POST 不能被收藏为书签
-4. POST 请求对数据长度没有要求
+​		`ThreadLocalMap` 中使⽤的` key `为 `ThreadLocal `的**弱引⽤**,⽽` value `是**强引⽤**。所以，如果 `ThreadLocal `没有被外部强引⽤的情况下，在垃圾回收的时候，`key `会被清理掉，⽽` value `不会 被清理掉。这样⼀来， `ThreadLocalMap` 中就会出现` key` 为 null 的 Entry。假如我们不做任何措 施的话，`value `永远⽆法被 GC 回收，这个时候就可能会产⽣**内存泄露**。`ThreadLocalMap` 实现 中已经考虑了这种情况，在调⽤ `set() `、` get() `、` remove() `⽅法的时候，会清理掉 key 为 null 的记录。
 
 
 
-### 22 双亲委派机制
+### 19 成员变量和局部变量
 
-​       Java虚拟机对class文件采用的时**按需加载**的方式，也就是说当需要使用这个类的时候才会将它的class文件加载到内存当中生成class对象，而且加载某个类的class文件是，Java采用的是**双亲委派机制**，即把请求交由其父类处理，他是一种任务委派机制。
-
- **工作原理**
-
-1. 如果一个类加载器收到了类加载请求，它并不会自己先去加载，而是把这个请求委托给父类加载器去执行；
-2. 如果父类加载器还存在其父类加载器，则会进一步向上委托，依次递归，请求最终将到达顶层的启动类加载器。
-3. 如果父类加载器可以完成类加载任务，就成功返回，倘若父类加载器无法完成加载任务，子加载器才会尝试自己去加载，这就是双亲委派模式
-
-Java虚拟机对class文件采用的时**按需加载**的方式，也就是说当需要使用这个类的时候才会将它的class文件加载到内存当中生成class对象，而且加载某个类的class文件是，Java采用的是**双亲委派机制**，即把请求交由其父类处理，他是一种任务委派机制。
-
-**优点**
-
-- 避免类的重复加载
-- 保护程序安全，防止核心API被随意篡改
-
-- - 自定义类：Java.lang.String
-	- 自定义类：Java.lang.Bwang
-
- **沙箱安全机制**
-
-自定义String类，但是在加载自定义String类的时候会率先使用引导类加载器加载，而引导类加载器在加载过程中会加载JDK自带的文件，报错信息说没有main方法，是因为加载的是rt.jar包中的String类，这样可以保证对Java核心API的源代码保护，这就是沙箱安全机制
+1. 从**语法形式**上看:成员变量是属于类的，⽽局部变量是在⽅法中定义的变量或是⽅法的参数； 成员变量可以被 public , private , static 等修饰符所修饰，⽽局部变量不能被访问控制修饰 符及 static 所修饰；但是，成员变量和局部变量都能被 final 所修饰。
+2. 从变量在内存中的**存储⽅式**来看:如果成员变量是使⽤ static 修饰的，那么这个成员变量是属 于类的，如果没有使⽤ static 修饰，这个成员变量是属于实例的。对象存于堆内存，如果局 部变量类型为基本数据类型，那么存储在栈内存，如果为引⽤数据类型，那存放的是指向堆 内存对象的引⽤或者是指向常量池中的地址。
+3. 从变量在内存中的**⽣存时间**上看:成员变量是对象的⼀部分，它随着对象的创建⽽存在，⽽局 部变量随着⽅法的调⽤⽽⾃动消失。
+4. 成员变量如果没有被赋**初值**:则会⾃动以类型的默认值⽽赋值（⼀种情况例外:被 final 修饰 的成员变量也必须显式地赋值），⽽局部变量则不会⾃动赋值。
 
 
 
-### 23 ==和equals的区别
+### 19 ==和equals的区别
 
 1. ==的作用是判断两个对象的地址是不是相等。即判断两个对象是不是同一个对象。(基本数据类型比较的是值，引用数据类型比较的是内存地址) 
 2. equals() : 它的作用也是判断两个对象是否相等。但它一般有两种使用情况： 
@@ -928,44 +990,161 @@ Java虚拟机对class文件采用的时**按需加载**的方式，也就是说�
 **hashCode() 与equals()：**
 
 1. 如果两个对象相等，则 hashcode ⼀定也是相同的
-
 2. 两个对象相等,对两个 equals() ⽅法返回 true
-
 3. 两个对象有相同的 hashcode 值，它们也不⼀定是相等的
-
 4. 综上， equals() ⽅法被覆盖过，则 hashCode() ⽅法也必须被覆盖
-
 5. hashCode() 的默认⾏为是对堆上的对象产⽣独特值。如果没有重写 hashCode() ，则该 class 的两个对象⽆论如何都不会相等（即使这两个对象指向相同的数据）。
 
+**为什么重写equals还要重写hashcode？**
+
+​		HashMap中，如果要比较key是否相等，要同时使用这两个函数！因为自定义的类的hashcode()方法继承于Object类，其hashcode码为默认的内存地址，这样即便有相同含义的两个对象，比较也是不相等的。
+
+​		HashMap中的比较key是这样的，先求出key的hashcode(),比较其值是否相等，若相等再比较equals(),若相等则认为他们是相等的。若equals()不相等则认为他们不相等。如果只重写hashcode()不重写equals()方法，当比较equals()时只是看他们是否为同一对象（即进行内存地址的比较）,所以必定要两个方法一起重写。
 
 
-### 24 多进程和多线程的选择
 
-![image-20210309142440374](../images/image-20210309142440374.png)
+### 21 try/catch
 
-**1）需要频繁创建销毁的优先用线程**
+<img src="../images/image-20210326210139845.png" alt="image-20210326210139845" style="zoom: 50%;" />
 
-这种原则最常见的应用就是Web服务器了，来一个连接建立一个线程，断了就销毁线程，要是用进程，创建和销毁的代价是很难承受的
 
-**2）需要进行大量计算的优先使用线程**
 
-所谓大量计算，当然就是要耗费很多CPU，切换频繁了，这种情况下线程是最合适的。这种原则最常见的是图像处理、算法处理。
+### 22 final
 
-**3）强相关的处理用线程，弱相关的处理用进程**
+final 关键字主要⽤在三个地⽅：变量、⽅法、类。
 
-什么叫强相关、弱相关？理论上很难定义，给个简单的例子就明白了。
+1. 对于⼀个 final 变量，如果是基本数据类型的变量，则其数值⼀旦在初始化之后便不能更 改；如果是引⽤类型的变量，则在对其初始化之后便不能再让其指向另⼀个对象。
 
-一般的Server需要完成如下任务：消息收发、消息处理。“消息收发”和“消息处理”就是弱相关的任务，而“消息处理”里面可能又分为“消息解码”、“业务处理”，这两个任务相对来说相关性就要强多了。因此“消息收发”和“消息处理”可以分进程设计，“消息解码”、“业务处理”可以分线程设计。
+2. 当⽤ final 修饰⼀个类时，表明这个类不能被继承。final 类中的所有成员⽅法都会被隐式地 指定为 final ⽅法。
 
-当然这种划分方式不是一成不变的，也可以根据实际情况进行调整。
+3. 使⽤ final ⽅法的原因有两个。第⼀个原因是把⽅法锁定，以防任何继承类修改它的含义； 第⼆个原因是效率。在早期的 Java 实现版本中，会将 final ⽅法转为内嵌调⽤。但是如果⽅ 法过于庞⼤，可能看不到内嵌调⽤带来的任何性能提升（现在的 Java 版本已经不需要使⽤ final ⽅法进⾏这些优化了）。类中所有的 private ⽅法都隐式地指定为 final。
 
-**4）可能要扩展到多机分布的用进程，多核分布的用线程**
 
-原因请看上面对比。
 
-**5）都满足需求的情况下，用你最熟悉、最拿手的方式**
+### 23 AQS(AbstractQueuedSynchronizer)
 
-至于“数据共享、同步”、“编程、调试”、“可靠性”这几个维度的所谓的“复杂、简单”应该怎么取舍，我只能说：没有明确的选择方法。但我可以告诉你一个选择原则：如果多进程和多线程都能够满足要求，那么选择你最熟悉、最拿手的那个。 
+> 如果被请求的共享资源空闲，则将当前请求资源的线程设置为有效的⼯作线程，并且将共享资源设置为锁定状态。如果被请求的共享资源被占⽤，那么就需要⼀套线程阻塞等待以及被唤醒时锁分配的机制，这个机制 AQS 是⽤ CLH 队列锁实现的，即将暂时获取不到锁 的线程加⼊到队列中。
 
-需要提醒的是：虽然我给了这么多的选择原则，但实际应用中基本上都是“进程+线程”的结合方式，千万不要真的陷入一种非此即彼的误区。
+<img src="../images/image-20210329151113580.png" alt="image-20210329151113580" style="zoom:50%;" />
 
+* CLH(Craig,Landin,and Hagersten)队列是⼀个虚拟的双向队列（虚拟的双向队列即不存在 队列实例，仅存在结点之间的关联关系）。AQS 是将每条请求共享资源的线程封装成⼀个 CLH 锁队列的⼀个结点（Node）来实现锁的分配。
+
+**AQS的两种资源共享方式**
+
+* Exclusive（独占）：只有⼀个线程能执⾏，如 锁：
+	* 公平锁：按照线程在队列中的排队顺序，先到者先拿到锁 
+	* ⾮公平锁：当线程要获取锁时，⽆视队列顺序直接去抢锁，谁抢到就是谁的
+* Share（共享）：多个线程可同时执⾏。
+
+
+
+### 24 Log4j
+
+* 在项目的classpath下或者resource下新建log4j.properties
+
+	```properties
+	#将等级为DEBUG的日志信息输出到console和file这两个目的地，console和file的定义在下面的代码
+	log4j.rootLogger=DEBUG,console,file
+	
+	#控制台输出的相关设置
+	log4j.appender.console = org.apache.log4j.ConsoleAppender
+	log4j.appender.console.Target = System.out
+	log4j.appender.console.Threshold=DEBUG											# 指定日志消息的输出最低层次。
+	log4j.appender.console.layout = org.apache.log4j.PatternLayout
+	log4j.appender.console.layout.ConversionPattern=[%]-%m%n
+	
+	#文件输出的相关设置
+	log4j.appender.file = org.apache.log4j.RollingFileAppender
+	log4j.appender.file.File=./log/komorebi.log
+	log4j.appender.file.MaxFileSize=10mb
+	log4j.appender.file.Threshold=DEBUG
+	log4j.appender.file.layout=org.apache.log4j.PatternLayout
+	log4j.appender.file.layout.ConversionPattern=[%p][%d{yy-MM-dd}][%c]%m%n
+	
+	#日志输出级别
+	log4j.logger.org.mybatis=DEBUG
+	log4j.logger.java.sql=DEBUG
+	log4j.logger.java.sql.Statement=DEBUG
+	log4j.logger.java.sql.ResultSet=DEBUG
+	log4j.logger.java.sql.PreparedStatement=DEBUG
+	```
+
+* log4j中有三个重要组件：Logger、Appender和Layout
+
+	* 允许存在多个Logger，名字大小写敏感，且具有继承关系。有一个称为Root，永远存在且不能通过名字检索或引用，可以通过Logger.getRootLogger()，其余Logger.getLogger
+	* Appender则指明将所有的log信息存放到什么地方，支持console file gui等
+	* Layout是控制Log信息的输出方式，格式化输出，有三种
+		* HTMLLayout：格式化日志输出为HTML表格形式
+		* SimpleLayout：打印三项内容：级别-信息
+		* PatternLayout：根据指定的转换模式格式化日志输出
+
+* 日志级别
+
+	A：off     最高等级，用于关闭所有日志记录。
+	B：fatal    指出每个严重的错误事件将会导致应用程序的退出。
+	C：error   指出虽然发生错误事件，但仍然不影响系统的继续运行。
+	D：warm   表明会出现潜在的错误情形。
+	E：info     一般和在粗粒度级别上，强调应用程序的运行全程。
+	F：debug   一般用于细粒度级别上，对调试应用程序非常有帮助。
+	G：all      最低等级，用于打开所有日志记录。
+
+
+
+### 25 lambda表达式
+
+* lambda表达式实质上是一个**匿名方法**，但该方法并非独立执行，而是用于**实现由函数式接口定义的唯一抽象方法**
+
+	* 函数式接口是仅含一个抽象方法的接口，可以指定Object定义的任何共有方法
+	* 每个lambda表达式背后必定有一个函数式接口
+
+* 使用lambda表达式时，会创建实现函数式接口的一个匿名类实例，可以将lambda表达式视为一个对象，将其作为参数传递
+
+* 两种形式：
+
+	* 包含单独表达式：parameters -> an expression;
+
+		```java
+		list.forEach(item -> System.out.println(item));
+		```
+
+	* 包含代码块：parameters -> {expressions};
+
+		```java
+		list.forEach(item -> {
+			int numA = item.getNumA();
+			int numB = item.getNumB();
+			System.out.println(numsA + numB);
+		});
+		```
+
+
+
+### 26 Java对象头前32位标识的含义
+
+由于Java面向对象的思想，在JVM中需要大量存储对象，为实现一些功能，需要在对象中添加一些标记字段用于增强对象功能
+
+![image-20210216090810183](../images/image-20210216090810183.png)
+
+**Mark Word**：用来存储对象自身的运行时数据，类似于hashcode、gc分代年龄等
+
+![image-20210216091259899](../images/image-20210216091259899.png)
+
+* **biased_lock**：对象是否启用偏向锁标记，只占1个二进制位。为1时表示对象启用偏向锁，为0时表示对象没有偏向锁。
+* **age**：4位的Java对象年龄。在GC中，如果对象在Survivor区复制一次，年龄增加1。当对象达到设定的阈值时，将会晋升到老年代。默认情况下，并行GC的年龄阈值为15，并发GC的年龄阈值为6。由于age只有4位，所以最大值为15，这就是`-XX:MaxTenuringThreshold`选项最大值为15的原因。
+* **identity_hashcode**：25位的对象标识Hash码，采用延迟加载技术。调用方法`System.identityHashCode()`计算，并会将结果写到该对象头中。当对象被锁定时，该值会移动到管程Monitor中。
+* **thread**：持有偏向锁的线程ID。
+* **epoch**：偏向时间戳。
+* **ptr_to_lock_record**：指向栈中锁记录的指针。
+* **ptr_to_heavyweight_monitor**：指向管程Monitor的指针。
+
+
+
+### 27 int和Integer的区别
+
+1.Integer是int的包装类,int则是java的一种基本数据类型
+
+2.Integer变量必须实例化后才能使用,而int变量不需要
+
+3.Integer实际是对象的引用,当new一个Integer时,实际上是生成一个指针指向此对象;而int则是直接存储数据值 。
+
+4.Integer的默认值是null,int的默认值是0
