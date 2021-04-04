@@ -138,6 +138,89 @@ class Solution {
 }
 ```
 
+## 根据字符出现频率排序（0451）
+
+> *给定一个字符串，请将字符串里的字符按照出现的频率降序排列。*
+>
+> *示例 1:*
+>
+> *输入:*
+>
+> *"tree"*
+>
+> *输出:*
+>
+> *"eert"*
+
+```java
+// 桶排序
+class Solution {
+    public String frequencySort(String s) {
+        if (s.isEmpty() || s.length() == 1) {return s;}
+
+        Map<Character, Integer> count = new HashMap<>();
+        for (char c : s.toCharArray()) {
+            count.put(c, count.getOrDefault(c, 0) + 1);
+        }
+
+        // 构造一个桶的集合（即一系列桶），桶的个数为 s 的长度 +1，因为 buckets[0] 没有意义
+        // 目的是将出现频率为 i 的字符放到第 i 个桶里（即 buckets[i]）
+        List<Character>[] buckets = new List[s.length() + 1];
+
+        for (char key : count.keySet()) {
+            // 某个字符在 HashMap 中的 Value 是几就会被放到第几个桶里
+            int value = count.get(key);
+            if (buckets[value] == null) {
+                // 如果某个桶还未放入过字符（即未初始化），则初始化其为一个数组
+                buckets[value] = new ArrayList<Character>();
+            }
+            buckets[value].add(key); // 然后将字符放到桶中
+        }
+
+        StringBuilder ans = new StringBuilder();
+        for (int i = buckets.length - 1; i > 0; --i) {
+            // 遍历每个桶
+            if (buckets[i] != null) {
+                // 如果桶里有字符
+                for (char j : buckets[i]) {
+                    // 遍历桶里的每个字符
+                    for (int k = i; k > 0; --k) {
+                        // 字符出现了几次就向 ans 中添加几次该字符
+                        ans.append(j);
+                    }
+                }
+            }
+        }
+
+        return ans.toString();
+    }
+}
+
+// HashMap排序
+class Solution {
+    public String frequencySort(String s) {
+        if (s.isEmpty() || s.length() == 1) {return s;}
+
+        Map<Character, Integer> count = new HashMap<>();
+        for (char c : s.toCharArray()) {
+            count.put(c, count.getOrDefault(c, 0) + 1);
+        }
+
+        List<Map.Entry<Character, Integer>> curList = new ArrayList<>(count.entrySet());
+        curList.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
+
+        StringBuilder ans = new StringBuilder();
+        for (int i = 0; i < curList.size(); i++) {
+            for (int j = 0; j < curList.get(i).getValue(); j++) {
+                ans.append(curList.get(i).getKey());
+            }
+        }
+
+        return ans.toString();
+    }
+}
+```
+
 
 
 # 2 数学问题
@@ -2443,6 +2526,58 @@ class Solution {
 }
 ```
 
+## 验证IP地址
+
+> 编写一个函数来验证输入的字符串是否是有效的 IPv4 或 IPv6 地址。
+>
+> 如果是有效的 IPv4 地址，返回 "IPv4" ；
+> 如果是有效的 IPv6 地址，返回 "IPv6" ；
+> 如果不是上述类型的 IP 地址，返回 "Neither" 。
+> IPv4 地址由十进制数和点来表示，每个地址包含 4 个十进制数，其范围为 0 - 255， 用(".")分割。比如，172.16.254.1；
+>
+> 同时，IPv4 地址内的数不会以 0 开头。比如，地址 172.16.254.01 是不合法的。
+>
+> IPv6 地址由 8 组 16 进制的数字来表示，每组表示 16 比特。这些组数字通过 (":")分割。比如,  2001:0db8:85a3:0000:0000:8a2e:0370:7334 是一个有效的地址。而且，我们可以加入一些以 0 开头的数字，字母可以使用大写，也可以是小写。所以， 2001:db8:85a3:0:0:8A2E:0370:7334 也是一个有效的 IPv6 address地址 (即，忽略 0 开头，忽略大小写)。
+>
+
+```java
+class Solution {
+    public String validIPAddress(String IP) {
+        if (IP.chars().filter(c -> c == '.').count() == 3) {
+            return validateIPv4(IP);
+        }
+        else if (IP.chars().filter(c -> c == ':').count() == 7) {
+            return validateIPv6(IP);
+        }
+        return "Neither";
+    }
+
+    private static String validateIPv4(String IP) {
+        String[] nums = IP.split("\\.", -1);
+        for (String s : nums) {
+            if (s.length() == 0 || s.length() > 3 || (s.charAt(0) == '0' && s.length() != 1)) {return "Neither";}
+            for (char c : s.toCharArray()) {
+                if (!Character.isDigit(c)) {return "Neither";}
+            }
+            if (Integer.parseInt(s) > 255) {return "Neither";}
+        }
+        return "IPv4";
+    }
+
+    private static String validateIPv6(String IP) {
+        String[] nums = IP.split(":", -1);
+        String hexDigits = "0123456789abcdefABCDEF";
+        for (String s : nums) {
+            if (s.length() == 0 || s.length() > 4) {return "Neither";}
+            for (char c : s.toCharArray()) {
+                if (hexDigits.indexOf(c) == -1) {return "Neither";}
+            }
+        }
+        return "IPv6";
+    }
+}
+```
+
 ## 特殊数字
 
 > 快乐数：*对于一个正整数，每一次将该数替换为它每个位置上的数字的平方和。*
@@ -2987,6 +3122,41 @@ class Solution {
         }
 
         return dp[n - 1][target];
+    }
+}
+```
+
+## 一和零（0474）
+
+> 给你一个二进制字符串数组 strs 和两个整数 m 和 n 。
+>
+> 请你找出并返回 strs 的最大子集的大小，该子集中 最多 有 m 个 0 和 n 个 1 。
+>
+> 如果 x 的所有元素也是 y 的元素，集合 x 是集合 y 的 子集 。
+>
+
+```java
+class Solution {
+    public int findMaxForm(String[] strs, int m, int n) {
+        int[][] dp = new int[m + 1][n + 1];
+        for (String s: strs) {
+            int[] count = countString(s);
+            for (int zeroes = m; zeroes >= count[0]; zeroes--) {
+                for (int ones = n; ones >= count[1]; ones--) {
+                    dp[zeroes][ones] = Math.max(dp[zeroes][ones], 1 + dp[zeroes - count[0]][ones - count[1]]);
+                }
+            }
+        }
+        return dp[m][n];
+    }
+
+    private static int[] countString(String s) {
+        int[] dir = new int[2];
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) == '0') {dir[0]++;}
+            else {dir[1]++;}
+        }
+        return dir;
     }
 }
 ```
@@ -3748,6 +3918,27 @@ public class LRUCache {
     }
 }
 ```
+
+```java
+public class LRUCache<K, V> extends LinkedHashMap<K, V> {
+    
+private final int CACHE_SIZE;
+
+    // 这里就是传递进来最多能缓存多少数据
+    public LRUCache(int cacheSize) {
+        super((int) Math.ceil(cacheSize / 0.75) + 1, 0.75f, true); // 这块就是设置一个hashmap的初始大小，同时最后一个true指的是让linkedhashmap按照访问顺序来进行排序，最近访问的放在头，最老访问的就在尾
+        CACHE_SIZE = cacheSize;
+    }
+
+    @Override
+    protected boolean removeEldestEntry(Map.Entry eldest) {
+        return size() > CACHE_SIZE; // 这个意思就是说当map中的数据量大于指定的缓存个数的时候，就自动删除最老的数据
+    }
+
+}
+```
+
+
 
 ## 最小栈（0155）
 

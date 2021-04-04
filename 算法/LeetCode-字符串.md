@@ -1231,6 +1231,55 @@ class Solution {
 }
 ```
 
+## 重复的子字符串（0459）
+
+> *给定一个非空的字符串，判断它是否可以由它的一个子串重复多次构成。给定的字符串只含有小写英文字母，并且长度不超过10000。*
+
+```java
+// 字符串匹配
+class Solution {
+    public boolean repeatedSubstringPattern(String s) {
+        return (s + s).indexOf(s, 1) != s.length();
+    }
+}
+
+// KMP
+class Solution {
+    public boolean repeatedSubstringPattern(String s) {
+        return kmp(s + s, s);
+    }
+
+    private boolean kmp(String query, String pattern) {
+        int m = query.length(), n = pattern.length();
+        int[] fail = new int[n];
+        Arrays.fill(fail, -1);
+
+        for (int i = 1; i < n; i++) {
+            int j = fail[i - 1];
+            while (j != -1 && pattern.charAt(j + 1) != pattern.charAt(i)) {
+                j = fail[j];
+            }
+            if (pattern.charAt(j + 1) == pattern.charAt(i)) {
+                fail[i] = j + 1;
+            }
+        }
+
+        int match = -1;
+        for (int i = 1; i < m - 1; i++) {
+            while (match != -1 && pattern.charAt(match + 1) != query.charAt(i)) {
+                match = fail[match];
+            }
+            if (pattern.charAt(match + 1) == query.charAt(i)) {
+                match++;
+                if (match == n - 1) {return true;}
+            }
+        }
+
+        return false;
+    }
+}
+```
+
 ## 找到字符串中所有字母异位词（0438）
 
 > *给定一个字符串 s 和一个非空字符串 p，找到 s 中所有是 p 的字母异位词的子串，返回这些子串的起始索引。*
@@ -1270,6 +1319,36 @@ class Solution {
             }
         }
         
+        return ans;
+    }
+}
+```
+
+## 环绕字符串中唯一的子字符串（0467）
+
+> 把字符串 s 看作是“abcdefghijklmnopqrstuvwxyz”的无限环绕字符串，所以 s 看起来是这样的："...zabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcd....". 
+>
+> 现在我们有了另一个字符串 p 。你需要的是找出 s 中有多少个唯一的 p 的非空子串，尤其是当你的输入是字符串 p ，你需要输出字符串 s 中 p 的不同的非空子串的数目。 
+>
+> 注意: p 仅由小写的英文字母组成，p 的大小可能超过 10000。
+>
+
+```java
+class Solution {
+    public int findSubstringInWraproundString(String p) {
+        int[] dp = new int[26];
+        char[] array = p.toCharArray();
+
+        int count = 0;
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0 && (array[i] - array[i - 1] - 1) % 26 == 0) {count++;}
+            else {count = 1;}
+
+            dp[array[i] - 'a'] = Math.max(dp[array[i] - 'a'], count);
+        }
+
+        int ans = 0;
+        for (int n : dp) {ans += n;}
         return ans;
     }
 }

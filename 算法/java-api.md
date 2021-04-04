@@ -44,6 +44,8 @@ char[] d = s.toCharArray();
 String ans = String.valueOf(d);
 // 取子串	[start, end)
 String s1 = s.substring(start, end);
+// 计算一个字符出现的次数
+ans.chars().filter(c -> c == ':').count() == 7
 // sb
 StringBuilder s = new StringBuilder();
 s.append(j);
