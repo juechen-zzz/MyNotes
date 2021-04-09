@@ -189,6 +189,110 @@ class Solution {
 }
 ```
 
+## 单词搜索2（0212）
+
+> 给定一个 m x n 二维字符网格 board 和一个单词（字符串）列表 words，找出所有同时在二维网格和字典中出现的单词。
+>
+> 单词必须按照字母顺序，通过 相邻的单元格 内的字母构成，其中“相邻”单元格是那些水平相邻或垂直相邻的单元格。同一个单元格内的字母在一个单词中不允许被重复使用。
+>
+
+```java
+class Solution {
+    List<String> ans = new ArrayList<>();
+
+    public List<String> findWords(char[][] board, String[] words) {
+        int m = board.length, n = board[0].length;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                dfs(board, words, "", i, j);
+            }
+        }
+        return ans;
+    }
+
+    public void dfs(char[][] board, String[] words, String s, int x, int y) {
+        int m = board.length, n = board[0].length;
+        if (x < 0 || x >= m || y < 0 || y >= n) {return;}
+
+        if (containsWord(words, s)) {ans.add(s);}
+
+        dfs(board, words, s + board[x][y], x + 1, y);
+        dfs(board, words, s + board[x][y], x - 1, y);
+        dfs(board, words, s + board[x][y], x, y + 1);
+        dfs(board, words, s + board[x][y], x, y - 1);
+    }
+
+    public boolean containsWord(String[] words, String s) {
+        for (String tmp : words) {
+            if (tmp.equals(s)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+```
+
+## 最小高度树（0310）
+
+> 树是一个无向图，其中任何两个顶点只通过一条路径连接。 换句话说，一个任何没有简单环路的连通图都是一棵树。
+>
+> 给你一棵包含 n 个节点的树，标记为 0 到 n - 1 。给定数字 n 和一个有 n - 1 条无向边的 edges 列表（每一个边都是一对标签），其中 edges[i] = [ai, bi] 表示树中节点 ai 和 bi 之间存在一条无向边。
+>
+> 可选择树中任何一个节点作为根。当选择节点 x 作为根节点时，设结果树的高度为 h 。在所有可能的树中，具有最小高度的树（即，min(h)）被称为 最小高度树 。
+>
+> 请你找到所有的 最小高度树 并按 任意顺序 返回它们的根节点标签列表。
+>
+
+```java
+class Solution {
+    public List<Integer> findMinHeightTrees(int n, int[][] edges) {
+        List<Integer> ans = new ArrayList<>();
+
+        int[] degree = new int[n];
+        List<List<Integer>> adjency = new ArrayList<>();
+        for (int i = 0; i < n; i++) {adjency.add(new ArrayList<>());}
+        for (int[] edge : edges) {
+            degree[edge[0]]++;
+            degree[edge[1]]++;
+            adjency.get(edge[0]).add(edge[1]);
+            adjency.get(edge[1]).add(edge[0]);
+        }
+
+        Queue<Integer> queue = new LinkedList<>();
+        for (int i = 0; i < n; i++) {
+            if (degree[i] == 1) {
+                queue.offer(i);
+            }
+        }
+
+        int residue = n;
+        if (residue == 1) {ans.add(0);}
+
+        while (residue != 1 && residue != 2) {
+            int size = queue.size();
+            residue -= size;
+            for (int i = 0; i < size; i++) {
+                int cur = queue.poll();
+                for (int node : adjency.get(cur)) {
+                    if (degree[node] > 0) {
+                        degree[node]--;
+                    }
+                    if (degree[node] == 1) {
+                        queue.offer(node);
+                    }
+                }
+            }
+        }
+
+        while (!queue.isEmpty()) {
+            ans.add(queue.poll());
+        }
+        return ans;
+    }
+}
+```
+
 ## 重新安排行程（0332）
 
 > *给定一个机票的字符串二维数组 [from, to]，子数组中的两个成员分别表示飞机出发和降落的机场地点，对该行程进行重新规划排序。所有这些机票都属于一个从 JFK（肯尼迪国际机场）出发的先生，所以该行程必须从 JFK 开始。*
@@ -548,6 +652,51 @@ class UnionFind {
 }
 ```
 
+## 岛屿数量（0200）
+
+> 给你一个由 '1'（陆地）和 '0'（水）组成的的二维网格，请你计算网格中岛屿的数量。
+>
+> 岛屿总是被水包围，并且每座岛屿只能由水平方向和/或竖直方向上相邻的陆地连接形成。
+>
+> 此外，你可以假设该网格的四条边均被水包围。
+>
+
+```java
+class Solution {
+    public int numIslands(char[][] grid) {
+        if (grid == null || grid.length == 0) {return 0;}
+
+        int m = grid.length;
+        int n = grid[0].length;
+        int ans = 0;
+
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == '1') {
+                    ans++;
+                    dfs(grid, i, j);
+                }
+            }
+        }
+
+        return ans;
+    }
+
+    public void dfs(char[][] grid, int row, int col) {
+        int m = grid.length;
+        int n = grid[0].length;
+
+        if (row < 0 || row >= m || col < 0 || col >= n || grid[row][col] == '0') {return;}
+
+        grid[row][col] = '0';
+        dfs(grid, row - 1, col);
+        dfs(grid, row + 1, col);
+        dfs(grid, row, col - 1);
+        dfs(grid, row, col + 1);
+    }
+}
+```
+
 ## 岛屿的最大面积（0695）
 
 > *给定一个包含了一些 0 和 1 的非空二维数组 grid 。*
@@ -624,3 +773,59 @@ class Solution {
 }
 ```
 
+## 太平洋大西洋水流问题（0417）
+
+> *给定一个 m x n 的非负整数矩阵来表示一片大陆上各个单元格的高度。“太平洋”处于大陆的左边界和上边界，而“大西洋”处于大陆的右边界和下边界。*
+>
+> *规定水流只能按照上、下、左、右四个方向流动，且只能从高到低或者在同等高度上流动。*
+>
+> *请找出那些水流既可以流动到“太平洋”，又能流动到“大西洋”的陆地单元的坐标。*
+
+```java
+class Solution {
+    private int m, n;
+    private int[][] dir = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+    private boolean inArea(int x, int y) {return 0 <= x && x < m && 0 <= y && y < n;}
+
+    public List<List<Integer>> pacificAtlantic(int[][] heights) {
+        List<List<Integer>> ans = new ArrayList<>();
+        if (heights.length == 0) {return ans;}
+
+        m = heights.length;
+        n = heights[0].length;
+        int[][] po = new int[m][n], ao = new int[m][n];
+
+        for (int i = 0; i < m; i++) {
+            dfs(heights, i, 0, po);
+            dfs(heights, i, n - 1, ao);
+        }
+        for (int i = 0; i < n; i++) {
+            dfs(heights, 0, i, po);
+            dfs(heights, m - 1, i, ao);
+        }
+
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (po[i][j] == 1 && ao[i][j] == 1){
+                    ans.add(Arrays.asList(i, j));
+                }
+            }
+        }
+        return ans;
+    }
+
+    private void dfs(int[][] matrix, int x, int y, int[][] tmp){
+        tmp[x][y] = 1;
+        for (int[] d : dir) {
+            int newx = x + d[0];
+            int newy = y + d[1];
+            if (!inArea(newx, newy) || matrix[x][y] > matrix[newx][newy] || tmp[newx][newy] == 1){
+                continue;
+            }
+            dfs(matrix, newx, newy, tmp);
+        }
+    }
+}
+```
+
+## 

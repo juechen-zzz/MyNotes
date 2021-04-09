@@ -808,6 +808,34 @@ class Solution {
 }
 ```
 
+## 左叶子之和（0404）
+
+> 计算给定二叉树的所有左叶子之和。
+
+```java
+class Solution {
+    public int sumOfLeftLeaves(TreeNode root) {
+        if (root == null) {return 0;}
+        return dfs(root);
+    }
+
+    private int dfs(TreeNode root) {
+        int ans = 0;
+        if (root.left != null) {
+            ans += (isLeaf(root.left) ? root.left.val : dfs(root.left));
+        }
+        if (root.right != null && !isLeaf(root.right)) {
+            ans += dfs(root.right);
+        }
+        return ans;
+    }
+
+    private boolean isLeaf(TreeNode root) {
+        return (root.left == null && root.right == null);
+    }
+}
+```
+
 ## 删除二叉搜索树的节点（0450）
 
 > *给定一个二叉搜索树的根节点 root 和一个值 key，删除二叉搜索树中的 key 对应的节点，并保证二叉搜索树的性质不变。返回二叉搜索树（有可能被更新）的根节点的引用。*

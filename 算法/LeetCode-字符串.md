@@ -34,65 +34,6 @@ class Solution {
 }
 ```
 
-## 最长回文子串（0005）      
-
-> *给定一个字符串 s，找到 s 中最长的回文子串。你可以假设 s 的最大长度为 1000。*
->
-> *输入: "babad"*
->
-> *输出: "bab"*
->
-> *注意: "aba" 也是一个有效答案。*
-
-```java
-// DP
-class Solution {
-    public String longestPalindrome(String s) {
-        int n = s.length();
-        boolean[][] dp = new boolean[n][n];
-        String ans = "";
-        for (int i = n - 1; i >= 0; i--){
-            for (int j = i; j < n; j++){
-                if (i == j) {dp[i][j] = true;}
-                else if (j - i == 1) {dp[i][j] = (s.charAt(i) == s.charAt(j));}
-                else {
-                    dp[i][j] = ((s.charAt(i) == s.charAt(j)) && dp[i + 1][j - 1]);
-                }
-
-                if (dp[i][j] && (j - i + 1 >= ans.length())){
-                    ans = s.substring(i, j + 1);
-                }
-            }
-        }
-        return ans;
-    }
-}
-
-// 中心扩散
-class Solution {
-    public String longestPalindrome(String s) {
-        String ans = "";
-        int idx = 0;
-        while (idx < s.length()) {
-            int left = idx, right = idx;
-            while (left - 1 >= 0 && s.charAt(left) == s.charAt(left - 1)){left--;}
-            while (right + 1 < s.length() && s.charAt(right) == s.charAt(right + 1)) {right++;}
-            
-            idx = right + 1;
-            while (left >= 0 && right < s.length() && s.charAt(left) == s.charAt(right)){
-                left--;
-                right++;
-            }
-
-            if (right - left - 1 > ans.length()) {
-                ans = s.substring(left + 1, right);
-            }
-        }
-        return ans;
-    }
-}
-```
-
 ## 最长回文串（0409）
 
 > *给定一个包含大写字母和小写字母的字符串，找到通过这些字母构造成的最长的回文串。*
@@ -315,91 +256,6 @@ public class Solution {
 }
 ```
 
-## 正则表达式匹配（0010）
-
-> *给你一个字符串 s 和一个字符规律 p，请你来实现一个支持 '.' 和 '\*' 的正则表达式匹配。*
->
-> *'.' 匹配任意单个字符*
->
-> *'\*' 匹配零个或多个前面的那一个元素*
->
-> *输入：s = "ab" p = ".\*"*
->
-> *输出：true*
->
-> *解释：".\*" 表示可匹配零个或多个（'\*'）任意字符（'.'）。*
-
-```java
-class Solution {
-    public boolean isMatch(String s, String p) {
-        //初始化dp[0][0]=true,dp[0][1]和dp[1][0]~dp[s.length][0]默认值为false所以不需要显式初始化
-        //填写第一行dp[0][2]~dp[0][p.length]
-        int m = s.length(), n = p.length();
-        boolean[][] dp = new boolean[m + 1][n + 1];
-        dp[0][0] = true;
-        for (int k = 2; k <= p.length(); k++){
-            dp[0][k] = (p.charAt(k - 1) == '*' && dp[0][k-2]);
-        }
-
-        for (int i = 0; i < m; i++){
-            for (int j = 0; j < n; j++){
-                if (p.charAt(j) == '*'){
-                    // 1.只匹配0次，s不变[i+1], p移除两个元素[j+1-2]。
-                    // 2.比较s的i元素和p的j-1(因为此时j元素为*)元素,相等则移除首元素[i+1-1],p不变。
-                    dp[i + 1][j + 1] = (dp[i + 1][j - 1] || (dp[i][j + 1] && headMatched(s, p, i, j - 1)));
-                }else {
-                    dp[i + 1][j + 1] =  (dp[i][j] && headMatched(s, p, i, j));
-                }
-            }
-        }
-        return dp[m][n];
-    }
-    //判断s第i个字符和p第j个字符是否匹配
-    public boolean headMatched(String s,String p,int i,int j){
-        return (s.charAt(i) == p.charAt(j) || p.charAt(j) == '.');
-    }
-}
-```
-
-## 最长公共前缀（0014）
-
-> *编写一个函数来查找字符串数组中的最长公共前缀。*
->
-> *如果不存在公共前缀，返回空字符串 ""。*
->
-> *输入: ["flower","flow","flight"]*
->
-> *输出: "fl"*
-
-```java
-class Solution {
-    public String longestCommonPrefix(String[] strs) {
-        if (strs.length == 0) {return "";}
-        else if (strs.length == 1) {return strs[0];}
-        else {
-            int minLength = strs[0].length();
-            for (int i = 1; i < strs.length; i++){
-                if (strs[i].length() < minLength) {
-                    minLength = strs[i].length();
-                }
-            }
-            
-            int index = 0;
-            while (index < minLength){
-                char ch = strs[0].charAt(index);
-                for (int i = 0; i < strs.length; i++){
-                    if (strs[i].charAt(index) != ch) {
-                        return strs[0].substring(0, index);
-                    }
-                }
-                index++;
-            }
-            return strs[0].substring(0, index);
-        }
-    }
-}
-```
-
 ## 串联所有单词的子串（0030）
 
 > *给定一个字符串 s 和一些长度相同的单词 words。找出 s 中恰好可以由 words 中所有单词串联形成的子串的起始位置。*
@@ -449,45 +305,57 @@ class Solution {
 }
 ```
 
-## 最长有效括号（0032）
+## 字符串相乘（0043）
 
-> *给你一个只包含 '(' 和 ')' 的字符串，找出最长有效（格式正确且连续）括号子串的长度。*
+> 给定两个以字符串形式表示的非负整数 num1 和 num2，返回 num1 和 num2 的乘积，它们的乘积也表示为字符串形式。
 >
-> *输入：s = "(()"*
+> 示例 1:
 >
-> *输出：2*
+> 输入: num1 = "2", num2 = "3"
+> 输出: "6"
+> 示例 2:
 >
-> *解释：最长有效括号子串是 "()"*
+> 输入: num1 = "123", num2 = "456"
+> 输出: "56088"
+> 说明：
+>
+> num1 和 num2 的长度小于110。
+> num1 和 num2 只包含数字 0-9。
+> num1 和 num2 均不以零开头，除非是数字 0 本身。
+> 不能使用任何标准库的大数类型（比如 BigInteger）或直接将输入转换为整数来处理。
 
 ```java
 class Solution {
-    public int longestValidParentheses(String s) {
-        int[] dp = new int[s.length() + 1];
-        dp[0] = 0;
-        for (int i = 1; i < s.length(); i++) {
-            if (s.charAt(i) == ')' && i - dp[i - 1] - 1 >= 0 && s.charAt(i - dp[i - 1] - 1) == '(') {
-                dp[i] = dp[i - 1] + 2;
-                if (i - dp[i - 1] - 2 >= 0) {
-                    dp[i] += dp[i - dp[i - 1] - 2];
-                }
-            }
-        }
-        return getMax(dp);
-    }
+    public String multiply(String num1, String num2) {
+        if (num1.equals("0") || num2.equals("0")) {return "0";}
 
-    public int getMax(int[] nums) {
-        int ans = Integer.MIN_VALUE;
-        for (int n : nums) {
-            if (n > ans) {
-                ans = n;
+        int m = num1.length(), n = num2.length();
+        int[] ansArr = new int[m + n];
+        for (int i = m - 1; i >= 0; i--) {
+            int x = num1.charAt(i) - '0';
+            for (int j = n - 1; j >= 0; j--) {
+                int y = num2.charAt(j) - '0';
+                ansArr[i + j + 1] += x * y;
             }
         }
-        return ans;
+        for (int i = m + n - 1; i > 0; i--) {
+            ansArr[i - 1] += ansArr[i] / 10;
+            ansArr[i] %= 10;
+        }
+
+        int index = ansArr[0] == 0 ? 1 : 0;
+        StringBuilder ans = new StringBuilder();
+        while (index < m + n) {
+            ans.append(ansArr[index]);
+            index++;
+        }
+
+        return ans.toString();
     }
 }
 ```
 
-## 删除无效的括号（0300）
+## 删除无效的括号（0301）
 
 > *删除最小数量的无效括号，使得输入的字符串有效，返回所有可能的结果。*
 >
@@ -525,48 +393,6 @@ class Solution {
             if (count < 0) return false;
         }
         return count == 0;
-    }
-}
-```
-
-## 通配符匹配（0044）
-
-> *给定一个字符串 (s) 和一个字符模式 (p) ，实现一个支持 '?' 和 '\*' 的通配符匹配。*
->
-> *'?' 可以匹配任何单个字符。*
->
-> *'\*' 可以匹配任意字符串（包括空字符串）。*
->
-> *两个字符串完全匹配才算匹配成功。*
-
-```java
-class Solution {
-    public boolean isMatch(String s, String p) {
-        int m = s.length();
-        int n = p.length();
-        boolean[][] dp = new boolean[m + 1][n + 1];
-        dp[0][0] = true;
-        for (int i = 1; i <= n; i++) {
-            if (p.charAt(i - 1) == '*') {
-                dp[0][i] = true;
-            } 
-            else {
-                break;
-            }
-        }
-
-        for (int i = 1; i <= m; i++) {
-            for (int j = 1; j <= n; j++) {
-                if (p.charAt(j - 1) == '*') {
-                    dp[i][j] = dp[i - 1][j] || dp[i][j - 1];
-                }
-                else if (p.charAt(j - 1) == '?' || s.charAt(i - 1) == p.charAt(j - 1)) {
-                    dp[i][j] = dp[i - 1][j - 1];
-                }
-            }
-        }
-
-        return dp[m][n];
     }
 }
 ```
@@ -678,42 +504,6 @@ class Solution {
 }
 ```
 
-## 编辑距离（0072）
-
-> *给你两个单词 word1 和 word2，请你计算出将 word1 转换成 word2 所使用的最少操作数 。*
->
-> 对一个单词进行如下三种操作：*
->
-> *插入一个字符*
->
-> *删除一个字符*
->
-> *替换一个字符*
-
-```java
-class Solution {
-    public int minDistance(String word1, String word2) {
-        int m = word1.length(), n = word2.length();
-        int[][] dp = new int[m + 1][n + 1];
-        for (int i = 1; i <= m; i++) {dp[i][0] = i;}
-        for (int j = 1; j <= n; j++) {dp[0][j] = j;}
-
-        for (int i = 1; i <= m; i++) {
-            for (int j = 1; j <= n; j++) {
-                if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
-                    dp[i][j] = dp[i - 1][j - 1];
-                }
-                else {
-                    dp[i][j] = Math.min(Math.min(dp[i - 1][j], dp[i][j - 1]), dp[i - 1][j - 1]) + 1;
-                }
-            }
-        }
-
-        return dp[m][n];
-    }
-}
-```
-
 ## 最小覆盖子串（0076）
 
 > *给你一个字符串 s 、一个字符串 t 。返回 s 中涵盖 t 所有字符的最小子串。如果 s 中不存在涵盖 t 所有字符的子串，则返回空字符串 "" 。*
@@ -802,33 +592,75 @@ class Solution {
 }
 ```
 
-## 不同的子序列（0115）
+## 复原IP地址（0093）
 
-> 给定一个字符串 `s` 和一个字符串 `t` ，计算在 `s` 的子序列中 `t` 出现的个数。
+> 给定一个只包含数字的字符串，用以表示一个 IP 地址，返回所有可能从 s 获得的 有效 IP 地址 。你可以按任何顺序返回答案。
+>
+> 有效 IP 地址 正好由四个整数（每个整数位于 0 到 255 之间组成，且不能含有前导 0），整数之间用 '.' 分隔。
+>
+> 例如："0.1.2.201" 和 "192.168.1.1" 是 有效 IP 地址，但是 "0.011.255.245"、"192.168.1.312" 和 "192.168@1.1" 是 无效 IP 地址。
+>
+>  
+>
+> 示例 1：
+>
+> 输入：s = "25525511135"
+> 输出：["255.255.11.135","255.255.111.35"]
+> 示例 2：
+>
+> 输入：s = "0000"
+> 输出：["0.0.0.0"]
 
 ```java
 class Solution {
-    public int numDistinct(String s, String t) {
-        int m = s.length(), n = t.length();
-        if (m < n) {
-            return 0;
-        }
-        int[][] dp = new int[m + 1][n + 1];
-        for (int i = 0; i <= m; i++) {
-            dp[i][n] = 1;
-        }
-        for (int i = m - 1; i >= 0; i--) {
-            char sChar = s.charAt(i);
-            for (int j = n - 1; j >= 0; j--) {
-                char tChar = t.charAt(j);
-                if (sChar == tChar) {
-                    dp[i][j] = dp[i + 1][j + 1] + dp[i + 1][j];
-                } else {
-                    dp[i][j] = dp[i + 1][j];
+    static final int SEG_COUNT = 4;
+    List<String> ans = new ArrayList<String>();
+    int[] segments = new int[SEG_COUNT];
+
+    public List<String> restoreIpAddresses(String s) {
+        segments = new int[SEG_COUNT];
+        dfs(s, 0, 0);
+        return ans;
+    }
+
+    public void dfs(String s, int segId, int segStart) {
+        // 如果找到了 4 段 IP 地址并且遍历完了字符串，那么就是一种答案
+        if (segId == SEG_COUNT) {
+            if (segStart == s.length()) {
+                StringBuffer ipAddr = new StringBuffer();
+                for (int i = 0; i < SEG_COUNT; ++i) {
+                    ipAddr.append(segments[i]);
+                    if (i != SEG_COUNT - 1) {
+                        ipAddr.append('.');
+                    }
                 }
+                ans.add(ipAddr.toString());
+            }
+            return;
+        }
+
+        // 如果还没有找到 4 段 IP 地址就已经遍历完了字符串，那么提前回溯
+        if (segStart == s.length()) {
+            return;
+        }
+
+        // 由于不能有前导零，如果当前数字为 0，那么这一段 IP 地址只能为 0
+        if (s.charAt(segStart) == '0') {
+            segments[segId] = 0;
+            dfs(s, segId + 1, segStart + 1);
+        }
+
+        // 一般情况，枚举每一种可能性并递归
+        int addr = 0;
+        for (int segEnd = segStart; segEnd < s.length(); ++segEnd) {
+            addr = addr * 10 + (s.charAt(segEnd) - '0');
+            if (addr > 0 && addr <= 0xFF) {
+                segments[segId] = addr;
+                dfs(s, segId + 1, segEnd + 1);
+            } else {
+                break;
             }
         }
-        return dp[0][0];
     }
 }
 ```
@@ -1077,7 +909,7 @@ class Solution {
 }
 ```
 
-## 字符串编码（0394）
+## 字符串解码（0394）
 
 > *给定一个经过编码的字符串，返回它解码后的字符串。*
 >
@@ -1113,6 +945,39 @@ class Solution {
         }
         
         return ans.toString();
+    }
+}
+```
+
+## 移掉K位数字（0402）
+
+> 给定一个以字符串表示的非负整数 *num*，移除这个数中的 *k* 位数字，使得剩下的数字最小。
+
+```java
+class Solution {
+    public String removeKdigits(String num, int k) {
+        Deque<Character> deque = new LinkedList<>();
+        for (int i = 0; i < num.length(); i++) {
+            char c = num.charAt(i);
+            while (!deque.isEmpty() && k > 0 && deque.peekLast() > c) {
+                deque.pollLast();
+                k--;
+            }
+            deque.offerLast(c);
+        }
+
+        for (int i = 0; i < k; i++) {deque.pollLast();}
+
+        StringBuilder ans = new StringBuilder();
+        boolean leadingZero = true;
+        while (!deque.isEmpty()) {
+            char curNum = deque.pollFirst();
+            if (leadingZero && curNum == '0') {continue;}
+            leadingZero = false;
+            ans.append(curNum);
+        }
+
+        return ans.length() == 0 ? "0" : ans.toString();
     }
 }
 ```
@@ -1350,6 +1215,41 @@ class Solution {
         int ans = 0;
         for (int n : dp) {ans += n;}
         return ans;
+    }
+}
+```
+
+## 连接词（0472）
+
+> 给定一个 不含重复 单词的字符串数组 words ，编写一个程序，返回 words 中的所有 连接词 。
+>
+> 连接词 的定义为：一个字符串完全是由至少两个给定数组中的单词组成的。
+>
+
+```java
+class Solution {
+    public List<String> findAllConcatenatedWordsInADict(String[] words) {
+        Set<String> set = new HashSet<>(Arrays.asList(words));
+        List<String> ans = new ArrayList<>();
+        for (String s : words) {
+            if (myMethod(s, set, 0)) {
+                ans.add(s);
+            }
+        }
+        return ans;
+    }
+
+    private boolean myMethod(String s, Set<String> set, int index) {
+        if (set.contains(s) && index != 0) {return true;}
+        for (int i = 1; i < s.length(); i++) {
+            String tmp = s.substring(0, i);
+            if (set.contains(tmp)) {
+                if (myMethod(s.substring(i), set, index + 1)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
 ```

@@ -2,7 +2,7 @@
 
 # 1 哈希表
 
-## 两数之和
+## 两数之和（0001）
 
 > *给定一个整数数组 nums 和一个目标值 target，请你在该数组中找出和为目标值的那 两个 整数，并返回他们的数组下标。*
 >
@@ -30,7 +30,7 @@ class Solution {
 }
 ```
 
-## 有效的数独
+## 有效的数独（0036）
 
 > *判断一个 9x9 的数独是否有效。只需要根据以下规则，验证已经填入的数字是否有效即可。*
 >
@@ -223,7 +223,532 @@ class Solution {
 
 
 
-# 2 数学问题
+# 2 位运算
+
+## 颠倒二进制位（0190）
+
+> *颠倒给定的 32 位无符号整数的二进制位。*
+>
+> *输入: 00000010100101000001111010011100*
+>
+> *输出: 00111001011110000010100101000000*
+
+```java
+public class Solution {
+    // you need treat n as an unsigned value
+    public int reverseBits(int n) {
+        int ans = 0;
+        for (int i = 0; i < 32; i++) {
+            ans = ans << 1;
+            ans = (n & 1) | ans;
+            n = n >> 1;
+        }
+        return ans;
+    }
+}
+```
+
+## 位1的个数（0191）
+
+> *编写一个函数，输入是一个无符号整数（以二进制串的形式），返回其二进制表达式中数字位数为 '1' 的个数（也被称为汉明重量）。*
+
+```java
+public class Solution {
+    // you need to treat n as an unsigned value
+    public int hammingWeight(int n) {
+        int count = 0;
+        for (int i = 0; i < 32; i++) {
+            count += (n & 1);
+            n = n >> 1;
+        }
+        return count;
+    }
+}
+```
+
+## 数字范围按位与（0201）
+
+> *给定范围 [m, n]，其中 0 <= m <= n <= 2147483647，返回此范围内所有数字的按位与（包含 m, n 两端点）。*
+
+```java
+class Solution {
+    public int rangeBitwiseAnd(int m, int n) {
+        while (m < n) {
+            // 抹去最右边的 1
+            n = n & (n - 1);
+        }
+        return n;
+    }
+}
+```
+
+## 数组中两个数的最大异或值
+
+> *给定一个非空数组，数组中元素为 a0, a1, a2, … , an-1，其中 0 ≤ ai < 231 。*
+>
+> *找到 ai 和aj 最大的异或 (XOR) 运算结果，其中0 ≤ i, j < n 。*
+
+```java
+class Solution {
+    public int findMaximumXOR(int[] nums) {
+        int maxNum = nums[0];
+        for (int num : nums) {maxNum = Math.max(maxNum, num);}
+        int n = (Integer.toBinaryString(maxNum)).length();
+
+        int ans = 0, curXor;
+        Set<Integer> prefixes = new HashSet<>();
+        for (int i = n - 1; i >= 0; i--) {
+            ans = ans << 1;
+            curXor = ans | 1;
+            prefixes.clear();
+
+            for (int num : nums) {
+                prefixes.add(num >> i);
+            }
+            for (int p : prefixes) {
+                if (prefixes.contains(curXor ^ p)) {
+                    ans = curXor;
+                    break;
+                }
+            }
+        }
+
+        return ans;
+    }
+}
+```
+
+
+
+
+
+# 3 数学问题
+
+## 特殊数字
+
+> 快乐数：*对于一个正整数，每一次将该数替换为它每个位置上的数字的平方和。*
+
+```java
+class Solution {
+    public boolean isHappy(int n) {
+        Set<Integer> set = new HashSet<>();
+        while (!set.contains(n) && n != 1) {
+            set.add(n);
+            n = getNextNum(n);
+        }
+        return n == 1;
+    }
+
+    public int getNextNum(int n) {
+        int ans = 0;
+        while (n > 0) {
+            int d = n % 10;
+            ans += d * d;
+            n /= 10;
+        }
+        return ans;
+    }
+}
+```
+
+> 质数：*统计所有小于非负整数 n 的质数的数量*
+
+```java
+class Solution {
+    public int countPrimes(int n) {
+        int ans = 0;
+        for (int i = 2; i < n; i++) {
+            ans += isPrime(i) ? 1 : 0;
+        }
+        return ans;
+    }
+
+    public boolean isPrime(int n) {
+        for (int i = 2; i * i <= n; i++) {
+            if (n % i == 0) {return false;}
+        }
+        return true;
+    }
+}
+```
+
+> 丑数：*丑数就是只包含质因数 2, 3, 5 的正整数。*
+
+```java
+class Solution {
+    public boolean isUgly(int num) {
+        while (num > 1 && (num % 2 == 0 || num % 3 == 0 || num % 5 == 0)) {
+            if (num % 2 == 0) {num /= 2;}
+            if (num % 3 == 0) {num /= 3;}
+            if (num % 5 == 0) {num /= 5;}
+        }
+        return num == 1;
+    }
+}
+```
+
+> *编写一个程序，找出第 n 个丑数。*
+
+```java
+class Solution {
+    public int nthUglyNumber(int n) {
+        int[] dp = new int[n];
+        dp[0] = 1;
+        int index2 = 0, index3 = 0, index5 = 0;
+        for (int i = 1; i < n; i++) {
+            int minValue = Math.min(Math.min(dp[index2] * 2, dp[index3] * 3), dp[index5] * 5);
+            dp[i] = minValue;
+            if (dp[index2] * 2 == minValue) {index2++;}
+            if (dp[index3] * 3 == minValue) {index3++;}
+            if (dp[index5] * 5 == minValue) {index5++;}
+        }
+        return dp[n - 1];
+    }
+}
+```
+
+> *编写一段程序来查找第 n 个超级丑数。*
+>
+> *超级丑数是指其所有质因数都是长度为 k 的质数列表 primes 中的正整数。*
+
+```java
+class Solution {
+    public class SuperUglyNumber {
+        public int nthSuperUglyNumber(int n, int[] primes) {
+            int len = primes.length;
+            int dp[] = new int[n];
+            dp[0] = 1;
+            /*梳理一下思路，dp[i]保存的是第i个超级丑数*/
+            /*index[i]表示的是primes里面的第i个数下一个将要相乘的数在dp中的位置，
+            反过来想，对于每个primes来说，我们都需要和dp中已经算出来的结果相乘算，
+            然后取最小的那个作为新的dp元素
+            索引index实际上表示是这个素数已经和dp中的哪个位置结合了，下一个位置的坐标是多少 */
+            int index[] = new int[len];
+            /*可能存在重复的丑数，所以呢，不要在for循环里面加break，把所有的情况都+1*/
+            for (int i = 1; i < n; i++) {
+                int min = Integer.MAX_VALUE;
+                /*遍历对比一下值，找出最小的，*/
+                for (int j = 0; j < len; j++) {
+                    if (min > primes[j] * dp[index[j]]) {
+                        min = primes[j] * dp[index[j]];//这个地方就是当前质因数和他要结合的dp
+                    }
+                }
+                dp[i] = min;
+                /*那个素数要乘以dp的坐标index要加1，向后推一个位
+                * 如果存在重复的值，也就是说不同的质因数相乘，得出来相同的结果了，
+                * 我们就把这几个位置都+1，这样就可以避免出现重复的值了。
+                * 你想想，假如你找到了对应的素数的index，把它加1之后就break掉，那么后面的数也可以算出这个结果，
+                * 下次循环的时候，势必会把这个重复的数当成下一个dp，因为这个数肯定要比下一个丑数小
+                * 所以我们在for循环中不要加break；*/
+                for (int j = 0; j < len; j++) {
+                    if (min == primes[j] * dp[index[j]]) {
+                        index[j]++;
+                    }
+                }
+
+            }
+            return dp[n - 1];
+        }
+    }
+}
+```
+
+
+> 完全平方数：
+>
+> *给定正整数 n，找到若干个完全平方数（比如 1, 4, 9, 16, ...）使得它们的和等于 n。你需要让组成和的完全平方数的个数最少。*
+
+```java
+class Solution {
+    public int numSquares(int n) {
+        int[] dp = new int[n + 1];
+        Arrays.fill(dp, Integer.MAX_VALUE);
+        dp[0] = 0;
+
+        int maxIndex = (int)Math.sqrt(n) + 1;
+        int[] squareNums = new int[maxIndex];
+        for (int i = 1; i < maxIndex; i++) {squareNums[i] = i * i;}
+
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j < maxIndex; j++) {
+                if (i < squareNums[j]) {break;}
+                dp[i] = Math.min(dp[i], dp[i - squareNums[j]] + 1);
+            }
+        }
+
+        return dp[n];
+    }
+}
+```
+
+## 买卖股票
+
+> *只允许完成一笔交易（即买入和卖出一支股票一次），设计一个算法来计算你所能获取的最大利润*
+
+```java
+class Solution {
+    public int maxProfit(int[] prices) {
+        if (prices.length < 2) {return 0;}
+        int minPrice = prices[0];
+        int ans = 0;
+        for (int i = 0; i < prices.length; i++){
+            minPrice = Math.min(minPrice, prices[i]);
+            ans = Math.max(ans, prices[i] - minPrice);
+        }
+        return ans;
+    }
+}
+```
+
+> *可以尽可能地完成更多的交易（多次买卖一支股票）*
+
+```java
+class Solution {
+    public int maxProfit(int[] prices) {
+        if (prices.length < 2) {return 0;}
+        int ans = 0;
+        for (int i = 1; i < prices.length; i++){
+            if (prices[i] > prices[i - 1]){
+                ans = ans + prices[i] - prices[i - 1];
+            }
+        }
+        return ans;
+    }
+}
+```
+
+> *最多可以完成 两笔 交易*
+
+```java
+class Solution {
+    public int maxProfit(int[] prices) {
+        if (prices.length < 2) {return 0;}
+        int ans = 0;
+        int buy1 = Integer.MAX_VALUE, buy2 = Integer.MAX_VALUE;
+        int pro1 = Integer.MIN_VALUE, pro2 = Integer.MIN_VALUE;
+
+        for (int i = 0; i < prices.length; i++){
+            buy1 = Math.min(buy1, prices[i]);
+            pro1 = Math.max(pro1, prices[i] - buy1);
+            buy2 = Math.min(buy2, prices[i] - pro1);
+            pro2 = Math.max(pro2, prices[i] - buy2);
+        }
+        return pro2;
+    }
+}
+```
+
+> *设计一个算法来计算你所能获取的最大利润。你最多可以完成 k 笔交易。*
+
+```java
+class Solution {
+    public int maxProfit(int k, int[] prices) {
+        int n = prices.length;
+        if(n < 2) return 0;
+
+        // 如果k超过了最大可买卖次数，那就将k置为最大买卖次数
+        // 最大买卖次数就是天数的一半，如果当前卖出又买入，是没有意义的
+        k = Math.min(k, n / 2);
+
+        int[] buy = new int[k + 1];
+        int[] pro = new int[k + 1];
+        Arrays.fill(buy, Integer.MAX_VALUE);
+        Arrays.fill(pro, Integer.MIN_VALUE);
+        buy[0] = 0;
+        pro[0] = 0;
+
+        for (int i = 0; i < n; i++){
+            for (int j = 1; j <= k; j++){
+                buy[j] = Math.min(buy[j], prices[i] - pro[j - 1]);
+                pro[j] = Math.max(pro[j], prices[i] - buy[j]);
+            }
+        }
+
+        return pro[k];
+    }
+}
+```
+
+> *设计一个算法计算出最大利润。在满足以下约束条件下，你可以尽可能地完成更多的交易（多次买卖一支股票）:*
+>
+> *你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）。*
+>
+> *卖出股票后，你无法在第二天买入股票 (即冷冻期为 1 天)。*
+
+```java
+class Solution {
+    public int maxProfit(int[] prices) {
+        int n = prices.length;
+        if (n == 0) {return 0;}
+
+        // dp[i][0]: 手上持有股票的最大收益
+        // dp[i][1]: 手上不持有股票，并且处于冷冻期中的累计最大收益
+        // dp[i][2]: 手上不持有股票，并且不在冷冻期中的累计最大收益
+        int[][] dp = new int[n][3];
+        dp[0][0] = -prices[0];
+        for (int i = 1; i < n; i++) {
+            dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][2] - prices[i]);
+            dp[i][1] = dp[i - 1][0] + prices[i];
+            dp[i][2] = Math.max(dp[i - 1][1], dp[i - 1][2]);
+        }
+
+        return Math.max(dp[n - 1][1], dp[n - 1][2]);
+    }
+}
+```
+
+## 打家劫舍
+
+> *你是一个专业的小偷，计划偷窃沿街的房屋。每间房内都藏有一定的现金，影响你偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。*
+>
+> *给定一个代表每个房屋存放金额的非负整数数组，计算你 不触动警报装置的情况下 ，一夜之内能够偷窃到的最高金额。*
+
+```java
+class Solution {
+    public int rob(int[] nums) {
+        int n = nums.length;
+        if (n == 0) {return 0;}
+        else if (n == 1) {return nums[0];}
+        else if (n == 2) {return nums[0] > nums[1] ? nums[0] : nums[1];}
+        int[] dp = new int[n];
+        dp[0] = nums[0];
+        dp[1] = nums[1];
+        for (int i = 2; i < n; i++) {
+            int tmp = dp[0];
+            for (int j = 1; j < i - 1; j++) {
+                if (dp[j] > tmp) {tmp = dp[j];}
+            }
+            dp[i] = Math.max(dp[i - 1], tmp + nums[i]);
+        }
+        return dp[n - 1];
+    }
+}
+```
+
+> 环形数组，不能偷连续的两家
+
+```java
+class Solution {
+    public int rob(int[] nums) {
+        if(nums.length == 0) return 0;
+        if(nums.length == 1) return nums[0];
+        return Math.max(myRob(Arrays.copyOfRange(nums, 0, nums.length - 1)), 
+                        myRob(Arrays.copyOfRange(nums, 1, nums.length)));
+    }
+
+    private int myRob(int[] nums) {
+        int n = nums.length;
+        if (n == 0) {return 0;}
+        else if (n == 1) {return nums[0];}
+        else if (n == 2) {return nums[0] > nums[1] ? nums[0] : nums[1];}
+        int[] dp = new int[n];
+        dp[0] = nums[0];
+        dp[1] = nums[1];
+        for (int i = 2; i < n; i++) {
+            int tmp = dp[0];
+            for (int j = 1; j < i - 1; j++) {
+                if (dp[j] > tmp) {tmp = dp[j];}
+            }
+            dp[i] = Math.max(dp[i - 1], tmp + nums[i]);
+        }
+        return dp[n - 1];
+    }
+}
+```
+
+> *在上次打劫完一条街道之后和一圈房屋后，小偷又发现了一个新的可行窃的地区。这个地区只有一个入口，我们称之为“根”。 除了“根”之外，每栋房子有且只有一个“父“房子与之相连。一番侦察之后，聪明的小偷意识到“这个地方的所有房屋的排列类似于一棵二叉树”。 如果两个直接相连的房子在同一天晚上被打劫，房屋将自动报警。*
+>
+> *计算在不触动警报的情况下，小偷一晚能够盗取的最高金额。*
+>
+> *示例 1:
+>
+> *输入: [3,2,3,null,3,null,1]*
+>
+> *输出: 7* 
+>
+> *解释: 小偷一晚能够盗取的最高金额 = 3 + 3 + 1 = 7.*
+
+```java
+class Solution {
+    Map<TreeNode, Integer> f = new HashMap<>();
+    Map<TreeNode, Integer> g = new HashMap<>();
+
+    public int rob(TreeNode root) {
+        dfs(root);
+        return Math.max(f.getOrDefault(root, 0), g.getOrDefault(root, 0));
+    }
+
+    private void dfs(TreeNode node) {
+        if (node == null) {return;}
+
+        dfs(node.left);
+        dfs(node.right);
+        f.put(node, node.val + g.getOrDefault(node.left, 0) + g.getOrDefault(node.right, 0));
+        g.put(node, Math.max(f.getOrDefault(node.left, 0), g.getOrDefault(node.left, 0)) 
+            + Math.max(f.getOrDefault(node.right, 0), g.getOrDefault(node.right, 0)));
+    }
+}
+```
+
+## 接雨水
+
+> *给定 n 个非负整数表示每个宽度为 1 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。*
+
+```java
+class Solution {
+    public int trap(int[] height) {
+        int ans = 0;
+        int leftMax = 0, rightMax = 0;
+        for (int i = 0; i < height.length; i++) {
+            leftMax = Math.max(leftMax, height[i]);
+            rightMax = Math.max(rightMax, height[height.length - 1 - i]);
+            ans += (leftMax + rightMax - height[i]);
+        }
+        return ans - leftMax * height.length;
+    }
+}
+```
+
+> *给你一个 m x n 的矩阵，其中的值均为非负整数，代表二维高度图每个单元的高度，请计算图中形状最多能接多少体积的雨水。*
+
+```java
+class Solution {
+    public int trapRainWater(int[][] heightMap) {
+        if (heightMap.length == 0) {return 0;}
+        int m = heightMap.length, n = heightMap[0].length;
+        boolean[][] visited = new boolean[m][n];
+        PriorityQueue<int[]> pq = new PriorityQueue<>((o1, o2) -> o1[2] - o2[2]);
+
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (i == 0 || j == 0 || i == m - 1 || j == n - 1) {
+                    pq.offer(new int[]{i, j, heightMap[i][j]});
+                    visited[i][j] = true;
+                }
+            }
+        }
+
+        int ans = 0;
+        int[] dirs = {-1, 0, 1, 0, -1};
+        while (!pq.isEmpty()) {
+            int[] curPoint = pq.poll();
+            for (int i = 0; i < 4; i++) {
+                int nextX = curPoint[0] + dirs[i];
+                int nextY = curPoint[1] + dirs[i + 1];
+                if (nextX >= 0 && nextX < m && nextY >= 0 && nextY < n && !visited[nextX][nextY]) {
+                    if (curPoint[2] > heightMap[nextX][nextY]) {
+                        ans += curPoint[2] - heightMap[nextX][nextY];
+                    }
+                    pq.offer(new int[]{nextX, nextY, Math.max(heightMap[nextX][nextY], curPoint[2])});
+                    visited[nextX][nextY] = true;
+                }
+            }
+        }
+
+        return ans;
+    }
+}
+```
 
 ## 寻找两个正序数组的中位数（0004）
 
@@ -258,96 +783,6 @@ class Solution {
 
         if ((len & 1) == 0) {return (left + right) / 2.0;}
         else {return right;}
-    }
-}
-```
-
-## Z字形变化（0006）
-
-> *将一个给定字符串根据给定的行数，以从上往下、从左到右进行 Z 字形排列。*
->
-> *比如输入字符串为 "LEETCODEISHIRING" 行数为 3 时，排列如下：*
->
-> *L   C   I   R*
->
-> *E T O E S I I G*
->
-> *E   D   H   N*
->
-> *输入: s = "LEETCODEISHIRING", numRows = 3*
->
-> *输出: "LCIRETOESIIGEDHN"*
-
-```java
-class Solution {
-    public String convert(String s, int numRows) {
-        if (numRows == 1) {return s;}
-        List<StringBuilder> rows = new ArrayList<>();
-        for (int i = 0; i < Math.min(s.length(), numRows); i++){
-            rows.add(new StringBuilder());
-        }
-
-        int curRow = 0;
-        boolean goingDown = false;
-        for (char c : s.toCharArray()) {
-            rows.get(curRow).append(c);
-            if (curRow == 0 || curRow == numRows - 1) {goingDown = !goingDown;}
-            curRow += goingDown ? 1 : -1;
-        }
-
-        StringBuilder res = new StringBuilder();
-        for (StringBuilder row : rows) {res.append(row);}
-        return res.toString();
-    }
-}
-```
-
-## 整数反转（0007）
-
-> *给出一个 32 位的有符号整数，你需要将这个整数中每位上的数字进行反转。*
->
-> *输入: 123*
->
-> *输出: 321*
-
-```java
-class Solution {
-    public int reverse(int x) {
-        int ans = 0;
-        while (x != 0) {
-            int pop = x % 10;
-            x /= 10;
-            if (ans > Integer.MAX_VALUE / 10 || ans < Integer.MIN_VALUE / 10) {return 0;}
-            ans = ans * 10 + pop;
-        }
-        return ans;
-    }
-}
-```
-
-## 盛最多水的容器（0011）
-
-> *给你 n 个非负整数 a1，a2，...，an，每个数代表坐标中的一个点 (i, ai) 。在坐标内画 n 条垂直线，垂直线 i 的两个端点分别为 (i, ai) 和 (i, 0) 。找出其中的两条线，使得它们与 x 轴共同构成的容器可以容纳最多的水。*
->
-> *输入：[1,8,6,2,5,4,8,3,7]*
->
-> *输出：49* 
->
-> *解释：图中垂直线代表输入数组 [1,8,6,2,5,4,8,3,7]。在此情况下，容器能够容纳水（表示为蓝色部分）的最大值为 49。*
-
-```java
-class Solution {
-    public int maxArea(int[] height) {
-        if (height.length < 2) {return 0;}
-        int ans = Integer.MIN_VALUE;
-        int left = 0, right = height.length - 1;
-        while (left < right){
-            int curSize = (right - left) * Math.min(height[left], height[right]);
-            ans = Math.max(ans, curSize);
-            if (height[left] < height[right]){left++;}
-            else {right--;}
-        }
-        return ans;
     }
 }
 ```
@@ -615,140 +1050,6 @@ class Solution {
             }
         }
         return index;
-    }
-}
-```
-
-## 移除元素（0027）
-
-> *给你一个数组 nums 和一个值 val，你需要 原地 移除所有数值等于 val 的元素，并返回移除后数组的新长度。*
->
-> *不要使用额外的数组空间，你必须仅使用 O(1) 额外空间并 原地 修改输入数组。*
->
-> *元素的顺序可以改变。你不需要考虑数组中超出新长度后面的元素。*
->
-> *给定 nums = [3,2,2,3], val = 3,*
->
-> *函数应该返回新的长度 2, 并且 nums 中的前两个元素均为 2。*
-
-```java
-class Solution {
-    public int removeElement(int[] nums, int val) {
-        int left = 0, right = nums.length - 1;
-        while (left <= right) {
-            if (nums[left] == val) {
-                int tmp = nums[right];
-                nums[right] = nums[left];
-                nums[left] = tmp;
-                right--;
-            }
-            else {
-                left++;
-            }
-        }
-        return right + 1;
-    }
-}
-```
-
-## 下一个排列（0031）
-
-> *实现获取 下一个排列 的函数，算法需要将给定数字序列重新排列成字典序中下一个更大的排列。*
->
-> *如果不存在下一个更大的排列，则将数字重新排列成最小的排列（即升序排列）。*
->
-> *必须 原地 修改，只允许使用额外常数空间。*
->
-> *输入：nums = [1,2,3]*
->
-> *输出：[1,3,2]*
-
-```java
-class Solution {
-    public void nextPermutation(int[] nums) {
-        int index = nums.length - 1;
-        while (index >= 1) {
-            if (nums[index - 1] >= nums[index]) {
-                index--;
-            }
-            else {break;}
-        }
-
-        if (index > 0) {
-            int left = index - 1;
-            int right = nums.length - 1;
-            while (nums[left] >= nums[right]) {
-                right--;
-            }
-            int tmp = nums[left];
-            nums[left] = nums[right];
-            nums[right] = tmp;
-            Arrays.sort(nums, index, nums.length);
-        }
-        else {
-            Arrays.sort(nums);
-        }
-        return;
-    }
-}
-```
-
-## 接雨水
-
-> *给定 n 个非负整数表示每个宽度为 1 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。*
-
-```java
-class Solution {
-    public int trap(int[] height) {
-        int ans = 0;
-        int leftMax = 0, rightMax = 0;
-        for (int i = 0; i < height.length; i++) {
-            leftMax = Math.max(leftMax, height[i]);
-            rightMax = Math.max(rightMax, height[height.length - 1 - i]);
-            ans += (leftMax + rightMax - height[i]);
-        }
-        return ans - leftMax * height.length;
-    }
-}
-```
-
-> *给你一个 m x n 的矩阵，其中的值均为非负整数，代表二维高度图每个单元的高度，请计算图中形状最多能接多少体积的雨水。*
-
-```java
-class Solution {
-    public int trapRainWater(int[][] heightMap) {
-        if (heightMap.length == 0) {return 0;}
-        int m = heightMap.length, n = heightMap[0].length;
-        boolean[][] visited = new boolean[m][n];
-        PriorityQueue<int[]> pq = new PriorityQueue<>((o1, o2) -> o1[2] - o2[2]);
-
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                if (i == 0 || j == 0 || i == m - 1 || j == n - 1) {
-                    pq.offer(new int[]{i, j, heightMap[i][j]});
-                    visited[i][j] = true;
-                }
-            }
-        }
-
-        int ans = 0;
-        int[] dirs = {-1, 0, 1, 0, -1};
-        while (!pq.isEmpty()) {
-            int[] curPoint = pq.poll();
-            for (int i = 0; i < 4; i++) {
-                int nextX = curPoint[0] + dirs[i];
-                int nextY = curPoint[1] + dirs[i + 1];
-                if (nextX >= 0 && nextX < m && nextY >= 0 && nextY < n && !visited[nextX][nextY]) {
-                    if (curPoint[2] > heightMap[nextX][nextY]) {
-                        ans += curPoint[2] - heightMap[nextX][nextY];
-                    }
-                    pq.offer(new int[]{nextX, nextY, Math.max(heightMap[nextX][nextY], curPoint[2])});
-                    visited[nextX][nextY] = true;
-                }
-            }
-        }
-
-        return ans;
     }
 }
 ```
@@ -1163,72 +1464,6 @@ class Solution {
 }
 ```
 
-## 加一（0066）
-
-> *给定一个由 整数 组成的 非空 数组所表示的非负整数，在该数的基础上加一。*
->
-> *最高位数字存放在数组的首位， 数组中每个元素只存储单个数字。*
->
-> *你可以假设除了整数 0 之外，这个整数不会以零开头。*
-
-```java
-class Solution {
-    public int[] plusOne(int[] digits) {
-        if (digits.length == 0) {return digits;}
-        int idx = digits.length - 1;
-        while (idx >= 0) {
-            if (digits[idx] != 9) {
-                digits[idx]++;
-                break;
-            }
-            else {
-                digits[idx] = 0;
-            }
-            idx--;
-        }
-        // 考虑9999这种情况
-        if (idx == -1) {
-            int[] ans = new int[digits.length + 1];
-            ans[0] = 1;
-            for (int i = 1; i <= digits.length; i++) {ans[i] = digits[i - 1];}
-            return ans;
-        }
-        else {
-            return digits;
-        }
-    }
-}
-```
-
-## 颜色分类（0075）
-
-> *给定一个包含红色、白色和蓝色，一共 n 个元素的数组，原地对它们进行排序，使得相同颜色的元素相邻，并按照红色、白色、蓝色顺序排列。*
-
-```java
-class Solution {
-    public void sortColors(int[] nums) {
-        int n = nums.length;
-        int idx = 0;
-        for (int i = 0; i < n; i++) {
-            if (nums[i] == 0) {
-                int tmp = nums[i];
-                nums[i] = nums[idx];
-                nums[idx] = tmp;
-                idx++;
-            }
-        }
-        for (int i = idx; i < n; i++) {
-            if (nums[i] == 1) {
-                int tmp = nums[i];
-                nums[i] = nums[idx];
-                nums[idx] = tmp;
-                idx++;
-            }
-        }
-    }
-}
-```
-
 ## 格雷码（0089）
 
 > *格雷编码是一个二进制数字系统，在该系统中，两个连续的数值仅有一个位数的差异。*
@@ -1249,31 +1484,6 @@ class Solution {
             tmp *= 2;
         }
 
-        return ans;
-    }
-}
-```
-
-## 杨辉三角（0118）
-
-> *给定一个非负整数 numRows，生成杨辉三角的前 numRows 行。*
-
-```java
-class Solution {
-    public List<List<Integer>> generate(int numRows) {
-        List<List<Integer>> ans = new ArrayList<>();
-        for (int i = 0; i < numRows; i++) {
-            List<Integer> tmp = new ArrayList<>();
-            for (int j = 0; j <= i; j++) {
-                if (j == 0 || j == i) {
-                    tmp.add(1);
-                }
-                else {
-                    tmp.add(ans.get(i - 1).get(j - 1) + ans.get(i - 1).get(j));
-                }
-            }
-            ans.add(new ArrayList<>(tmp));
-        }
         return ans;
     }
 }
@@ -1319,211 +1529,21 @@ class Solution {
 }
 ```
 
-## 买卖股票
+## 数组中的第K个最大元素（0215）
 
-> *只允许完成一笔交易（即买入和卖出一支股票一次），设计一个算法来计算你所能获取的最大利润*
-
-```java
-class Solution {
-    public int maxProfit(int[] prices) {
-        if (prices.length < 2) {return 0;}
-        int minPrice = prices[0];
-        int ans = 0;
-        for (int i = 0; i < prices.length; i++){
-            minPrice = Math.min(minPrice, prices[i]);
-            ans = Math.max(ans, prices[i] - minPrice);
-        }
-        return ans;
-    }
-}
-```
-
-> *可以尽可能地完成更多的交易（多次买卖一支股票）*
+> 在未排序的数组中找到第 **k** 个最大的元素。请注意，你需要找的是数组排序后的第 k 个最大的元素，而不是第 k 个不同的元素。
 
 ```java
 class Solution {
-    public int maxProfit(int[] prices) {
-        if (prices.length < 2) {return 0;}
-        int ans = 0;
-        for (int i = 1; i < prices.length; i++){
-            if (prices[i] > prices[i - 1]){
-                ans = ans + prices[i] - prices[i - 1];
-            }
-        }
-        return ans;
-    }
-}
-```
+    public int findKthLargest(int[] nums, int k) {
+        PriorityQueue<Integer> ans = new PriorityQueue<>();
 
-> *最多可以完成 两笔 交易*
-
-```java
-class Solution {
-    public int maxProfit(int[] prices) {
-        if (prices.length < 2) {return 0;}
-        int ans = 0;
-        int buy1 = Integer.MAX_VALUE, buy2 = Integer.MAX_VALUE;
-        int pro1 = Integer.MIN_VALUE, pro2 = Integer.MIN_VALUE;
-
-        for (int i = 0; i < prices.length; i++){
-            buy1 = Math.min(buy1, prices[i]);
-            pro1 = Math.max(pro1, prices[i] - buy1);
-            buy2 = Math.min(buy2, prices[i] - pro1);
-            pro2 = Math.max(pro2, prices[i] - buy2);
-        }
-        return pro2;
-    }
-}
-```
-
-> *设计一个算法来计算你所能获取的最大利润。你最多可以完成 k 笔交易。*
-
-```java
-class Solution {
-    public int maxProfit(int k, int[] prices) {
-        int n = prices.length;
-        if(n < 2) return 0;
-
-        // 如果k超过了最大可买卖次数，那就将k置为最大买卖次数
-        // 最大买卖次数就是天数的一半，如果当前卖出又买入，是没有意义的
-        k = Math.min(k, n / 2);
-
-        int[] buy = new int[k + 1];
-        int[] pro = new int[k + 1];
-        Arrays.fill(buy, Integer.MAX_VALUE);
-        Arrays.fill(pro, Integer.MIN_VALUE);
-        buy[0] = 0;
-        pro[0] = 0;
-
-        for (int i = 0; i < n; i++){
-            for (int j = 1; j <= k; j++){
-                buy[j] = Math.min(buy[j], prices[i] - pro[j - 1]);
-                pro[j] = Math.max(pro[j], prices[i] - buy[j]);
-            }
+        for (int n : nums) {
+            ans.offer(n);
+            if (ans.size() > k) {ans.poll();}
         }
 
-        return pro[k];
-    }
-}
-```
-
-> *设计一个算法计算出最大利润。在满足以下约束条件下，你可以尽可能地完成更多的交易（多次买卖一支股票）:*
->
-> *你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）。*
->
-> *卖出股票后，你无法在第二天买入股票 (即冷冻期为 1 天)。*
-
-```java
-class Solution {
-    public int maxProfit(int[] prices) {
-        int n = prices.length;
-        if (n == 0) {return 0;}
-
-        // dp[i][0]: 手上持有股票的最大收益
-        // dp[i][1]: 手上不持有股票，并且处于冷冻期中的累计最大收益
-        // dp[i][2]: 手上不持有股票，并且不在冷冻期中的累计最大收益
-        int[][] dp = new int[n][3];
-        dp[0][0] = -prices[0];
-        for (int i = 1; i < n; i++) {
-            dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][2] - prices[i]);
-            dp[i][1] = dp[i - 1][0] + prices[i];
-            dp[i][2] = Math.max(dp[i - 1][1], dp[i - 1][2]);
-        }
-
-        return Math.max(dp[n - 1][1], dp[n - 1][2]);
-    }
-}
-```
-
-## 打家劫舍
-
-> *你是一个专业的小偷，计划偷窃沿街的房屋。每间房内都藏有一定的现金，影响你偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。*
->
-> *给定一个代表每个房屋存放金额的非负整数数组，计算你 不触动警报装置的情况下 ，一夜之内能够偷窃到的最高金额。*
-
-```java
-class Solution {
-    public int rob(int[] nums) {
-        int n = nums.length;
-        if (n == 0) {return 0;}
-        else if (n == 1) {return nums[0];}
-        else if (n == 2) {return nums[0] > nums[1] ? nums[0] : nums[1];}
-        int[] dp = new int[n];
-        dp[0] = nums[0];
-        dp[1] = nums[1];
-        for (int i = 2; i < n; i++) {
-            int tmp = dp[0];
-            for (int j = 1; j < i - 1; j++) {
-                if (dp[j] > tmp) {tmp = dp[j];}
-            }
-            dp[i] = Math.max(dp[i - 1], tmp + nums[i]);
-        }
-        return dp[n - 1];
-    }
-}
-```
-
-> 环形数组，不能偷连续的两家
-
-```java
-class Solution {
-    public int rob(int[] nums) {
-        if(nums.length == 0) return 0;
-        if(nums.length == 1) return nums[0];
-        return Math.max(myRob(Arrays.copyOfRange(nums, 0, nums.length - 1)), 
-                        myRob(Arrays.copyOfRange(nums, 1, nums.length)));
-    }
-
-    private int myRob(int[] nums) {
-        int n = nums.length;
-        if (n == 0) {return 0;}
-        else if (n == 1) {return nums[0];}
-        else if (n == 2) {return nums[0] > nums[1] ? nums[0] : nums[1];}
-        int[] dp = new int[n];
-        dp[0] = nums[0];
-        dp[1] = nums[1];
-        for (int i = 2; i < n; i++) {
-            int tmp = dp[0];
-            for (int j = 1; j < i - 1; j++) {
-                if (dp[j] > tmp) {tmp = dp[j];}
-            }
-            dp[i] = Math.max(dp[i - 1], tmp + nums[i]);
-        }
-        return dp[n - 1];
-    }
-}
-```
-
-> *在上次打劫完一条街道之后和一圈房屋后，小偷又发现了一个新的可行窃的地区。这个地区只有一个入口，我们称之为“根”。 除了“根”之外，每栋房子有且只有一个“父“房子与之相连。一番侦察之后，聪明的小偷意识到“这个地方的所有房屋的排列类似于一棵二叉树”。 如果两个直接相连的房子在同一天晚上被打劫，房屋将自动报警。*
->
-> *计算在不触动警报的情况下，小偷一晚能够盗取的最高金额。*
->
-> *示例 1:
->
-> *输入: [3,2,3,null,3,null,1]*
->
-> *输出: 7* 
->
-> *解释: 小偷一晚能够盗取的最高金额 = 3 + 3 + 1 = 7.*
-
-```java
-class Solution {
-    Map<TreeNode, Integer> f = new HashMap<>();
-    Map<TreeNode, Integer> g = new HashMap<>();
-
-    public int rob(TreeNode root) {
-        dfs(root);
-        return Math.max(f.getOrDefault(root, 0), g.getOrDefault(root, 0));
-    }
-
-    private void dfs(TreeNode node) {
-        if (node == null) {return;}
-
-        dfs(node.left);
-        dfs(node.right);
-        f.put(node, node.val + g.getOrDefault(node.left, 0) + g.getOrDefault(node.right, 0));
-        g.put(node, Math.max(f.getOrDefault(node.left, 0), g.getOrDefault(node.left, 0)) 
-            + Math.max(f.getOrDefault(node.right, 0), g.getOrDefault(node.right, 0)));
+        return ans.peek();
     }
 }
 ```
@@ -1559,61 +1579,29 @@ class Solution {
 }
 ```
 
-## 最长递增子序列（0300）
+## 长度最小的子数组（0209）
 
-> *给你一个整数数组 nums ，找到其中最长严格递增子序列的长度。*
+> 给定一个含有 n 个正整数的数组和一个正整数 target 。
 >
-> *子序列是由数组派生而来的序列，删除（或不删除）数组中的元素而不改变其余元素的顺序。例如，[3,6,2,7] 是数组 [0,3,1,6,2,2,7] 的子序列。*
+> 找出该数组中满足其和 ≥ target 的长度最小的 连续子数组 [numsl, numsl+1, ..., numsr-1, numsr] ，并返回其长度。如果不存在符合条件的子数组，返回 0 。
+>
 
 ```java
-// DP
 class Solution {
-    public int lengthOfLIS(int[] nums) {
-        int n = nums.length;
-        int[] dp = new int[n];
-        Arrays.fill(dp, 1);
+    public int minSubArrayLen(int s, int[] nums) {
+        int left = 0, right = 0;
+        int sum = 0;
+        int min  = Integer.MAX_VALUE;
 
-        for (int i = 0; i < n; i++){
-            for (int j = 0; j < i; j++){
-                if (nums[i] > nums[j]){
-                    dp[i] = Math.max(dp[i], dp[j] + 1);
-                }
+        while (right < nums.length) {
+            sum += nums[right++];
+            while (sum >= s) {
+                min = Math.min(min, right - left);
+                sum -= nums[left++];
             }
         }
-
-        int ans = 0;
-        for (int i = 0; i < n; i++){
-            ans = Math.max(ans, dp[i]);
-        }
-        return ans;
-    }
-}
-
-// 二分
-class Solution {
-    public int lengthOfLIS(int[] nums) {
-        int[] top = new int[nums.length];
         
-        int piles = 0;
-        for (int i = 0; i < nums.length; i++){
-            int poker = nums[i];
-
-            int left = 0, right = piles;
-            while (left < right){
-                int mid = (left + right) / 2;
-                if (top[mid] > poker){
-                    right = mid;
-                } else if (top[mid] < poker){
-                    left = mid + 1;
-                }else {
-                    right = mid;
-                }
-            }
-
-            if (left == piles) {piles++;}
-            top[left] = poker;
-        }
-        return piles;
+        return min == Integer.MAX_VALUE ? 0 : min;
     }
 }
 ```
@@ -1729,7 +1717,7 @@ class Solution {
 }
 ```
 
-## 只出现过一次的数字（0136 && 0137）
+## 只出现一次的数字
 
 > *给定一个非空整数数组，除了某个元素只出现一次以外，其余每个元素均出现两次。找出那个只出现了一次的元素。*
 
@@ -1758,6 +1746,30 @@ class Solution {
         }
         for(Long s : set) {sumSet += s;}
         return (int)((3 * sumSet - sumArray) / 2);
+    }
+}
+```
+
+> 给定一个整数数组 `nums`，其中恰好有两个元素只出现一次，其余所有元素均出现两次。 找出只出现一次的那两个元素。你可以按 **任意顺序** 返回答案。
+
+```java
+class Solution {
+    public int[] singleNumber(int[] nums) {
+        Set<Integer> set = new HashSet<>();
+        for (int n : nums) {
+            if (set.contains(n)) {
+                set.remove(n);
+            }
+            else {
+                set.add(n);
+            }
+        }
+        int[] ans = new int[set.size()];
+        List<Integer> list = new ArrayList<>(set);
+        for (int i = 0; i < list.size(); i++) {
+            ans[i] = list.get(i);
+        } 
+        return ans;
     }
 }
 ```
@@ -1821,74 +1833,6 @@ class Solution {
             }
         }
         return ans;
-    }
-}
-```
-
-## 逆波兰表达式求值（0150）
-
-> *根据 逆波兰表示法，求表达式的值。*
->
-> *有效的运算符包括 +, -, \*, / 。每个运算对象可以是整数，也可以是另一个逆波兰表达式。*
->
-> *输入: ["2", "1", "+", "3", "\*"]*
->
-> *输出: 9*
->
-> *解释: 该算式转化为常见的中缀算术表达式为：((2 + 1) \* 3) = 9*
-
-```java
-class Solution {
-    public int evalRPN(String[] tokens) {
-        Stack<Integer> stack = new Stack<>();
-        int num1, num2;
-        for (String s : tokens) {
-            switch(s) {
-                case "+":
-                    num2 = stack.pop();
-                    num1 = stack.pop();
-                    stack.push(num1 + num2);
-                    break;
-                case "-":
-                    num2 = stack.pop();
-                    num1 = stack.pop();
-                    stack.push(num1 - num2);
-                    break;
-                case "*":
-                    num2 = stack.pop();
-                    num1 = stack.pop();
-                    stack.push(num1 * num2);
-                    break;
-                case "/":
-                    num2 = stack.pop();
-                    num1 = stack.pop();
-                    stack.push(num1 / num2);
-                    break;
-                default:
-                    stack.push(Integer.valueOf(s));
-                    break;
-            }
-        }
-        return stack.pop();
-    }
-}
-```
-
-## 寻找峰值（0162）
-
-> *峰值元素是指其值大于左右相邻值的元素。*
->
-> *给你一个输入数组 nums，找到峰值元素并返回其索引。数组可能包含多个峰值，在这种情况下，返回 任何一个峰值 所在位置即可。*
->
-> *你可以假设 nums[-1] = nums[n] = -∞ 。*
-
-```java
-public class Solution {
-    public int findPeakElement(int[] nums) {
-        for (int i = 0; i < nums.length - 1; i++) {
-            if (nums[i] > nums[i + 1]) {return i;}
-        }
-        return nums.length - 1;
     }
 }
 ```
@@ -2083,8 +2027,6 @@ class Solution {
 }
 ```
 
-
-
 ## 猜数字（0299）
 
 > *你写出一个秘密数字，并请朋友猜这个数字是多少。*
@@ -2212,7 +2154,7 @@ class Solution {
 }
 ```
 
-## H指数（0264）
+## H指数
 
 > *编写一个方法，计算出研究者的 h 指数。*
 
@@ -2526,6 +2468,144 @@ class Solution {
 }
 ```
 
+## 最小基因变化（0433）
+
+> 一条基因序列由一个带有8个字符的字符串表示，其中每个字符都属于 "A", "C", "G", "T"中的任意一个。
+>
+> 假设我们要调查一个基因序列的变化。一次基因变化意味着这个基因序列中的一个字符发生了变化。
+>
+> 例如，基因序列由"AACCGGTT" 变化至 "AACCGGTA" 即发生了一次基因变化。
+>
+> 与此同时，每一次基因变化的结果，都需要是一个合法的基因串，即该结果属于一个基因库。
+>
+> 现在给定3个参数 — start, end, bank，分别代表起始基因序列，目标基因序列及基因库，请找出能够使起始基因序列变化为目标基因序列所需的最少变化次数。如果无法实现目标变化，请返回 -1。
+>
+
+```java
+class Solution {
+    public int minMutation(String start, String end, String[] bank) {
+        Set<String> set = new HashSet<>(Arrays.asList(bank));
+        if (!set.contains(end)) {return -1;}
+        char[] dir = {'A', 'C', 'G', 'T'};
+
+        Queue<String> queue = new LinkedList<>();
+        queue.offer(start);
+        set.remove(start);
+        int step = 0;
+
+        while (queue.size() > 0) {
+            step++;
+            int count = queue.size();
+            for (int k = 0; k < count; k++) {
+                char[] tmp = queue.poll().toCharArray();
+                int n = tmp.length;
+                for (int i = 0; i < n; i++) {
+                    char oldChar = tmp[i];
+                    for (int j = 0; j < 4; j++) {
+                        tmp[i] = dir[j];
+                        String newGenetic = new String(tmp);
+                        if (end.equals(newGenetic)) {return step;}
+                        else if (set.contains(newGenetic)) {
+                            set.remove(newGenetic);
+                            queue.offer(newGenetic);
+                        }
+                    }
+                    tmp[i] = oldChar;
+                }
+            }
+        }
+
+        return -1;
+    }
+}
+```
+
+## 环形数组是否存在循环（0457）
+
+> 存在一个不含 0 的 环形 数组 nums ，每个 nums[i] 都表示位于下标 i 的角色应该向前或向后移动的下标个数：
+>
+> 如果 nums[i] 是正数，向前 移动 nums[i] 步
+> 如果 nums[i] 是负数，向后 移动 nums[i] 步
+> 因为数组是 环形 的，所以可以假设从最后一个元素向前移动一步会到达第一个元素，而第一个元素向后移动一步会到达最后一个元素。
+
+```java
+class Solution {
+    public boolean circularArrayLoop(int[] nums) {
+        int n = nums.length;
+        if (n == 1 || n == 0) {return false;}
+        if (n == 2 && nums[0] * nums[1] <= 0) {return false;}
+
+        int[] nums2 = new int[n];
+        for (int i = 0; i < n; i++) {nums2[i] = nums[i];}
+
+        for (int i = 0; i < n; i++) {
+            if (nums2[i] == 0) {continue;}
+            else {
+                int curNum = nums[i], curIndex = i;
+                nums2[i] = 0;
+                int circleLen = 0;
+                while (true) {
+                    int nextIndex = curIndex + curNum;
+                    if (nextIndex >= 0) {nextIndex %= n;}
+                    else {nextIndex = n - ((0 - nextIndex) % n);}
+
+                    int nextNum = nums[nextIndex];
+                    if (nextIndex == curIndex || nextNum * curNum <= 0) {break;}
+
+                    if (circleLen > n) {return true;}
+
+                    circleLen++;
+                    nums2[nextIndex] = 0;
+                    curNum = nextNum;
+                    curIndex = nextIndex;
+                }
+            }
+        }
+
+        return false;
+    }
+}
+```
+
+## 供暖器（0475）
+
+> 冬季已经来临。 你的任务是设计一个有固定加热半径的供暖器向所有房屋供暖。
+>
+> 在加热器的加热半径范围内的每个房屋都可以获得供暖。
+>
+> 现在，给出位于一条水平线上的房屋 houses 和供暖器 heaters 的位置，请你找出并返回可以覆盖所有房屋的最小加热半径。
+>
+
+```java
+class Solution {
+    // 双指针
+    public int findRadius(int[] houses, int[] heaters) {
+        // 1. 排序
+        Arrays.sort(houses);
+        Arrays.sort(heaters);
+
+        // 2. 双指针计算最大半径
+        // 下面的代码最难懂的地方是 Math.abs(heaters[i] - house) >= Math.abs(heaters[i + 1] - house)
+        // 我们举一个例子来说明这行代码的意思：
+        // houses：1，2，3，4
+        // heaters：1，4
+        // 对于 house 1，heater 1 比 heater 4 更接近 house1，所以不将 i 移动到 i + 1
+        // 对于 house 2，heater 1 比 heater 4 更接近 house2，所以不将 i 移动到 i + 1
+        // 对于 house 3，heater 4 比 heater 1 更接近 house3，所以将 i 移动到 i + 1
+        // 对于 house 4，依次类推
+        int ans = 0, idx = 0;
+        for (int h : houses) {
+            while (idx < heaters.length - 1 && Math.abs(heaters[idx] - h) >= Math.abs(heaters[idx + 1] - h)) {
+                idx++;
+            }
+            ans = Math.max(ans, Math.abs(heaters[idx] - h));
+        }
+
+        return ans;
+    }
+}
+```
+
 ## 翻转对（0493）
 
 > 给定一个数组 nums ，如果 i < j 且 nums[i] > 2*nums[j] 我们就将 (i, j) 称作一个重要翻转对。
@@ -2592,6 +2672,47 @@ class Solution {
 }
 ```
 
+## 对角线遍历（0498）
+
+> 给定一个含有 M x N 个元素的矩阵（M 行，N 列），请以对角线遍历的顺序返回这个矩阵中的所有元素，对角线遍历如下图所示。
+
+```java
+class Solution {
+    public int[] findDiagonalOrder(int[][] matrix) {
+        if (matrix == null || matrix.length == 0) {return new int[0];}
+
+        int m = matrix.length, n = matrix[0].length;
+        int[] ans = new int[m * n];
+
+        int idx = 0;
+        List<Integer> tmp = new ArrayList<>();
+
+        for (int i = 0; i < m + n - 1; i++) {
+            tmp.clear();
+
+            int row = i < n ? 0 : i - n + 1;
+            int col = i < n ? i : n - 1;
+
+            while (row < m && col > -1) {
+                tmp.add(matrix[row][col]);
+                row++;
+                col--;
+            }
+
+            if (i % 2 == 0) {
+                Collections.reverse(tmp);
+            }
+
+            for (int j = 0; j < tmp.size(); j++) {
+                ans[idx++] = tmp.get(j);
+            }
+        }
+
+        return ans;
+    }
+}
+```
+
 ## 验证IP地址
 
 > 编写一个函数来验证输入的字符串是否是有效的 IPv4 或 IPv6 地址。
@@ -2644,1250 +2765,9 @@ class Solution {
 }
 ```
 
-## 特殊数字
 
-> 快乐数：*对于一个正整数，每一次将该数替换为它每个位置上的数字的平方和。*
 
-```java
-class Solution {
-    public boolean isHappy(int n) {
-        Set<Integer> set = new HashSet<>();
-        while (!set.contains(n) && n != 1) {
-            set.add(n);
-            n = getNextNum(n);
-        }
-        return n == 1;
-    }
-
-    public int getNextNum(int n) {
-        int ans = 0;
-        while (n > 0) {
-            int d = n % 10;
-            ans += d * d;
-            n /= 10;
-        }
-        return ans;
-    }
-}
-```
-
-> *统计所有小于非负整数 n 的质数的数量*
-
-```java
-class Solution {
-    public int countPrimes(int n) {
-        int ans = 0;
-        for (int i = 2; i < n; i++) {
-            ans += isPrime(i) ? 1 : 0;
-        }
-        return ans;
-    }
-
-    public boolean isPrime(int n) {
-        for (int i = 2; i * i <= n; i++) {
-            if (n % i == 0) {return false;}
-        }
-        return true;
-    }
-}
-```
-
-> 丑数：*丑数就是只包含质因数 2, 3, 5 的正整数。*
->
-
-```java
-class Solution {
-    public boolean isUgly(int num) {
-        while (num > 1 && (num % 2 == 0 || num % 3 == 0 || num % 5 == 0)) {
-            if (num % 2 == 0) {num /= 2;}
-            if (num % 3 == 0) {num /= 3;}
-            if (num % 5 == 0) {num /= 5;}
-        }
-        return num == 1;
-    }
-}
-```
-
-> *编写一个程序，找出第 n 个丑数。*
-
-```java
-class Solution {
-    public int nthUglyNumber(int n) {
-        int[] dp = new int[n];
-        dp[0] = 1;
-        int index2 = 0, index3 = 0, index5 = 0;
-        for (int i = 1; i < n; i++) {
-            int minValue = Math.min(Math.min(dp[index2] * 2, dp[index3] * 3), dp[index5] * 5);
-            dp[i] = minValue;
-            if (dp[index2] * 2 == minValue) {index2++;}
-            if (dp[index3] * 3 == minValue) {index3++;}
-            if (dp[index5] * 5 == minValue) {index5++;}
-        }
-        return dp[n - 1];
-    }
-}
-```
-
-> *编写一段程序来查找第 n 个超级丑数。*
->
-> *超级丑数是指其所有质因数都是长度为 k 的质数列表 primes 中的正整数。*
-
-```java
-class Solution {
-    public class SuperUglyNumber {
-        public int nthSuperUglyNumber(int n, int[] primes) {
-            int len = primes.length;
-            int dp[] = new int[n];
-            dp[0] = 1;
-            /*梳理一下思路，dp[i]保存的是第i个超级丑数*/
-            /*index[i]表示的是primes里面的第i个数下一个将要相乘的数在dp中的位置，
-            反过来想，对于每个primes来说，我们都需要和dp中已经算出来的结果相乘算，
-            然后取最小的那个作为新的dp元素
-            索引index实际上表示是这个素数已经和dp中的哪个位置结合了，下一个位置的坐标是多少 */
-            int index[] = new int[len];
-            /*可能存在重复的丑数，所以呢，不要在for循环里面加break，把所有的情况都+1*/
-            for (int i = 1; i < n; i++) {
-                int min = Integer.MAX_VALUE;
-                /*遍历对比一下值，找出最小的，*/
-                for (int j = 0; j < len; j++) {
-                    if (min > primes[j] * dp[index[j]]) {
-                        min = primes[j] * dp[index[j]];//这个地方就是当前质因数和他要结合的dp
-                    }
-                }
-                dp[i] = min;
-                /*那个素数要乘以dp的坐标index要加1，向后推一个位
-                * 如果存在重复的值，也就是说不同的质因数相乘，得出来相同的结果了，
-                * 我们就把这几个位置都+1，这样就可以避免出现重复的值了。
-                * 你想想，假如你找到了对应的素数的index，把它加1之后就break掉，那么后面的数也可以算出这个结果，
-                * 下次循环的时候，势必会把这个重复的数当成下一个dp，因为这个数肯定要比下一个丑数小
-                * 所以我们在for循环中不要加break；*/
-                for (int j = 0; j < len; j++) {
-                    if (min == primes[j] * dp[index[j]]) {
-                        index[j]++;
-                    }
-                }
-
-            }
-            return dp[n - 1];
-        }
-    }
-}
-```
-
-
-> 完全平方数：
->
-> *给定正整数 n，找到若干个完全平方数（比如 1, 4, 9, 16, ...）使得它们的和等于 n。你需要让组成和的完全平方数的个数最少。*
-
-```java
-class Solution {
-    public int numSquares(int n) {
-        int[] dp = new int[n + 1];
-        Arrays.fill(dp, Integer.MAX_VALUE);
-        dp[0] = 0;
-
-        int maxIndex = (int)Math.sqrt(n) + 1;
-        int[] squareNums = new int[maxIndex];
-        for (int i = 1; i < maxIndex; i++) {squareNums[i] = i * i;}
-
-        for (int i = 1; i <= n; i++) {
-            for (int j = 1; j < maxIndex; j++) {
-                if (i < squareNums[j]) {break;}
-                dp[i] = Math.min(dp[i], dp[i - squareNums[j]] + 1);
-            }
-        }
-
-        return dp[n];
-    }
-}
-```
-
-# 3 DP 
-
-## 三角形最小路径和（0120）
-
-> *给定一个三角形 triangle ，找出自顶向下的最小路径和。*
-
-```java
-class Solution {
-    public int minimumTotal(List<List<Integer>> triangle) {
-        int n = triangle.size();
-        int[][] dp = new int[n][n];
-        dp[0][0] = triangle.get(0).get(0);
-        for (int i = 1; i < n; i++) {
-            for (int j = 0; j <= i; j++) {
-                if (j == 0) {
-                    dp[i][j] = triangle.get(i).get(j) + dp[i - 1][j];
-                }
-                else if (j == i) {
-                    dp[i][j] = triangle.get(i).get(j) + dp[i - 1][j - 1];
-                }
-                else {
-                    dp[i][j] = triangle.get(i).get(j) + Math.min(dp[i - 1][j - 1], dp[i - 1][j]);
-                }
-            }
-        }
-
-        int ans = Integer.MAX_VALUE;
-        for (int i = 0; i < n; i++) {
-            if (dp[n - 1][i] < ans) {
-                ans = dp[n - 1][i];
-            }
-        }
-
-        return ans;
-    }
-}
-```
-
-## 计算各个位数不同的数字个数（0357）
-
-> *给定一个非负整数 n，计算各位数字都不同的数字 x 的个数，其中 0 ≤ x < 10n 。*
-
-```java
-class Solution {
-    public int countNumbersWithUniqueDigits(int n) {
-        //个位为0，
-        if(n == 0) {return 1;}
-        int ans = 0;
-        int[] dp = new int[n];
-        dp[0] = 9;
-        //分别计算 i位数 不包含0时对应的数量
-        for (int i = 1; i < n; i++) {
-            dp[i] = dp[i - 1] * (9 - i);
-        }
-        //最终结果加上不包含0的情况
-        for (int i = 0; i < n ; i++) {
-            ans += dp[i];
-        }
-        //最终结果加上包含0的情况
-        for (int i = 2; i <= n; i++) {
-            ans += dp[i - 2] * (i - 1);
-        }
-        //加上0这种特殊情况
-        return ans + 1;
-    }
-}
-```
-
-## 乘积最大子数组（0152）
-
-> *给你一个整数数组 nums ，请你找出数组中乘积最大的连续子数组（该子数组中至少包含一个数字），并返回该子数组所对应的乘积。*
-
-```java
-class Solution {
-    public int maxProduct(int[] nums) {
-        int n = nums.length;
-        int[] maxDp = new int[n];
-        int[] minDp = new int[n];
-        maxDp[0] = nums[0];
-        minDp[0] = nums[0];
-
-        int ans = nums[0];
-        for (int i = 1; i < n; i++) {
-            maxDp[i] = Math.max(nums[i], Math.max(nums[i] * maxDp[i - 1], nums[i] * minDp[i - 1]));
-            minDp[i] = Math.min(nums[i], Math.min(nums[i] * maxDp[i - 1], nums[i] * minDp[i - 1]));
-            ans = Math.max(ans, maxDp[i]);
-        }
-
-        return ans;
-    }
-}
-```
-
-## 地下城游戏（0174）
-
-> *编写一个函数来计算确保骑士能够拯救到公主所需的最低初始健康点数。*
-
-```java
-class Solution {
-    public int calculateMinimumHP(int[][] dungeon) {
-        int m = dungeon.length, n = dungeon[0].length;
-        int[][] dp = new int[m + 1][n + 1];
-        for (int i = 0; i <= m; ++i) {Arrays.fill(dp[i], Integer.MAX_VALUE);}
-        dp[m][n - 1] = dp[m - 1][n] = 1;
-
-        // needMin + globalDun[i][j] = Math.min(dp[i + 1][j], dp[i][j + 1])
-        for (int i = m - 1; i >= 0; i--) {
-            for (int j = n - 1; j >= 0; j--) {
-                int minn = Math.min(dp[i + 1][j], dp[i][j + 1]);
-                dp[i][j] = Math.max(minn - dungeon[i][j], 1);
-            }
-        }
-
-        return dp[0][0];
-    }
-}
-```
-
-## 最大正方形（0221）
-
-> *在一个由 '0' 和 '1' 组成的二维矩阵内，找到只包含 '1' 的最大正方形，并返回其面积。*
-
-```java
-class Solution {
-    public int maximalSquare(char[][] matrix) {
-        int ans = 0;
-        if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {return 0;}
-
-        int m = matrix.length, n = matrix[0].length;
-        int[][] dp = new int[m][n];
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                if (matrix[i][j] == '1') {
-                    if (i == 0 || j == 0) {dp[i][j] = 1;}
-                    else {
-                        dp[i][j] = Math.min(Math.min(dp[i - 1][j], dp[i][j - 1]), dp[i - 1][j - 1]) + 1;
-                    }
-                    ans = Math.max(ans, dp[i][j]);
-                }
-            }
-        }
-
-        return ans * ans;
-    }
-}
-```
-
-## 零钱兑换（0322）
-
-> *给定不同面额的硬币 coins 和一个总金额 amount。*
->
-> *编写一个函数来计算可以凑成总金额所需的最少的硬币个数。如果没有任何一种硬币组合能组成总金额，返回 -1。*
->
-> *可以认为每种硬币的数量是无限的。*
-
-```java
-public class Solution {
-    public int coinChange(int[] coins, int amount) {
-        int max = amount + 1;
-        int[] dp = new int[amount + 1];
-        Arrays.fill(dp, max);
-        
-        dp[0] = 0;
-        for (int i = 1; i <= amount; i++) {
-            for (int j = 0; j < coins.length; j++) {
-                if (coins[j] <= i) {
-                    dp[i] = Math.min(dp[i], 1 + dp[i - coins[j]]);
-                }
-            }
-        }
-        return dp[amount] > amount ? -1 : dp[amount];
-    }
-}
-```
-
-## 俄罗斯套娃（0354）
-
-> *给定一些标记了宽度和高度的信封，宽度和高度以整数对形式 (w, h) 出现。当另一个信封的宽度和高度都比这个信封大的时候，这个信封就可以放进另一个信封里，如同俄罗斯套娃一样。*
->
-> *请计算最多能有多少个信封能组成一组“俄罗斯套娃”信封（即可以把一个信封放到另一个信封里面）。*
-
-```java
-class Solution {
-    public int maxEnvelopes(int[][] envelopes) {
-        int n = envelopes.length;
-        Arrays.sort(envelopes, new Comparator<int[]>(){
-            public int compare(int[] a, int[] b){
-                return a[0] == b[0] ? b[1] - a[1] : a[0] - b[0];
-            }
-        });
-
-        int[] height = new int[n];
-        for (int i = 0;i < n; i++){
-            height[i] = envelopes[i][1];
-        }
-        return lengthOfLIS(height);
-    }
-
-    public int lengthOfLIS(int[] height){
-        int n = height.length;
-        int[] dp = new int[n];
-        Arrays.fill(dp, 1);
-
-        for (int i = 0; i < n; i++){
-            for (int j = 0; j < i; j++){
-                if (height[i] > height[j]){
-                    dp[i] = Math.max(dp[i], dp[j] + 1);
-                }
-            }
-        }
-
-        int ans = 0;
-        for (int i = 0; i < n; i++){
-            ans = Math.max(ans, dp[i]);
-        }
-        return ans;
-    }
-} 
-```
-
-## 矩形区域不超过 K 的最大数值和（0363）
-
-> *给定一个非空二维矩阵 matrix 和一个整数 k，找到这个矩阵内部不大于 k 的最大矩形和。*
-
-```java
-class Solution {
-    public int maxSumSubmatrix(int[][] matrix, int k) {
-        int m = matrix.length, n = matrix[0].length;
-        int ans = Integer.MIN_VALUE;
-        
-        for (int i1 = 1; i1 <= m; i1++) {
-            for (int j1 = 1; j1 <= n; j1++) {
-                int[][] dp = new int[m + 1][n + 1];
-                dp[i1][j1] = matrix[i1 - 1][j1 - 1];
-                
-                for (int i2 = i1; i2 <= m; i2++) {
-                    for (int j2 = j1; j2 <= n; j2++) {
-                        dp[i2][j2] = dp[i2 - 1][j2] + dp[i2][j2 - 1] - dp[i2 - 1][j2 - 1] + matrix[i2 - 1][j2 - 1];
-                        if (dp[i2][j2] <= k && dp[i2][j2] > ans) {
-                            ans = dp[i2][j2];
-                        }
-                    }
-                }
-            }
-        }
-        return ans;
-    }
-}
-```
-
-## 最大整除子集（0368）
-
-> *给出一个由无重复的正整数组成的集合，找出其中最大的整除子集，子集中任意一对 (Si，Sj) 都要满足：Si % Sj = 0 或 Sj % Si = 0。*
->
-> *如果有多个目标子集，返回其中任何一个均可。*
-
-```java
-class Solution {
-    public List<Integer> largestDivisibleSubset(int[] nums) {
-        int n = nums.length;
-        if (n == 0) {return new ArrayList<>();}
-        Arrays.sort(nums);
-
-        List[] dp = new List[n];
-        dp[0] = new ArrayList<>();
-        dp[0].add(nums[0]);
-
-        List<Integer> ans = dp[0];
-        for (int i = 1; i < n; i++) {
-            dp[i] = new ArrayList<>();
-            dp[i].add(nums[i]);
-
-            for (int j = 0; j < i; j++) {
-                if (nums[i] % nums[j] == 0 && dp[i].size() < dp[j].size() + 1) {
-                    dp[i] = new ArrayList(dp[j]);
-                    dp[i].add(nums[i]);
-                }
-            }
-
-            if (ans.size() < dp[i].size()) {ans = dp[i];}
-        }
-
-        return ans;
-    }
-}
-```
-
-## 猜数字大小（0375）
-
-> *我们正在玩一个猜数游戏，游戏规则如下：*
->
-> *我从 1 到 n 之间选择一个数字，你来猜我选了哪个数字。*
->
-> *每次你猜错了，我都会告诉你，我选的数字比你的大了或者小了。*
->
-> *然而，当你猜了数字 x 并且猜错了的时候，你需要支付金额为 x 的现金。直到你猜到我选的数字，你才算赢得了这个游戏。*
-
-```java
-class Solution {
-    public int getMoneyAmount(int n) {
-        if (n == 1) {return 0;}
-        int[][] dp = new int[n + 1][n + 1];
-
-        for (int i = 1; i < n + 1; i++) {
-            for (int j = i - 1; j > 0; j--) {
-                int min = Integer.MAX_VALUE, left = 0, right = 0;
-                for (int k = i; k > j - 1; k--) {
-                    left = (k == j || j == k - 1) ? -1 : dp[k - 1][j];
-                    right = (k == i || i == k + 1) ? -1 : dp[i][k + 1];
-                    min = (left == -1 && right == -1) ? k : Math.min(min, k + Math.max(left, right));
-                }
-                dp[i][j] = min;
-            }
-        }
-        return dp[n][1];
-    }
-}
-```
-
-## 分割数组的最大值（0410）
-
-> *给定一个非负整数数组 nums 和一个整数 m ，你需要将这个数组分成 m 个非空的连续子数组。*
->
-> *设计一个算法使得这 m 个子数组各自和的最大值最小。*
-
-```java
-class Solution {
-    public int splitArray(int[] nums, int m) {
-        int n = nums.length;
-        int[][] dp = new int[n + 1][m + 1];
-        for (int i = 0; i <= n; i++) {Arrays.fill(dp[i], Integer.MAX_VALUE);}
-
-        int[] sum = new int[n + 1];
-        for (int i = 0; i < n; i++) {sum[i + 1] = sum[i] + nums[i];}
-
-        dp[0][0] = 0;
-        for (int i = 1; i <= n; i++) {
-            for (int j = 1; j <= Math.min(i, m); j++) {
-                for (int k = 0; k < i; k++) {
-                    dp[i][j] = Math.min(dp[i][j], Math.max(dp[k][j - 1], sum[i] - sum[k]));
-                }
-            }
-        }
-
-        return dp[n][m];
-    }
-}
-```
-
-## 分割等和子集（0416）
-
-> *给定一个只包含正整数的非空数组。是否可以将这个数组分割成两个子集，使得两个子集的元素和相等。*
-
-```java
-class Solution {
-    public boolean canPartition(int[] nums) {
-        int n = nums.length;
-        if (n < 2) {return false;}
-
-        int sum = 0, maxNum = 0;
-        for (int num : nums) {
-            sum += num;
-            maxNum = Math.max(maxNum, num);
-        }
-        if ((sum & 1) != 0) {return false;}
-        int target = sum / 2;
-        if (maxNum > target) {return false;}
-
-        // dp[i][j]表示从数组的[0,i]下标范围内选取若干个正整数，是否存在一种方案的和为j
-        boolean[][] dp = new boolean[n][target + 1];
-        for (int i = 0; i < n; i++) {dp[i][0] = true;}
-        dp[0][nums[0]] = true;
-
-        for (int i = 1; i < n; i++) {
-            int curNum = nums[i];
-            for (int j = 1; j <= target; j++) {
-                if (j >= curNum) {
-                    dp[i][j] = dp[i - 1][j] || dp[i - 1][j - curNum];
-                }
-                else {
-                    dp[i][j] = dp[i - 1][j];
-                }
-            }
-        }
-
-        return dp[n - 1][target];
-    }
-}
-```
-
-## 一和零（0474）
-
-> 给你一个二进制字符串数组 strs 和两个整数 m 和 n 。
->
-> 请你找出并返回 strs 的最大子集的大小，该子集中 最多 有 m 个 0 和 n 个 1 。
->
-> 如果 x 的所有元素也是 y 的元素，集合 x 是集合 y 的 子集 。
->
-
-```java
-class Solution {
-    public int findMaxForm(String[] strs, int m, int n) {
-        int[][] dp = new int[m + 1][n + 1];
-        for (String s: strs) {
-            int[] count = countString(s);
-            for (int zeroes = m; zeroes >= count[0]; zeroes--) {
-                for (int ones = n; ones >= count[1]; ones--) {
-                    dp[zeroes][ones] = Math.max(dp[zeroes][ones], 1 + dp[zeroes - count[0]][ones - count[1]]);
-                }
-            }
-        }
-        return dp[m][n];
-    }
-
-    private static int[] countString(String s) {
-        int[] dir = new int[2];
-        for (int i = 0; i < s.length(); i++) {
-            if (s.charAt(i) == '0') {dir[0]++;}
-            else {dir[1]++;}
-        }
-        return dir;
-    }
-}
-```
-
-## 预测赢家（0486）
-
-> *给定一个表示分数的非负整数数组。 玩家 1 从数组任意一端拿取一个分数，随后玩家 2 继续从剩余数组任意一端拿取分数，然后玩家 1 拿，…… 。每次一个玩家只能拿取一个分数，分数被拿取之后不再可取。直到没有剩余分数可取时游戏结束。最终获得分数总和最多的玩家获胜。*
->
-> *给定一个表示分数的数组，预测玩家1是否会成为赢家。你可以假设每个玩家的玩法都会使他的分数最大化。*
-
-```java
-// 回溯
-class Solution {
-    public boolean PredictTheWinner(int[] nums) {
-        return myMethod(nums, 0, nums.length - 1, 1) >= 0;
-    }
-
-    private int myMethod(int[] nums, int start, int end, int turn) {
-        if (start == end) {
-            return nums[start] * turn;
-        }
-        int scoreStart = nums[start] * turn + myMethod(nums, start + 1, end, -turn);
-        int scoreEnd = nums[end] * turn + myMethod(nums, start, end - 1, -turn);
-        
-        if(turn == 1) {return Math.max(scoreStart, scoreEnd);}
-        else {return Math.min(scoreStart, scoreEnd);}
-    }
-}
-
-// DP : dp[i][j]表示当数组剩下的部分为下标i到j时，当前玩家与另一个玩家的分数之差的最大值
-class Solution {
-    public boolean PredictTheWinner(int[] nums) {
-        int n = nums.length;
-        int[][] dp = new int[n][n];
-        for (int i = 0; i < n; i++) {dp[i][i] = nums[i];}
-
-        for (int i = n - 2; i >= 0; i--) {
-            for (int j = i + 1; j < n; j++) {
-                dp[i][j] = Math.max(nums[i] - dp[i + 1][j], nums[j] - dp[i][j - 1]);
-            }
-        }
-
-        return dp[0][n - 1] >= 0;
-    }
-}
-```
-
-
-
-# 4 位运算
-
-## 颠倒二进制位（0190）
-
-> *颠倒给定的 32 位无符号整数的二进制位。*
->
-> *输入: 00000010100101000001111010011100*
->
-> *输出: 00111001011110000010100101000000*
-
-```java
-public class Solution {
-    // you need treat n as an unsigned value
-    public int reverseBits(int n) {
-        int ans = 0;
-        for (int i = 0; i < 32; i++) {
-            ans = ans << 1;
-            ans = (n & 1) | ans;
-            n = n >> 1;
-        }
-        return ans;
-    }
-}
-```
-
-## 位1的个数（0191）
-
-> *编写一个函数，输入是一个无符号整数（以二进制串的形式），返回其二进制表达式中数字位数为 '1' 的个数（也被称为汉明重量）。*
-
-```java
-public class Solution {
-    // you need to treat n as an unsigned value
-    public int hammingWeight(int n) {
-        int count = 0;
-        for (int i = 0; i < 32; i++) {
-            count += (n & 1);
-            n = n >> 1;
-        }
-        return count;
-    }
-}
-```
-
-## 数字范围按位与（0201）
-
-> *给定范围 [m, n]，其中 0 <= m <= n <= 2147483647，返回此范围内所有数字的按位与（包含 m, n 两端点）。*
-
-```java
-class Solution {
-    public int rangeBitwiseAnd(int m, int n) {
-        while (m < n) {
-            // 抹去最右边的 1
-            n = n & (n - 1);
-        }
-        return n;
-    }
-}
-```
-
-## 数组中两个数的最大异或值
-
-> *给定一个非空数组，数组中元素为 a0, a1, a2, … , an-1，其中 0 ≤ ai < 231 。*
->
-> *找到 ai 和aj 最大的异或 (XOR) 运算结果，其中0 ≤ i, j < n 。*
-
-```java
-class Solution {
-    public int findMaximumXOR(int[] nums) {
-        int maxNum = nums[0];
-        for (int num : nums) {maxNum = Math.max(maxNum, num);}
-        int n = (Integer.toBinaryString(maxNum)).length();
-
-        int ans = 0, curXor;
-        Set<Integer> prefixes = new HashSet<>();
-        for (int i = n - 1; i >= 0; i--) {
-            ans = ans << 1;
-            curXor = ans | 1;
-            prefixes.clear();
-
-            for (int num : nums) {
-                prefixes.add(num >> i);
-            }
-            for (int p : prefixes) {
-                if (prefixes.contains(curXor ^ p)) {
-                    ans = curXor;
-                    break;
-                }
-            }
-        }
-
-        return ans;
-    }
-}
-```
-
-
-
-# 5 栈
-
-## 有效的括号（0020）
-
-> *给定一个只包括 '('，')'，'{'，'}'，'['，']' 的字符串，判断字符串是否有效。*
->
-> *输入: "()[]{}"*
->
-> *输出: true*
-
-```java
-class Solution {
-    public boolean isValid(String s) {
-        if (s.length() % 2 != 0) {return false;}
-        Map<Character, Character> pairs = new HashMap<Character, Character>() {{
-            put(')', '(');
-            put(']', '[');
-            put('}', '{');
-        }};
-
-        Stack<Character> stack = new Stack<>();
-
-        for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            if (pairs.containsKey(c)) {
-                if (stack.isEmpty() || stack.peek() != pairs.get(c)) {
-                    return false;
-                }
-                stack.pop();
-            } else {
-                stack.push(c);
-            }
-        }
-        return stack.isEmpty();
-    }
-}
-```
-
-## 柱状图中最大的矩形（0084）
-
-> *给定 n 个非负整数，用来表示柱状图中各个柱子的高度。每个柱子彼此相邻，且宽度为 1 。*
->
-> *求在该柱状图中，能够勾勒出来的矩形的最大面积。*
-
-```java
-class Solution {
-    public int largestRectangleArea(int[] heights) {
-        int n = heights.length;
-        int[] tmp = new int[n + 2];
-        System.arraycopy(heights, 0, tmp, 1, n);
-
-        Stack<Integer> stack = new Stack<>();
-        int ans = 0;
-        for (int i = 0; i < n + 2; i++) {
-            while (!stack.isEmpty() && tmp[i] < tmp[stack.peek()]) {
-                int h = tmp[stack.pop()];
-                ans = Math.max(ans, (i - stack.peek() - 1) * h);
-            }
-            stack.push(i);
-        }
-
-        return ans;
-    }
-}
-```
-
-## 计算器
-
-> *实现一个基本的计算器来计算一个简单的字符串表达式 s 的值。*
-
-```java
-// + - * / ()
-class Solution {
-    public int calculate(String s) {
-        Deque<Character> deque = new LinkedList<>();
-        for (int i = 0; i < s.length(); i++) {
-            deque.offerLast(s.charAt(i));
-        }
-        return myMethod(deque);
-    }
-
-    private static int myMethod(Deque<Character> deque) {
-        Stack<Integer> stack = new Stack<>();
-
-        char sign = '+';
-        int num = 0;
-        while (deque.size() > 0) {
-            char c = deque.pollFirst();
-            if (Character.isDigit(c)) {
-                num = 10 * num + (c - '0');
-            }
-            if (c == '(') {
-                num = myMethod(deque);
-            }
-
-            if ((!Character.isDigit(c) && c !=' ') || deque.size() == 0) {
-                if (sign == '+') {stack.push(num);}
-                else if (sign == '-') {stack.push(-num);}
-                else if (sign == '*') {stack.push(stack.pop() * num);}
-                else if (sign == '/') {stack.push(stack.pop() / num);}
-
-                num = 0;
-                sign = c;
-            }
-
-            if (c == ')') {break;}
-        }
-
-        int ans = 0;
-        for (int n : stack) {
-            ans += n;
-        }
-        return ans;
-    }
-}
-```
-
-## 移掉K位数字（0402）
-
-> *给定一个以字符串表示的非负整数 num，移除这个数中的 k 位数字，使得剩下的数字最小。*
-
-```java
-class Solution {
-    public String removeKdigits(String num, int k) {
-        Deque<Character> deque = new LinkedList<>();
-        for (int i = 0; i < num.length(); i++) {
-            char c = num.charAt(i);
-            while (!deque.isEmpty() && k > 0 && deque.peekLast() > c) {
-                deque.pollLast();
-                k--;
-            }
-            deque.offerLast(c);
-        }
-
-        for (int i = 0; i < k; i++) {
-            deque.pollLast();
-        }
-
-        StringBuilder ans = new StringBuilder();
-        boolean leadingZero = true;
-        while (!deque.isEmpty()) {
-            char curNum = deque.pollFirst();
-            if (leadingZero && curNum == '0') {continue;}
-            leadingZero = false;
-            ans.append(curNum);
-        }
-
-        return ans.length() == 0 ? "0" : ans.toString();
-    }
-}
-```
-
-## 132模式（0456）
-
-```java
-class Solution {
-    public boolean find132pattern(int[] nums) {
-        int n = nums.length;
-        int[] curMin = new int[n];
-        curMin[0] = nums[0];
-
-        for (int i = 1; i < n; i++) {curMin[i] = Math.min(curMin[i - 1], nums[i]);}
-        Stack<Integer> stack = new Stack<>();
-
-        for (int i = n - 1; i >= 0; i--) {
-            while (!stack.isEmpty() && stack.peek() <= curMin[i]) {stack.pop();}
-            if (!stack.isEmpty() && nums[i] > stack.peek()) {return true;}
-            stack.push(nums[i]);
-        }
-
-        return false;
-    }
-}
-```
-
-
-
-# 6 二分
-
-## 搜索旋转排序数组（0033 && 0081）
-
-> *升序排列的整数数组 nums 在预先未知的某个点上进行了旋转（例如， [0,1,2,4,5,6,7] 经旋转后可能变为 [4,5,6,7,0,1,2] ）。*
->
-> *请你在数组中搜索 target ，如果数组中存在这个目标值，则返回它的索引，否则返回 -1 。*
->
-> *输入：nums = [4,5,6,7,0,1,2], target = 0*
->
-> *输出：4*
-
-```java
-class Solution {
-    public int search(int[] nums, int target) {
-        int n = nums.length;
-        if (n == 0) {return -1;}
-        if (n == 1) {return nums[0] == target ? 0 : -1;}
-        int left = 0, right = n - 1;
-
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            if (nums[mid] == target) {return mid;}
-            if (nums[left] <= nums[mid]) {
-                if (nums[left] <= target && nums[mid] > target) {
-                    right = mid - 1;
-                }
-                else {
-                    left = mid + 1;
-                }
-            }
-            else {
-                if (nums[mid] < target && nums[right] >= target) {
-                    left = mid + 1;
-                } 
-                else {
-                    right = mid - 1;
-                }
-            }
-        }
-        return -1;
-    }
-}
-```
-
-> *假设按照升序排序的数组在预先未知的某个点上进行了旋转。*
->
-> *( 例如，数组 [0,0,1,2,2,5,6] 可能变为 [2,5,6,0,0,1,2] )。*
->
-> *编写一个函数来判断给定的目标值是否存在于数组中。若存在返回 true，否则返回 false。*
-
-```java
-class Solution {
-    public boolean search(int[] nums, int target) {
-        int n = nums.length;
-        if (n == 0) {return false;}
-        if (n == 1) {return nums[0] == target;}
-        int left = 0, right = n - 1;
-
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            if (nums[mid] == target) {return true;}
-            if (nums[left] == nums[mid]) {
-                left++;
-                continue;
-            }
-            if (nums[left] <= nums[mid]) {
-                if (nums[left] <= target && target < nums[mid]) {
-                    right = mid - 1;
-                }
-                else {
-                    left = mid + 1;
-                }
-            }
-            else {
-                if (nums[mid] < target && target <= nums[right]) {
-                    left = mid + 1;
-                }
-                else {
-                    right = mid - 1;
-                }
-            }
-        }
-
-        return false;
-    }
-}
-```
-
-## 在排序数组中查找元素的第一个和最后一个位置（0034）
-
-> *给定一个按照升序排列的整数数组 nums，和一个目标值 target。找出给定目标值在数组中的开始位置和结束位置。*
->
-> *如果数组中不存在目标值 target，返回 [-1, -1]。*
->
-> *输入：nums = [5,7,7,8,8,10], target = 8*
->
-> *输出：[3,4]*
-
-```java
-class Solution {
-    public int[] searchRange(int[] nums, int target) {
-        int leftIndex = binarySearch(nums, target, true);
-        int rightIndex = binarySearch(nums, target, false);
-        if (leftIndex <= rightIndex && rightIndex < nums.length && nums[leftIndex] == target && nums[rightIndex] == target) {
-            return new int[]{leftIndex, rightIndex};
-        }
-        return new int[]{-1, -1};
-    }
-
-    public int binarySearch(int[] nums, int target, boolean lower) {
-        int left = 0, right = nums.length - 1;
-        while (left <= right) {
-            int mid = (left + right) / 2;
-            if (nums[mid] > target || (lower && nums[mid] >= target)) {
-                right = mid - 1;
-            }
-            else {
-                left = mid + 1;
-            }
-        }
-        return lower ? left : right;
-    }
-}
-```
-
-## 寻找旋转排序数组中的最小值（0153）
-
-> *假设按照升序排序的数组在预先未知的某个点上进行了旋转。例如，数组 [0,1,2,4,5,6,7] 可能变为 [4,5,6,7,0,1,2] 。*
->
-> *请找出其中最小的元素。*
-
-```java
-class Solution {
-    public int findMin(int[] nums) {
-        int left = 0;
-        int right = nums.length - 1;
-        while (left < right) {
-            int mid = left + (right - left) / 2;
-            if (nums[mid] < nums[right]) {
-                right = mid;
-            } else if (nums[mid] > nums[right]) {
-                left = mid + 1;
-            } else {
-                right -= 1;
-            }
-        }
-        return nums[left];
-    }
-}
-```
-
-## x的平方根（0069）
-
-> *实现 int sqrt(int x) 函数。*
-
-```java
-class Solution {
-    public int mySqrt(int x) {
-        int left = 0, right = x;
-        int ans = -1;
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            if ((long)mid * mid <= x) {
-                ans = mid;
-                left = mid + 1;
-            }
-            else {
-                right = mid - 1;
-            }
-        }
-        return ans;
-    }
-}
-```
-
-## 第一个错误的版本（0278）
-
-> *假设你有 n 个版本 [1, 2, ..., n]，你想找出导致之后所有版本出错的第一个错误的版本。*
-
-```java
-public class Solution extends VersionControl {
-    public int firstBadVersion(int n) {
-        int left = 1, right = n;
-        while (left < right) {
-            int mid = left + (right - left) / 2;
-            if (isBadVersion(mid)) {
-                right = mid;
-            }
-            else {
-                left = mid + 1;
-            }
-        }
-        return left;
-    }
-}
-```
-
-## 寻找重复数（0287）
-
-> *给定一个包含 n + 1 个整数的数组 nums ，其数字都在 1 到 n 之间（包括 1 和 n），可知至少存在一个重复的整数。*
->
-> *假设 nums 只有 一个重复的整数 ，找出 这个重复的数 。*
-
-```java
-class Solution {
-    public int findDuplicate(int[] nums) {
-        int n = nums.length;
-        int left = 1, right = n - 1;
-
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            int count = 0;
-            for (int i = 0; i < n; i++) {
-                if (nums[i] <= mid) {
-                    count++;
-                }
-            }
-
-            // 等价于找右边界
-            if (count <= mid) {
-                left = mid + 1;
-            }
-            else {
-                right = mid - 1;
-            }
-        }
-        return right + 1;
-    }
-}
-```
-
-## 有序数组中第K小的元素（0378）
-
-> *给你一个 n x n 矩阵 matrix ，其中每行和每列元素均按升序排序，找到矩阵中第 k 小的元素。*
-
-```java
-class Solution {
-    public int kthSmallest(int[][] matrix, int k) {
-        int n = matrix.length;
-        int left = matrix[0][0];
-        int right = matrix[n - 1][n - 1];
-        while (left < right) {
-            int mid = left + ((right - left) >> 1);
-            if (check(matrix, mid, k, n)) {
-                right = mid;
-            } else {
-                left = mid + 1;
-            }
-        }
-        return left;
-    }
-
-    public boolean check(int[][] matrix, int mid, int k, int n) {
-        int i = n - 1;
-        int j = 0;
-        int num = 0;
-        while (i >= 0 && j < n) {
-            if (matrix[i][j] <= mid) {
-                num += i + 1;
-                j++;
-            } else {
-                i--;
-            }
-        }
-        return num >= k;
-    }
-}
-```
-
-## 反转字符串中的元音字母（0345）
-
-> *编写一个函数，以字符串作为输入，反转该字符串中的元音字母。*
-
-```java
-class Solution {
-    private final static HashSet<Character> vowels = new HashSet<>(Arrays.asList('a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U'));
-
-    public String reverseVowels(String s) {
-        if (s.length() == 0) {return s;}
-        int left = 0, right = s.length() - 1;
-        char[] c = new char[s.length()];
-
-        while (left <= right) {
-            char c1 = s.charAt(left);
-            char c2 = s.charAt(right);
-            if (!vowels.contains(c1)) {
-                c[left++] = c1;
-            }
-            else if (!vowels.contains(c2)) {
-                c[right--] = c2;
-            }
-            else {
-                c[left++] = c2;
-                c[right--] = c1;
-            }
-        }
-
-        return String.valueOf(c);
-    }
-}
-```
-
-## 有序数组中第K小的元素（0378）
-
-> *给你一个 n x n 矩阵 matrix ，其中每行和每列元素均按升序排序，找到矩阵中第 k 小的元素。*
-
-```java
-class Solution {
-    public int kthSmallest(int[][] matrix, int k) {
-        int n = matrix.length;
-        int left = matrix[0][0];
-        int right = matrix[n - 1][n - 1];
-        while (left < right) {
-            int mid = left + ((right - left) >> 1);
-            if (check(matrix, mid, k, n)) {
-                right = mid;
-            } else {
-                left = mid + 1;
-            }
-        }
-        return left;
-    }
-
-    private boolean check(int[][] matrix, int mid, int k, int n) {
-        int i = n - 1, j = 0;
-        int count = 0;
-        while (i >= 0 && j < n) {
-            if (matrix[i][j] <= mid) {
-                count += (i + 1);
-                j++;
-            }
-            else {
-                i--;
-            }
-        }
-        return count >= k;
-    }
-}
-```
-
-# 7 数据结构
+# 4 数据结构
 
 ## LRU缓存机制（0146）
 
@@ -4047,8 +2927,6 @@ private final int CACHE_SIZE;
 }
 ```
 
-
-
 ## 最小栈（0155）
 
 > *设计一个支持 push ，pop ，top 操作，并能在常数时间内检索到最小元素的栈。*
@@ -4118,6 +2996,67 @@ class MinStack {
 ```
 
 > *实现一个二叉搜索树迭代器。你将使用二叉搜索树的根节点初始化迭代器。*
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class BSTIterator {
+    List<Integer> list;
+    int index;
+
+    public BSTIterator(TreeNode root) {
+        list = new ArrayList<>();
+        this.index = 0;
+        this._inorder(root);
+    }
+
+    public void _inorder(TreeNode root) {
+        if (root == null) {return;}
+        this._inorder(root.left);
+        list.add(root.val);
+        this._inorder(root.right);
+    }
+    
+    public int next() {
+        return list.get(index++);
+    }
+    
+    public boolean hasNext() {
+        return index < list.size();
+    }
+}
+
+/**
+ * Your BSTIterator object will be instantiated and called as such:
+ * BSTIterator obj = new BSTIterator(root);
+ * int param_1 = obj.next();
+ * boolean param_2 = obj.hasNext();
+ */
+```
+
+## 二叉搜索树迭代器（0173）
+
+> 实现一个二叉搜索树迭代器类BSTIterator ，表示一个按中序遍历二叉搜索树（BST）的迭代器：
+> BSTIterator(TreeNode root) 初始化 BSTIterator 类的一个对象。BST 的根节点 root 会作为构造函数的一部分给出。指针应初始化为一个不存在于 BST 中的数字，且该数字小于 BST 中的任何元素。
+> boolean hasNext() 如果向指针右侧遍历存在数字，则返回 true ；否则返回 false 。
+> int next()将指针向右移动，然后返回指针处的数字。
+> 注意，指针初始化为一个不存在于 BST 中的数字，所以对 next() 的首次调用将返回 BST 中的最小元素。
+>
+> 你可以假设 next() 调用总是有效的，也就是说，当调用 next() 时，BST 的中序遍历中至少存在一个下一个数字。
+>
 
 ```java
 /**
@@ -4365,9 +3304,72 @@ public class MyQueue {
 
 ```
 
+## 二叉树的序列化（0297）
+
+> 序列化是将一个数据结构或者对象转换为连续的比特位的操作，进而可以将转换后的数据存储在一个文件或者内存中，同时也可以通过网络传输到另一个计算机环境，采取相反方式重构得到原数据。
+>
+> 请设计一个算法来实现二叉树的序列化与反序列化。这里不限定你的序列 / 反序列化算法执行逻辑，你只需要保证一个二叉树可以被序列化为一个字符串并且将这个字符串反序列化为原始的树结构。
+>
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Codec {
+    // Encodes a tree to a single string.
+    public String serialize(TreeNode root) {
+        return mySerialize(root, "");
+    }
+
+    public String mySerialize(TreeNode root, String s) {
+        if (root == null) {
+            s += "None,";
+        }
+        else {
+            s += s.valueOf(root.val) + ",";
+            s = mySerialize(root.left, s);
+            s = mySerialize(root.right, s);
+        }
+        return s;
+    }
+
+    // Decodes your encoded data to tree.
+    public TreeNode deserialize(String data) {
+        String[] strs = data.split(",");
+        List<String> datalist = new LinkedList<String>(Arrays.asList(strs));
+        return myDeserialize(datalist);
+    }
+
+    public TreeNode myDeserialize(List<String> datalist) {
+        if (datalist.get(0).equals("None")) {
+            datalist.remove(0);
+            return null;
+        }
+
+        TreeNode root = new TreeNode(Integer.valueOf(datalist.get(0)));
+        datalist.remove(0);
+        root.left = myDeserialize(datalist);
+        root.right = myDeserialize(datalist);
+
+        return root;
+    }
+}
+
+// Your Codec object will be instantiated and called as such:
+// Codec ser = new Codec();
+// Codec deser = new Codec();
+// TreeNode ans = deser.deserialize(ser.serialize(root));
+```
 
 
-# 8 排序算法
+
+# 5 排序算法
 
 > 快排：从排序数组中任选一个数据（一般默认最后一个）为分区点，遍历数据，比分区点小的放左边，比分区点大的放右边；再利用分治思想，直到区间缩小到1，就说明数据有序。
 

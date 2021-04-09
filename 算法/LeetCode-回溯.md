@@ -315,6 +315,48 @@ class Solution {
 }
 ```
 
+## 下一个排列（0031）
+
+> *实现获取 下一个排列 的函数，算法需要将给定数字序列重新排列成字典序中下一个更大的排列。*
+>
+> *如果不存在下一个更大的排列，则将数字重新排列成最小的排列（即升序排列）。*
+>
+> *必须 原地 修改，只允许使用额外常数空间。*
+>
+> *输入：nums = [1,2,3]*
+>
+> *输出：[1,3,2]*
+
+```java
+class Solution {
+    public void nextPermutation(int[] nums) {
+        int index = nums.length - 1;
+        while (index >= 1) {
+            if (nums[index - 1] >= nums[index]) {
+                index--;
+            }
+            else {break;}
+        }
+
+        if (index > 0) {
+            int left = index - 1;
+            int right = nums.length - 1;
+            while (nums[left] >= nums[right]) {
+                right--;
+            }
+            int tmp = nums[left];
+            nums[left] = nums[right];
+            nums[right] = tmp;
+            Arrays.sort(nums, index, nums.length);
+        }
+        else {
+            Arrays.sort(nums);
+        }
+        return;
+    }
+}
+```
+
 ## 全排列（0046 && 0047）
 
 > *给定一个 没有重复 数字的序列，返回其所有可能的全排列。*
@@ -715,61 +757,6 @@ class Solution {
             if (i >= 4 && minute + dic[i] < 60) {
                 dfs(count - 1, hour, minute + dic[i], i + 1);
             }
-        }
-    }
-}
-```
-
-## 太平洋大西洋水流问题（0417）
-
-> *给定一个 m x n 的非负整数矩阵来表示一片大陆上各个单元格的高度。“太平洋”处于大陆的左边界和上边界，而“大西洋”处于大陆的右边界和下边界。*
->
-> *规定水流只能按照上、下、左、右四个方向流动，且只能从高到低或者在同等高度上流动。*
->
-> *请找出那些水流既可以流动到“太平洋”，又能流动到“大西洋”的陆地单元的坐标。*
-
-```java
-class Solution {
-    private int m, n;
-    private int[][] dir = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
-    private boolean inArea(int x, int y) {return 0 <= x && x < m && 0 <= y && y < n;}
-
-    public List<List<Integer>> pacificAtlantic(int[][] heights) {
-        List<List<Integer>> ans = new ArrayList<>();
-        if (heights.length == 0) {return ans;}
-
-        m = heights.length;
-        n = heights[0].length;
-        int[][] po = new int[m][n], ao = new int[m][n];
-
-        for (int i = 0; i < m; i++) {
-            dfs(heights, i, 0, po);
-            dfs(heights, i, n - 1, ao);
-        }
-        for (int i = 0; i < n; i++) {
-            dfs(heights, 0, i, po);
-            dfs(heights, m - 1, i, ao);
-        }
-
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                if (po[i][j] == 1 && ao[i][j] == 1){
-                    ans.add(Arrays.asList(i, j));
-                }
-            }
-        }
-        return ans;
-    }
-
-    private void dfs(int[][] matrix, int x, int y, int[][] tmp){
-        tmp[x][y] = 1;
-        for (int[] d : dir) {
-            int newx = x + d[0];
-            int newy = y + d[1];
-            if (!inArea(newx, newy) || matrix[x][y] > matrix[newx][newy] || tmp[newx][newy] == 1){
-                continue;
-            }
-            dfs(matrix, newx, newy, tmp);
         }
     }
 }
