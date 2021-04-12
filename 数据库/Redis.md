@@ -190,8 +190,6 @@ info replication
 
 	
 
-
-
 ## 三、五大数据类型
 
 ### 3.1 String
@@ -286,6 +284,7 @@ info replication
 | :--------------: | :--------------------------------------------: | :--------------------------: |
 |       zadd       |               zadd myzset 1 one                |      往set中添加一个值       |
 |      zrange      |               zrange myzset 0 -1               |       查看里面的所有值       |
+|    zrevrange     |              zrevrange myzset 0 1              |         最大的两个值         |
 |  zrangebyscore   |  zrangebyscore myzset -inf +inf (withscores)   |             排序             |
 | zrevrangebyscore | zrevrangebyscore myzset +inf -inf (withscores) |         排序（逆序）         |
 |       zrem       |                zrem myzset one                 |         移除一个元素         |
