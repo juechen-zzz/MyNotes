@@ -156,6 +156,115 @@ class Solution {
 }
 ```
 
+## 最长公共子序列（1143）
+
+> *给定两个字符串 text1 和 text2，返回这两个字符串的最长公共子序列的长度。*
+>
+> *一个字符串的 子序列 是指这样一个新的字符串：它是由原字符串在不改变字符的相对顺序的情况下删除某些字符（也可以不删除任何字符）后组成的新字符串。*
+>
+> *例如，"ace" 是 "abcde" 的子序列，但 "aec" 不是 "abcde" 的子序列。两个字符串的「公共子序列」是这两个字符串所共同拥有的子序列。*
+>
+> *若这两个字符串没有公共子序列，则返回 0。*
+
+```java
+class Solution {
+    public int longestCommonSubsequence(String text1, String text2) {
+        int m = text1.length(), n = text2.length();
+        int[][] dp = new int[m + 1][n + 1];
+        for (int i = 0; i <= m; i++){
+            for (int j = 0; j <= n; j++){
+                if (i == 0 || j == 0) {
+                    dp[i][j] = 0;
+                    continue;
+                }
+                // 若当前对比的字符相同，则直接dp[i-1][j-1]+1
+                if (text1.charAt(i - 1) == text2.charAt(j - 1)){
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                }
+                // 若不相同，则max(dp[i - 1][j], dp[i][j - 1])
+                else {
+                    dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+        return dp[m][n];
+    }
+}
+```
+
+## 两个字符串的删除操作（0583）
+
+> *给定两个单词 word1 和 word2，找到使得 word1 和 word2 相同所需的最小步数，每步可以删除任意一个字符串中的一个字符。*
+
+```java
+// 最长公共子序列（超时）
+class Solution {
+    public int minDistance(String word1, String word2) {
+        return word1.length() + word2.length() - 2 * lcs(word1, word2, word1.length(), word2.length());
+    }
+
+    private static int lcs(String s1, String s2, int m, int n) {
+        if (m == 0 || n == 0) {return 0;}
+        if (s1.charAt(m - 1) == s2.charAt(n - 1)) {
+            return 1 + lcs(s1, s2, m - 1, n - 1);
+        }
+        else {
+            return Math.max(lcs(s1, s2, m, n - 1), lcs(s1, s2, m - 1, n));
+        }
+    }
+}
+
+// dp
+class Solution {
+    public int minDistance(String word1, String word2) {
+        int[][] dp = new int[word1.length() + 1][word2.length() + 1];
+
+        for (int i = 0; i <= word1.length(); i++) {
+            for (int j = 0; j <= word2.length(); j++) {
+                if (i == 0 || j == 0) {
+                    dp[i][j] = i + j;
+                }
+                else if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
+                    dp[i][j] = dp[i - 1][j - 1];
+                }
+                else {
+                    dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+
+        return dp[word1.length()][word2.length()];
+    }
+}
+```
+
+## 最长回文子序列（0516）
+
+> 给定一个字符串 `s` ，找到其中最长的回文子序列，并返回该序列的长度。可以假设 `s` 的最大长度为 `1000` 。
+
+```java
+class Solution {
+    public int longestPalindromeSubseq(String s) {
+        int n = s.length();
+        int[][] dp = new int[n][n];
+        for (int i = 0; i < n; i++) {dp[i][i] = 1;}
+
+        for (int i = n - 2; i >= 0; i--) {
+            for (int j = i + 1; j < n; j++) {
+                if (s.charAt(i) == s.charAt(j)) {
+                    dp[i][j] = dp[i + 1][j - 1] + 2;
+                }
+                else {
+                    dp[i][j] = Math.max(dp[i + 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+
+        return dp[0][n - 1];
+    }
+}
+```
+
 ## 正则表达式匹配（0010）
 
 > *给你一个字符串 s 和一个字符规律 p，请你来实现一个支持 '.' 和 '\*' 的正则表达式匹配。*
@@ -524,7 +633,7 @@ class NumMatrix {
  */
 ```
 
-## 零钱兑换（0322）
+## 零钱兑换
 
 > *给定不同面额的硬币 coins 和一个总金额 amount。*
 >
@@ -983,6 +1092,184 @@ class Solution {
         }
 
         return S > 1000 ? 0 : dp[nums.length - 1][S + 1000];
+    }
+}
+```
+
+## 移除盒子（0546）
+
+> *给出一些不同颜色的盒子，盒子的颜色由数字表示，即不同的数字表示不同的颜色。*
+>
+> *你将经过若干轮操作去去掉盒子，直到所有的盒子都去掉为止。每一轮你可以移除具有相同颜色的连续 k 个盒子（k >= 1），这样一轮之后你将得到 k \* k 个积分。*
+>
+> *当你将所有盒子都去掉之后，求你能获得的最大积分和。*
+
+```java
+class Solution {
+    int[][][] dp;
+
+    public int removeBoxes(int[] boxes) {
+        int n = boxes.length;
+        dp = new int[n][n][n];
+        return calculate(boxes, 0, n - 1, 0);
+    }
+
+    private int calculate(int[] boxes, int left, int right, int k) {
+        if (left > right) {return 0;}
+
+        if (dp[left][right][k] == 0) {
+            dp[left][right][k] = calculate(boxes, left, right - 1, 0) + (k + 1) * (k + 1);
+            for (int i = left; i < right; i++) {
+                if (boxes[i] == boxes[right]) {
+                    dp[left][right][k] = Math.max(dp[left][right][k], calculate(boxes, left, i, k + 1) + calculate(boxes, i + 1, right - 1, 0));
+                }
+            }
+        }
+
+        return dp[left][right][k];
+    }
+}
+```
+
+## 学生出勤记录
+
+> *给定一个字符串来代表一个学生的出勤记录，这个记录仅包含以下三个字符：*
+>
+> *'A' : Absent，缺勤*
+>
+> *'L' : Late，迟到*
+>
+> *'P' : Present，到场*
+>
+> *如果一个学生的出勤记录中不超过一个'A'(缺勤)并且不超过两个连续的'L'(迟到),那么这个学生会被奖赏。*
+>
+> *你需要根据这个学生的出勤记录判断他是否会被奖赏。*
+
+```java
+class Solution {
+    public boolean checkRecord(String s) {
+        int countA = 0;
+        int preL = 0;
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) == 'A') {
+                countA++;
+                if (countA > 1) {return false;}
+            }
+            else if (s.charAt(i) == 'L') {
+                if (preL == i - 1 && (i > 1 && s.charAt(i - 2) == 'L')) {
+                    return false;
+                }
+                preL = i;
+            }
+        }
+        return true;
+    }
+}
+```
+
+> *给定一个正整数 n，返回长度为 n 的所有可被视为可奖励的出勤记录的数量。 答案可能非常大，你只需返回结果mod 109 + 7的值。*
+>
+> *学生出勤记录是只包含以下三个字符的字符串：*
+>
+> *'A' : Absent，缺勤*
+>
+> *'L' : Late，迟到*
+>
+> *'P' : Present，到场*
+>
+> *如果记录不包含多于一个'A'（缺勤）或超过两个连续的'L'（迟到），则该记录被视为可奖励的。*
+
+```java
+class Solution {
+    private static final long MOD = 1000000007;
+
+    public int checkRecord(int n) {
+        long[] dp = new long[n <= 5 ? 6 : n + 1];
+        dp[0] = 1;
+        dp[1] = 2;
+        dp[2] = 4;
+        dp[3] = 7;
+        
+        for (int i = 4; i <= n; i++) {
+            dp[i] = ((2 * dp[i - 1]) % MOD + (MOD - dp[i - 4])) % MOD;
+        }
+
+        long sum = dp[n];
+        for (int i = 1; i <= n; i++) {
+            sum += (dp[i - 1] * dp[n - i]) % MOD;
+        }
+
+        return (int)(sum % MOD);
+    }
+}
+```
+
+## 最长湍流子数组（0978）
+
+> *当 A 的子数组 A[i], A[i+1], ..., A[j] 满足下列条件时，我们称其为湍流子数组：*
+>
+> *若 i <= k < j，当 k 为奇数时， A[k] > A[k+1]，且当 k 为偶数时，A[k] < A[k+1]；*
+>
+> *或 若 i <= k < j，当 k 为偶数时，A[k] > A[k+1] ，且当 k 为奇数时， A[k] < A[k+1]。*
+>
+> *也就是说，如果比较符号在子数组中的每个相邻元素对之间翻转，则该子数组是湍流子数组。*
+>
+> *返回 A 的最大湍流子数组的长度。*
+
+```java
+class Solution {
+    public int maxTurbulenceSize(int[] arr) {
+        if (arr.length == 1) {return 1;}
+        int n = arr.length;
+        int[][] dp = new int[n][2];
+        dp[0][0] = dp[0][1] = 1;
+
+        for (int i = 1; i < n; i++) {
+            dp[i][0] = dp[i][1] = 1;
+            if (arr[i - 1] > arr[i]) {
+                dp[i][0] = dp[i - 1][1] + 1;
+            }
+            else if (arr[i - 1] < arr[i]) {
+                dp[i][1] = dp[i - 1][0] + 1;
+            }
+        }
+
+        int ans = 1;
+        for (int i = 0; i < n; i++) {
+            ans = Math.max(ans, Math.max(dp[i][0], dp[i][1]));
+        }
+        return ans;
+    }
+}
+```
+
+## 给N*3网格图涂色（1411）
+
+> *你有一个 n x 3 的网格图 grid ，你需要用 红，黄，绿 三种颜色之一给每一个格子上色，且确保相邻格子颜色不同*
+>
+> *（也就是有相同水平边或者垂直边的格子颜色不同）。*
+>
+> *给你网格图的行数 n 。*
+>
+> *请你返回给 grid 涂色的方案数。由于答案可能会非常大，请你返回答案对 10^9 + 7 取余的结果。*
+
+```java
+class Solution {
+    public int numOfWays(int n) {
+        long dp2 = 6, dp3 = 6, mod = 1000000007;
+        for(int i = 1; i < n; i++) {
+            long temp2 = dp2;
+            long temp3 = dp3;
+            // 若当前使用 2 种颜色组成网格
+            // 如果上一个网格是 2 种颜色，则当前网格有 3 种可能
+            // 如果上一个网格是 3 种颜色，则当前网格有 2 种可能
+            dp2 = (temp2 * 3 % mod + temp3 * 2 % mod) % mod;
+            // 若当前使用 3 种颜色组成网格
+            // 如果上一个网格是 2 种颜色，则当前网格有 2 种可能
+            // 如果上一个网格是 3 种颜色，则当前网格有 2 种可能
+            dp3 = (temp2 * 2 % mod + temp3 * 2 % mod) % mod;
+        }
+        return (int)((dp2 + dp3) % mod);
     }
 }
 ```

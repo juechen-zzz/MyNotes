@@ -65,35 +65,6 @@ class Solution {
 }
 ```
 
-## 最长回文子序列（0516）
-
-> *给定一个字符串 s ，找到其中最长的回文子序列，并返回该序列的长度。可以假设 s 的最大长度为 1000 。*
-
-```java
-class Solution {
-    public int longestPalindromeSubseq(String s) {
-        int n = s.length();
-        int[][] dp = new int[n][n];
-        for (int i = 0; i < n; i++) {
-            dp[i][i] = 1;
-        }
-
-        for (int i = n - 2; i >= 0; i--){
-            for (int j = i + 1; j < n; j++){
-                if (s.charAt(i) == s.charAt(j)){
-                    dp[i][j] = dp[i + 1][j - 1] + 2;
-                }
-                else {
-                    dp[i][j] = Math.max(dp[i + 1][j], dp[i][j - 1]);
-                }
-            }
-        }
-
-        return dp[0][n - 1];
-    }
-}
-```
-
 ## 验证回文串（0125）
 
 > *给定一个字符串，验证它是否是回文串，只考虑字母和数字字符，可以忽略字母的大小写。*
@@ -762,6 +733,31 @@ class Solution {
 }
 ```
 
+## 反转字符串（0541）
+
+> *给定一个字符串 s 和一个整数 k，你需要对从字符串开头算起的每隔 2k 个字符的前 k 个字符进行反转。*
+>
+> *如果剩余字符少于 k 个，则将剩余字符全部反转。*
+>
+> *如果剩余字符小于 2k 但大于或等于 k 个，则反转前 k 个字符，其余字符保持原样。*
+
+```java
+class Solution {
+    public String reverseStr(String s, int k) {
+        char[] ans = s.toCharArray();
+        for (int start = 0; start < ans.length; start += 2 * k) {
+            int left = start, right = Math.min(start + k - 1, ans.length - 1);
+            while (left < right) {
+                char tmp = ans[left];
+                ans[left++] = ans[right];
+                ans[right--] = tmp;
+            }
+        } 
+        return new String(ans);
+    }
+}
+```
+
 ## 比较版本号（0165）
 
 > *给你两个版本号 version1 和 version2 ，请你比较它们。*
@@ -1250,6 +1246,182 @@ class Solution {
             }
         }
         return false;
+    }
+}
+```
+
+## 最长特殊序列
+
+> 给你两个字符串，请你从这两个字符串中找出最长的特殊序列。
+>
+> 「最长特殊序列」定义如下：该序列为某字符串独有的最长子序列（即不能是其他字符串的子序列）。
+>
+> 子序列 可以通过删去字符串中的某些字符实现，但不能改变剩余字符的相对顺序。空序列为所有字符串的子序列，任何字符串为其自身的子序列。
+>
+> 输入为两个字符串，输出最长特殊序列的长度。如果不存在，则返回 -1。
+>
+
+```java
+class Solution {
+    public int findLUSlength(String a, String b) {
+        if (a.equals(b)) {return -1;}
+        return Math.max(a.length(), b.length());
+    }
+}
+```
+
+> 给定字符串列表，你需要从它们中找出最长的特殊序列。最长特殊序列定义如下：该序列为某字符串独有的最长子序列（即不能是其他字符串的子序列）。
+>
+> 子序列可以通过删去字符串中的某些字符实现，但不能改变剩余字符的相对顺序。空序列为所有字符串的子序列，任何字符串为其自身的子序列。
+>
+> 输入将是一个字符串列表，输出是最长特殊序列的长度。如果最长特殊序列不存在，返回 -1 。
+>
+
+```java
+class Solution {
+    public int findLUSlength(String[] strs) {
+        Arrays.sort(strs, (s1, s2) -> s2.length() - s1.length());
+
+        for (int i = 0; i < strs.length; i++) {
+            boolean flag = true;
+            for (int j = 0; j < strs.length; j++) {
+                if (i == j) {continue;}
+                System.out.println(strs[i] + " " + strs[j]);
+                if (isSubsequence(strs[i], strs[j])) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) {return strs[i].length();}
+        }
+
+        return -1;
+    }
+
+    private static boolean isSubsequence(String x, String y) {
+        int idx = 0;
+        for (int i = 0; i < y.length() && idx < x.length(); i++) {
+            if (x.charAt(idx) == y.charAt(i)) {
+                idx++;
+            }
+        }
+        return idx == x.length();
+    }
+}
+```
+
+## 通过删除字母匹配字典里最长单词（0524）
+
+> 给定一个字符串和一个字符串字典，找到字典里面最长的字符串，该字符串可以通过删除给定字符串的某些字符来得到。如果答案不止一个，返回长度最长且字典顺序最小的字符串。如果答案不存在，则返回空字符串。
+>
+
+```java
+class Solution {
+    public String findLongestWord(String s, List<String> dictionary) {
+        String ans = "";
+        for (String cur : dictionary) {
+            if (isSubsequence(cur, s)) {
+                if (cur.length() > ans.length() || (cur.length() == ans.length() && cur.compareTo(ans) < 0)) {
+                    ans = cur;
+                }
+            }
+        }
+        return ans;
+    }
+
+    private static boolean isSubsequence(String x, String y) {
+        int idx = 0;
+        for (int i = 0; i < y.length() && idx < x.length(); i++) {
+            if (x.charAt(idx) == y.charAt(i)) {
+                idx++;
+            }
+        }
+        return idx == x.length();
+    }
+}
+```
+
+## 字符串的排列（0567）
+
+> *给定两个字符串 s1 和 s2，写一个函数来判断 s2 是否包含 s1 的排列。*
+>
+> *换句话说，第一个字符串的排列之一是第二个字符串的子串。*
+
+```java
+class Solution {
+    public boolean checkInclusion(String s1, String s2) {
+        Map<Character, Integer> need = new HashMap<>();
+        Map<Character, Integer> window = new HashMap<>();
+        for (int i = 0; i < s1.length(); i++) {
+            char c = s1.charAt(i);
+            need.put(c, need.getOrDefault(c, 0) + 1);
+        }
+
+        int left = 0, right = 0;
+        int valid = 0;
+
+        while (right < s2.length()) {
+            char c = s2.charAt(right);
+            right++;
+            if (need.containsKey(c)) {
+                window.put(c, window.getOrDefault(c, 0) + 1);
+                if (window.get(c) - need.get(c) == 0) {valid++;}
+            }
+
+            while (right - left >= s1.length()) {
+                if (valid == need.size()) {return true;}
+                char d = s2.charAt(left);
+                left++;
+                if (need.containsKey(d)) {
+                    if (window.get(d) - need.get(d) == 0) {valid--;}
+                    window.put(d, window.getOrDefault(d, 0) - 1);
+                }
+            }
+        }
+
+        return false;
+    }
+}
+```
+
+## 删除字符串中的所有相邻重复项（1047）
+
+> *给出由小写字母组成的字符串 S，重复项删除操作会选择两个相邻且相同的字母，并删除它们。*
+>
+> *在 S 上反复执行重复项删除操作，直到无法继续删除。*
+>
+> *在完成所有重复项删除操作后返回最终的字符串。答案保证唯一。*
+
+```java
+// 递归
+class Solution {
+    public String removeDuplicates(String S) {
+        int n = S.length();
+        for (int i = 1; i < n; i++){
+            if (S.charAt(i - 1) == S.charAt(i)){
+                return removeDuplicates(S.substring(0, i - 1) + removeDuplicates(S.substring(i + 1)));
+            }
+        }
+        return S;
+    }
+}
+
+// 栈
+class Solution {
+    public String removeDuplicates(String S) { 
+        StringBuilder sb = new StringBuilder();
+        int sbLength = 0;
+        for (char c : S.toCharArray()) {
+            if (sbLength != 0 && c == sb.charAt(sbLength - 1)) {
+                sb.deleteCharAt(sbLength - 1);
+                sbLength--;
+            }
+            else {
+                sb.append(c);
+                sbLength++;
+            }
+        }
+        return sb.toString();
     }
 }
 ```

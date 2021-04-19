@@ -828,4 +828,369 @@ class Solution {
 }
 ```
 
-## 
+## 扫雷游戏（0529）
+
+> 给定一个代表游戏板的二维字符矩阵。 'M' 代表一个未挖出的地雷，'E' 代表一个未挖出的空方块，'B' 代表没有相邻（上，下，左，右，和所有4个对角线）地雷的已挖出的空白方块，数字（'1' 到 '8'）表示有多少地雷与这块已挖出的方块相邻，'X' 则表示一个已挖出的地雷。
+>
+> 现在给出在所有未挖出的方块中（'M'或者'E'）的下一个点击位置（行和列索引），根据以下规则，返回相应位置被点击后对应的面板：
+>
+> 如果一个地雷（'M'）被挖出，游戏就结束了- 把它改为 'X'。
+> 如果一个没有相邻地雷的空方块（'E'）被挖出，修改它为（'B'），并且所有和其相邻的未挖出方块都应该被递归地揭露。
+> 如果一个至少与一个地雷相邻的空方块（'E'）被挖出，修改它为数字（'1'到'8'），表示相邻地雷的数量。
+> 如果在此次点击中，若无更多方块可被揭露，则返回面板。
+
+```java
+class Solution {
+    int[] dirX = {0, 1, 0, -1, 1, 1, -1, -1};
+    int[] dirY = {1, 0, -1, 0, 1, -1, 1, -1};
+
+    public char[][] updateBoard(char[][] board, int[] click) {
+        int x = click[0], y = click[1];
+        if (board[x][y] == 'M') {
+            board[x][y] = 'X';
+        }
+        else {
+            dfs(board, x, y);
+        }
+        return board;
+    }
+
+    private void dfs(char[][] board, int x, int y) {
+        int cnt = 0;
+        for (int i = 0; i < 8; i++) {
+            int nextX = x + dirX[i];
+            int nextY = y + dirY[i];
+            if (nextX < 0 || nextX >= board.length || nextY < 0 || nextY >= board[0].length) {
+                continue;
+            }
+
+            if (board[nextX][nextY] == 'M') {cnt++;}
+        }
+
+        if (cnt > 0) {board[x][y] = (char)(cnt + '0');}
+        else {
+            board[x][y] = 'B';
+            for (int i = 0; i < 8; i++) {
+                int nextX = x + dirX[i];
+                int nextY = y + dirY[i];
+                if (nextX < 0 || nextX >= board.length || nextY < 0 || nextY >= board[0].length || board[nextX][nextY] != 'E') {
+                    continue;
+                }
+
+                dfs(board, nextX, nextY);
+            }
+        }
+    }
+}
+```
+
+## 0/1矩阵（0542）
+
+> *给定一个由 0 和 1 组成的矩阵，找出每个元素到最近的 0 的距离。*
+>
+> *两个相邻元素间的距离为 1 。*
+
+```java
+class Solution {
+    private static int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+
+    public int[][] updateMatrix(int[][] matrix) {
+        int n = matrix.length, m = matrix[0].length;
+        int[][] ans = new int[n][m];
+        boolean[][] visited = new boolean[n][m];
+        Queue<int[]> queue = new LinkedList<>();
+        
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (matrix[i][j] == 0) {
+                    queue.offer(new int[]{i, j});
+                    visited[i][j] = true;
+                }
+            }
+        }
+
+        while (!queue.isEmpty()) {
+            int[] cell = queue.poll();
+            int x = cell[0], y = cell[1];
+            for (int d = 0; d < 4; d++) {
+                int nextX = x + dirs[d][0];
+                int nextY = y + dirs[d][1];
+                if (nextX >= 0 && nextX < n && nextY >= 0 && nextY < m && !visited[nextX][nextY]) {
+                    ans[nextX][nextY] = ans[x][y] + 1;
+                    queue.offer(new int[]{nextX, nextY});
+                    visited[nextX][nextY] = true; 
+                }
+            }
+        }
+
+        return ans;
+    }
+}
+```
+
+## 出界的路径数（0576）
+
+> *给定一个 m × n 的网格和一个球。球的起始坐标为 (i,j) ，你可以将球移到相邻的单元格内，或者往上、下、左、右四个方向上移动使球穿过网格边界。*
+>
+> *但是，你最多可以移动 N 次。找出可以将球移出边界的路径数量。答案可能非常大，返回 结果 mod 109 + 7 的值。*
+
+```java
+// DFS 超时
+class Solution {
+    int res = 0;
+    public int findPaths(int m, int n, int N, int i, int j) {
+        dfs(m, n, N, i, j);
+        return res;
+    }
+    public void dfs(int m, int n, int N, int i, int j){
+        if(N == 0 && i >= 0 && i < m && j >= 0 && j < n) return;
+        if(i >= N && m - i > N && j >= N && n - j > N) return;
+        if(N >= 0 && (i == -1 || j == -1 || i == m || j == n)){
+            res = (res + 1) % 1000000007;
+            return;
+        }
+        dfs(m, n, N - 1, i + 1, j);
+        dfs(m, n, N - 1, i - 1, j);
+        dfs(m, n, N - 1, i, j + 1);
+        dfs(m, n, N - 1, i, j - 1);
+    }
+}
+
+// DP
+class Solution {
+    public int findPaths(int m, int n, int N, int i, int j) {
+        if (N == 0) {return 0;}
+        long[][][] dp = new long[m + 2][n + 2][N + 1];
+
+        for (int r = 0; r <= m + 1; r++) {
+            dp[r][0][0] = 1;
+            dp[r][n + 1][0] = 1;
+        }
+        for (int c = 0; c <= n + 1; c++) {
+            dp[0][c][0] = 1;
+            dp[m + 1][c][0] = 1;
+        }
+
+        for (int k = 1; k <= N; k++) {
+            for (int r = 1; r <= m; r++) {
+                for (int c = 1; c <= n; c++) {
+                    dp[r][c][k] = (dp[r - 1][c][k - 1] + dp[r + 1][c][k - 1] + dp[r][c - 1][k - 1] + dp[r][c + 1][k - 1]) % 1000000007;
+                }
+            }
+        }
+
+        int ans = 0;
+        for (int k = 1; k <= N; k++) {
+            ans = (int)((ans + dp[i + 1][j + 1][k]) % 1000000007);
+        }
+        return ans;
+    }
+}
+```
+
+## 网络延迟时间（0743）
+
+> *有 n 个网络节点，标记为 1 到 n。*
+>
+> *给你一个列表 times，表示信号经过 有向 边的传递时间。 times[i] = (ui, vi, wi)，其中 ui 是源节点，vi 是目标节点， wi 是一个信号从源节点传递到目标节点的时间。*
+>
+> *现在，从某个节点 K 发出一个信号。需要多久才能使所有节点都收到信号？如果不能使所有节点收到信号，返回 -1 。*
+
+```java
+class Solution {
+    Map<Integer, Integer> dist = new HashMap<>();
+
+    public int networkDelayTime(int[][] times, int n, int k) {
+        Map<Integer, List<int[]>> graph = new HashMap<>();
+        for (int[] edge : times) {
+            if (!graph.containsKey(edge[0])) {
+                graph.put(edge[0], new ArrayList<int[]>());
+            }
+            graph.get(edge[0]).add(new int[]{edge[1], edge[2]});
+        }
+
+        for (int node : graph.keySet()) {Collections.sort(graph.get(node), (a, b) -> a[0] - b[0]);}
+        t
+
+        dfs(graph, k, 0);
+
+        int ans = 0;
+        for (int num : dist.values()) {
+            if (num == Integer.MAX_VALUE) {return -1;}
+            ans = Math.max(ans, num);
+        }
+        return ans;
+    }
+
+    private void dfs(Map<Integer, List<int[]>> graph, int node, int time) {
+        if (time >= dist.get(node)) {return;}
+        dist.put(node, time);
+        if (graph.containsKey(node)) {
+            for (int[] info : graph.get(node)) {
+                dfs(graph, info[0], time + info[1]);
+            }
+        }
+    }
+}
+```
+
+## 打开转盘锁（0752）
+
+> *你有一个带有四个圆形拨轮的转盘锁。每个拨轮都有10个数字： '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' 。每个拨轮可以自由旋转：例如把 '9' 变为  '0'，'0' 变为 '9' 。每次旋转都只能旋转一个拨轮的一位数字。*
+>
+> *锁的初始数字为 '0000' ，一个代表四个拨轮的数字的字符串。*
+>
+> *列表 deadends 包含了一组死亡数字，一旦拨轮的数字和列表里的任何一个元素相同，这个锁将会被永久锁定，无法再被旋转。*
+>
+> *字符串 target 代表可以解锁的数字，你需要给出最小的旋转次数，如果无论如何不能解锁，返回 -1。*
+
+```java
+// 1 BFS
+class Solution {
+    public int openLock(String[] deadends, String target) {
+        // 记录需要跳过的（包括限制不能出现的和已经访问过的）
+        Set<String> deads = new HashSet<>();
+        for (String s : deadends){deads.add(s);}
+        Queue<String> queue = new LinkedList<>();
+        Set<String> visited = new HashSet<>();
+
+        int step = 0;
+        queue.offer("0000");
+        visited.add("0000");
+
+        while (!queue.isEmpty()){
+            int n = queue.size();
+            for (int i = 0; i < n; i++){
+                String cur = queue.poll();
+                if (deads.contains(cur)){continue;}
+                if (cur.equals(target)){return step;}
+
+                for (int j = 0; j < 4; j++){
+                    String up = nextOne(cur, j).get(0);
+                    if (!visited.contains(up)){
+                        queue.offer(up);
+                        visited.add(up);
+                    }
+                    String down = nextOne(cur, j).get(1);
+                    if (!visited.contains(down)){
+                        queue.offer(down);
+                        visited.add(down);
+                    }
+                }
+            }
+            step++;
+        }
+        return -1;
+    }
+
+    public List<String> nextOne(String s, int index){
+        List<String> res = new LinkedList<>();
+
+        char[] upCh = s.toCharArray();
+        if (upCh[index] == '9') {upCh[index] = '0';}
+        else {upCh[index] += 1;}
+        res.add(new String(upCh));
+        
+        char[] downCh = s.toCharArray();
+        if (downCh[index] == '0') {downCh[index] = '9';}
+        else {downCh[index] -= 1;}
+        res.add(new String(downCh));
+
+        return res;
+    }
+}
+```
+
+## 可能的二分法（0886）
+
+> *给定一组 N 人（编号为 1, 2, ..., N）， 我们想把每个人分进任意大小的两组。*
+>
+> *每个人都可能不喜欢其他人，那么他们不应该属于同一组。*
+>
+> *形式上，如果 dislikes[i] = [a, b]，表示不允许将编号为 a 和 b 的人归入同一组。*
+>
+> *当可以用这种方法将所有人分进两组时，返回 true；否则返回 false。*
+
+```java
+class Solution {
+    private static List<Integer>[] graph;
+    private static Map<Integer,Integer> color;
+
+    public boolean possibleBipartition(int N, int[][] dislikes) {
+        graph = new ArrayList[N + 1];
+        for (int i = 1; i <= N; i++) {graph[i] = new ArrayList<>();}
+
+        for (int[] edge : dislikes) {
+            graph[edge[0]].add(edge[1]);
+            graph[edge[1]].add(edge[0]);
+        }
+
+        color = new HashMap<>();
+        for (int node = 1; node <= N; node++) {
+            if (!color.containsKey(node) && !dfs(node, 0)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean dfs(int node, int c) {
+        if (color.containsKey(node)) {return color.get(node) == c;}
+        
+        color.put(node, c);
+
+        for (int neigh : graph[node]) {
+            if (!dfs(neigh, c ^ 1)) {return false;}
+        }
+
+        return true;
+    }
+}
+```
+
+## 不邻接植花（1042）
+
+> *有 n 个花园，按从 1 到 n 标记。另有数组 paths ，其中 paths[i] = [xi, yi] 描述了花园 xi 到花园 yi 的双向路径。在每个花园中，你打算种下四种花之一。*
+>
+> *另外，所有花园 最多 有 3 条路径可以进入或离开.*
+>
+> *你需要为每个花园选择一种花，使得通过路径相连的任何两个花园中的花的种类互不相同。*
+>
+> *以数组形式返回 任一 可行的方案作为答案 answer，其中 answer[i] 为在第 (i+1) 个花园中种植的花的种类。花的种类用  1、2、3、4 表示。保证存在答案。*
+
+```java
+class Solution {
+    public int[] gardenNoAdj(int n, int[][] paths) {
+        /* 这是一道简单题，限制每个节点的度为3，同时提供四种颜色，因此不需要回溯 */
+        /* 初始化节点，使用map保存节点与其临界点的关系 */
+        Map<Integer, Set<Integer>> graph = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            graph.put(i, new HashSet<>());
+        }
+        /* 初始化路径信息 */
+        for (int[] cur : paths) {
+            int a = cur[0] - 1;
+            int b = cur[1] - 1;
+            graph.get(a).add(b);
+            graph.get(b).add(a);
+        }
+
+        int[] ans = new int[n];
+        for (int i = 0; i < n; i++) {
+            /* 查看当前节点的所有邻接点的色彩 */
+            boolean[] visited = new boolean[5];
+            for (int adj : graph.get(i)) {
+                visited[ans[adj]] = true;
+            }
+            /* 为当前节点染色 */
+            for (int j = 1; j <= 4; j++) {
+                if (!visited[j]) {
+                    ans[i] = j;
+                }
+            }
+        }
+        return ans;
+    }
+}
+```
+

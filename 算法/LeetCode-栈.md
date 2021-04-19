@@ -222,3 +222,152 @@ class Solution {
 }
 ```
 
+## 下一个更大元素
+
+> 给你两个 没有重复元素 的数组 nums1 和 nums2 ，其中nums1 是 nums2 的子集。
+>
+> 请你找出 nums1 中每个元素在 nums2 中的下一个比其大的值。
+>
+> nums1 中数字 x 的下一个更大元素是指 x 在 nums2 中对应位置的右边的第一个比 x 大的元素。如果不存在，对应位置输出 -1 。
+>
+
+```java
+class Solution {
+    public int[] nextGreaterElement(int[] nums1, int[] nums2) {
+        int len1 = nums1.length;
+        int len2 = nums2.length;
+
+        Stack<Integer> stack = new Stack<>();
+        Map<Integer, Integer> map = new HashMap<>();
+        // 先处理 nums2，把对应关系存入哈希表
+        for (int i = 0; i < len2; i++) {
+            while (!stack.isEmpty() && stack.peek() < nums2[i]) {
+                map.put(stack.pop(), nums2[i]);
+            }
+            stack.push(nums2[i]);
+        }
+
+        // 遍历 nums1 得到结果集
+        int[] ans = new int[len1];
+        for (int i = 0; i < len1; i++) {
+            ans[i] = map.getOrDefault(nums1[i], -1);
+        }
+        return ans;
+    }
+}
+```
+
+> 给定一个循环数组（最后一个元素的下一个元素是数组的第一个元素），输出每个元素的下一个更大元素。数字 x 的下一个更大的元素是按数组遍历顺序，这个数字之后的第一个比它更大的数，这意味着你应该循环地搜索它的下一个更大的数。如果不存在，则输出 -1。
+>
+
+```java
+class Solution {
+    public int[] nextGreaterElements(int[] nums) {
+        int n = nums.length;
+        int[] ans = new int[n];
+        Arrays.fill(ans, -1);
+
+        Stack<Integer> stack = new Stack<>();
+        for (int i = 0; i < n * 2 - 1; i++) {
+            while (!stack.isEmpty() && nums[stack.peek()] < nums[i % n]) {
+                ans[stack.pop()] = nums[i % n];
+            }
+            stack.push(i % n);
+        }
+
+        return ans;
+    }
+}
+```
+
+> *给你一个正整数 n ，请你找出符合条件的最小整数，其由重新排列 n 中存在的每位数字组成，并且其值大于 n 。如果不存在这样的正整数，则返回 -1 。*
+>
+> *注意 ，返回的整数应当是一个 32 位整数 ，如果存在满足题意的答案，但不是 32 位整数 ，同样返回 -1 。*
+
+```java
+class Solution {
+    public int nextGreaterElement(int n) {
+        char[] nums = ("" + n).toCharArray();
+        int left = nums.length - 2;
+        while (left >= 0 && nums[left] >= nums[left + 1]) {left--;}
+        if (left < 0) {return -1;}
+
+        int right = nums.length - 1;
+        while (right >= 0 && nums[left] >= nums[right]) {right--;}
+
+        swap(nums, left, right);
+        reverse(nums, left + 1);
+
+        try {
+            return Integer.parseInt(new String(nums));
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
+    private void swap(char[] nums, int left, int right) {
+        char tmp = nums[left];
+        nums[left] = nums[right];
+        nums[right] = tmp;
+    }
+
+    private void reverse(char[] nums, int start) {
+        int left = start, right = nums.length - 1;
+        while (left < right) {
+            swap(nums, left, right);
+            left++;
+            right--;
+        }
+    }
+}
+```
+
+## 最短无序连续子数组（0581）
+
+> *给你一个整数数组 nums ，你需要找出一个 连续子数组 ，如果对这个子数组进行升序排序，那么整个数组都会变为升序排序。*
+>
+> *请你找出符合题意的 最短 子数组，并输出它的长度。*
+
+```java
+// sort
+class Solution {
+    public int findUnsortedSubarray(int[] nums) {
+        int[] nums2 = nums.clone();
+        Arrays.sort(nums2);
+        int left = nums.length, right = 0;
+        for (int i = 0; i < nums.length; i++) {
+            if (nums[i] != nums2[i]) {
+                left = Math.min(left, i);
+                right = Math.max(right, i);
+            }
+        }
+        return (right - left >= 0 ? right - left + 1 : 0);
+    }
+}
+
+// stack
+class Solution {
+    public int findUnsortedSubarray(int[] nums) {
+        Stack<Integer> stack = new Stack<>();
+
+        int left = nums.length, right = 0;
+        for (int i = 0; i < nums.length; i++) {
+            while (!stack.isEmpty() && nums[stack.peek()] > nums[i]) {
+                left = Math.min(left, stack.pop());
+            }
+            stack.push(i);
+        }
+        stack.clear();
+
+        for (int i = nums.length - 1; i >= 0; i--) {
+            while (!stack.isEmpty() && nums[stack.peek()] < nums[i]) {
+                right = Math.max(right, stack.pop());
+            }
+            stack.push(i);
+        }
+
+        return right - left > 0 ? right - left + 1 : 0;
+    }
+}
+```
+

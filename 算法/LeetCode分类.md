@@ -221,6 +221,87 @@ class Solution {
 }
 ```
 
+## 连续的子数组和（0523）
+
+> 给定一个包含 非负数 的数组和一个目标 整数 k ，编写一个函数来判断该数组是否含有连续的子数组，其大小至少为 2，且总和为 k 的倍数，即总和为 n * k ，其中 n 也是一个整数。
+>
+
+```java
+class Solution {
+    public boolean checkSubarraySum(int[] nums, int k) {
+        int n = nums.length;
+        Map<Integer, Integer> map = new HashMap<>();
+        map.put(0, -1);
+
+        int sum = 0;
+        for (int i = 0; i < n; i++) {
+            sum += nums[i];
+            if (k != 0) {sum = sum % k;}
+
+            if (map.containsKey(sum)) {
+                if (i - map.get(sum) > 1) {
+                    return true;
+                }
+            }
+            else {
+                map.put(sum, i);
+            }
+        }
+
+        return false;
+    }
+}
+```
+
+## 连续数组（0525）
+
+> 给定一个二进制数组, 找到含有相同数量的 0 和 1 的最长连续子数组（的长度）。
+
+```java
+class Solution {
+    public int findMaxLength(int[] nums) {
+        Map<Integer, Integer> map = new HashMap<>();
+        map.put(0, -1);
+        int ans = 0, count = 0;
+        for (int i = 0; i < nums.length; i++) {
+            count += (nums[i] == 1 ? 1 : -1);
+            if (map.containsKey(count)) {
+                ans = Math.max(ans, i - map.get(count));
+            }
+            else {
+                map.put(count, i);
+            }
+        }
+        return ans;
+    }
+}
+```
+
+## 和为K的子数组（0560）
+
+> *给定一个整数数组和一个整数 k，你需要找到该数组中和为 k 的连续的子数组的个数。*
+
+```java
+class Solution {
+    public int subarraySum(int[] nums, int k) {
+        int ans = 0;
+        int pre = 0;
+        Map<Integer, Integer> map = new HashMap<>();
+        map.put(0, 1);
+
+        for (int i = 0; i < nums.length; i++) {
+            pre += nums[i];
+            if (map.containsKey(pre - k)) {
+                ans += map.get(pre - k);
+            }
+            map.put(pre, map.getOrDefault(pre, 0) + 1);
+        }
+
+        return ans;
+    }
+}
+```
+
 
 
 # 2 位运算
@@ -1793,6 +1874,37 @@ class Solution {
             ans[i] = list.get(i);
         } 
         return ans;
+    }
+}
+```
+
+> *给定一个只包含整数的有序数组，每个元素都会出现两次，唯有一个数只会出现一次，找出这个数。*
+
+```java
+class Solution {
+    public int singleNonDuplicate(int[] nums) {
+        int ans = 0;
+        for (int num : nums) {
+            ans ^= num;
+        }
+        return ans;
+    }
+}
+
+class Solution {
+    public int singleNonDuplicate(int[] nums) {
+        int left = 0;
+        int right = nums.length - 1;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] == nums[mid ^ 1]) {
+                left = mid + 1;
+            }
+            else {
+                right = mid;
+            }
+        }
+        return nums[left];
     }
 }
 ```

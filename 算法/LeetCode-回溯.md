@@ -887,3 +887,99 @@ class Solution {
 }
 ```
 
+## 优美的排列（0526）
+
+> 假设有从 1 到 N 的 N 个整数，如果从这 N 个数字中成功构造出一个数组，使得数组的第 i 位 (1 <= i <= N) 满足如下两个条件中的一个，我们就称这个数组为一个优美的排列。条件：
+>
+> 第 i 位的数字能被 i 整除
+> i 能被第 i 位上的数字整除
+> 现在给定一个整数 N，请问可以构造多少个优美的排列？
+
+```java
+class Solution {
+    int count = 0;
+
+    public int countArrangement(int n) {
+        boolean[] visited = new boolean[n + 1];
+        backtrack(n, visited, 1);
+        return count;
+    }
+
+    private void backtrack(int n, boolean[] visited, int pos) {
+        if (pos > n) {count++;}
+
+        for (int i = 1; i <= n; i++) {
+            if (!visited[i] && (pos % i == 0 || i % pos == 0)) {
+                visited[i] = true;
+                backtrack(n, visited, pos + 1);
+                visited[i] = false;
+            }
+        }
+    }
+}
+```
+
+## 钥匙和房间（0841）
+
+> *有 N 个房间，开始时你位于 0 号房间。每个房间有不同的号码：0，1，2，...，N-1，并且房间里可能有一些钥匙能使你进入下一个房间。*
+>
+> *在形式上，对于每个房间 i 都有一个钥匙列表 rooms[i]，每个钥匙 rooms[i][j] 由 [0,1，...，N-1] 中的一个整数表示，其中 N = rooms.length。 钥匙 rooms[i][j] = v 可以打开编号为 v 的房间。*
+>
+> *最初，除 0 号房间外的其余所有房间都被锁住。*
+>
+> *你可以自由地在房间之间来回走动。*
+>
+> *如果能进入每个房间返回 true，否则返回 false。*
+
+```java
+// DFS
+class Solution {
+    private static int num;
+    private static boolean[] visited;
+
+    public boolean canVisitAllRooms(List<List<Integer>> rooms) {
+        int n = rooms.size();
+        visited = new boolean[n];
+        num = 0;
+
+        dfs(rooms, 0);
+
+        return num == n;
+    }
+
+    private static void dfs(List<List<Integer>> rooms, int idx) {
+        visited[idx] = true;
+        num++;
+        for (int neigh : rooms.get(idx)) {
+            if (!visited[neigh]) {
+                dfs(rooms, neigh);
+            }
+        }
+    }
+}
+
+// BFS
+class Solution {
+    public boolean canVisitAllRooms(List<List<Integer>> rooms) {
+        int n = rooms.size(), num = 0;
+        boolean[] visited = new boolean[n];
+        Queue<Integer> queue = new LinkedList<>();
+
+        visited[0] = true;
+        queue.offer(0);
+        while (!queue.isEmpty()) {
+            int cur = queue.poll();
+            num++;
+            for (int neigh : rooms.get(cur)) {
+                if (!visited[neigh]) {
+                    visited[neigh] = true;
+                    queue.offer(neigh);
+                }
+            }
+        }
+
+        return num == n;
+    }
+}
+```
+

@@ -40,44 +40,81 @@ class Solution {
 }
 ```
 
-> 前序+中序（栈）
+> 栈
 
 ```java
-class Solution {
-    public List<Integer> preorderTraversal(TreeNode root) {
+	/**
+     * 前序遍历非递归方式实现
+     * 非递归实现思路：二叉树遍历的递归实现很简单，也很容易理解，在进行非递归实现时，需要用到栈这种数据结构（为什么是栈，不是别的数据结构）。
+     * 因为递归实现的过程就是程序自己在处理圧栈和弹栈，改用非递归实现时，用栈模拟系统的圧栈与弹栈，就可以了。
+     */
+    public List<Integer> preorder(TreeNode root) {
         List<Integer> ans = new ArrayList<>();
-        if (root == null) {return ans;}
-
         Stack<TreeNode> stack = new Stack<>();
-        TreeNode node = root;
-        while (!stack.isEmpty() || node != null) {
-            while (node != null) {
-                ans.add(node.val);
-                stack.push(node);
-                node = node.left;
+        TreeNode cur = root;
+        while (cur != null || !stack.isEmpty()) {
+            //对于前序遍历，需要一直往二叉树的左子树上走，直道左子树走完。在走左子树的过程中需要输出遇到节点的值
+            while (cur != null) {
+                ans.add(cur.val);
+                stack.push(cur);
+                cur = cur.left;
             }
-            node = stack.pop();
-            node = node.right;
+            //左边的节点都走完了，需要改变节点方向
+            if (!stack.isEmpty()) {
+                cur = stack.pop();
+                cur = cur.right;
+            }
         }
         return ans;
     }
-}
-class Solution {
-    public List<Integer> inorderTraversal(TreeNode root) {
+
+	/**
+     * 中序遍历的非递归实现,与上述前序遍历类似，只有稍许不同，注意
+     */
+    public List<Integer> inorder(TreeNode root) {
         List<Integer> ans = new ArrayList<>();
         Stack<TreeNode> stack = new Stack<>();
-        while (true) {
-            while (root != null) {
-                stack.push(root);
-                root = root.left;
+        TreeNode cur = root;
+        while (cur != null || !stack.isEmpty()) {
+            //一直向左，但是先不打印经历的节点的值
+            while (cur != null) {
+                stack.push(cur);
+                cur = cur.left;
             }
-            if (stack.isEmpty()) {return ans;}
-            TreeNode node = stack.pop();
-            ans.add(node.val);
-            root = node.right;
+            //到达最左边，打印并改变方向
+            if (!stack.isEmpty()) {
+                cur = stack.pop();
+                ans.add(cur.val);
+                cur = cur.right;
+            }
+ 
         }
+        return ans;
+ 
     }
-}
+
+/**
+     * 后序遍历的非递归实现
+     * 技巧：妙用前序遍历的非递归可以实现后序遍历的非递归实现，这里需要注意几点改变：后序时，先遍历右，再遍历左，最后将得到的结果反向就好了
+     */
+    public List<Integer> postorder(TreeNode root) {
+        List<Integer> ans = new ArrayList<>();
+        Stack<TreeNode> stack = new Stack<>();
+        TreeNode cur = root;
+        while (cur != null || !stack.isEmpty()) {
+            while (cur != null) {
+                ans.add(cur.val);
+                stack.push(cur);
+                cur = cur.right;
+            }
+            if (!stack.isEmpty()) {
+                cur = stack.pop();
+                cur = cur.left;
+            }
+        }
+        Collections.reverse(ans);
+        return ans;
+    }
 ```
 
 > 层序遍历
@@ -357,6 +394,59 @@ class Solution {
         return depth;
     }
 }
+```
+
+## 二叉树的直径（0543）
+
+> *给定一棵二叉树，你需要计算它的直径长度。一棵二叉树的直径长度是任意两个结点路径长度中的最大值。这条路径可能穿过也可能不穿过根结点。*
+
+```java
+class Solution {
+    int ans;
+
+    public int diameterOfBinaryTree(TreeNode root) {
+        ans = 1;
+        helper(root);
+        return ans - 1;
+    }
+
+    private int helper(TreeNode node) {
+        if (node == null) {return 0;}
+
+        int left = helper(node.left);
+        int right = helper(node.right);
+        
+        ans = Math.max(ans, left + right + 1);
+        return Math.max(left, right) + 1;
+    }
+}
+```
+
+## 二叉树的坡度（0563）
+
+> *给定一个二叉树，计算 整个树 的坡度 。*
+>
+> *一个树的 节点的坡度 定义即为，该节点左子树的节点之和和右子树节点之和的 差的绝对值 。如果没有左子树的话，左子树的节点之和为 0 ；没有右子树的话也是一样。空结点的坡度是 0 。*
+>
+> *整个树 的坡度就是其所有节点的坡度之和。*
+
+```java
+class Solution {
+    int ans = 0;
+
+    public int findTilt(TreeNode root) {
+        traverse(root);
+        return ans;
+    }
+
+    public int traverse(TreeNode root) {
+        if (root == null) {return 0;}
+        int left = traverse(root.left);
+        int right = traverse(root.right);
+        ans += Math.abs(left - right);
+        return left + right + root.val;
+    }
+}}
 ```
 
 ## 最小高度树（0310）
@@ -920,6 +1010,128 @@ class Solution {
         maxCount = Math.max(maxCount, map.get(sum));
 
         return sum;
+    }
+}
+```
+
+## 把二叉搜索树转换成累加树（0538）
+
+> 给出二叉 搜索 树的根节点，该树的节点值各不相同，请你将其转换为累加树（Greater Sum Tree），使每个节点 node 的新值等于原树中大于或等于 node.val 的值之和。
+>
+> 提醒一下，二叉搜索树满足下列约束条件：
+>
+> 节点的左子树仅包含键 小于 节点键的节点。
+> 节点的右子树仅包含键 大于 节点键的节点。
+> 左右子树也必须是二叉搜索树。
+
+```java
+class Solution {
+    int sum = 0;
+
+    public TreeNode convertBST(TreeNode root) {
+        if (root != null) {
+            convertBST(root.right);
+            sum += root.val;
+            root.val = sum;
+            convertBST(root.left);
+        }
+        return root;
+    }
+}
+```
+
+## N叉树
+
+> 最大深度
+
+```java
+class Solution {
+    public int maxDepth(Node root) {
+        Queue<Pair<Node, Integer>> stack = new LinkedList<>();
+        if (root != null) {stack.add(new Pair(root, 1));}
+
+        int depth = 0;
+        while (!stack.isEmpty()) {
+            Pair<Node, Integer> cur = stack.poll();
+            root = cur.getKey();
+            int curDepth = cur.getValue();
+            if (root != null) {
+                depth = Math.max(depth, curDepth);
+                for (Node c : root.children) {
+                    stack.add(new Pair(c, curDepth + 1));
+                }
+            }
+        }
+
+        return depth;
+    }
+}
+```
+
+> 前序
+
+```java
+class Solution {
+    public List<Integer> preorder(Node root) {
+        Stack<Node> stack = new Stack<>();
+        List<Integer> ans = new ArrayList<>();
+        if (root == null) {return ans;}
+
+        stack.add(root);
+        while (!stack.isEmpty()) {
+            Node node = stack.pop();
+            ans.add(node.val);
+            Collections.reverse(node.children);
+            for (Node adj : node.children) {
+                stack.add(adj);
+            }
+        }
+        return ans;
+    }
+}
+```
+
+> 后序
+
+```java
+class Solution {
+    public List<Integer> postorder(Node root) {
+        Stack<Node> stack = new Stack<>();
+        LinkedList<Integer> ans = new LinkedList<>();
+        if (root == null) {return ans;}
+
+        stack.add(root);
+        while (!stack.isEmpty()) {
+            Node node = stack.pop();
+            ans.addFirst(node.val);
+            for (Node adj : node.children) {
+                if (adj != null) {
+                    stack.add(adj);    
+                } 
+            }
+        }
+        return ans;
+    }
+}
+```
+
+## 另一个树的子树（0572）
+
+> *给定两个非空二叉树 s 和 t，检验 s 中是否包含和 t 具有相同结构和节点值的子树。s 的一个子树包括 s 的一个节点和这个节点的所有子孙。s 也可以看做它自身的一棵子树。*
+
+```java
+class Solution {
+    public boolean isSubtree(TreeNode s, TreeNode t) {
+        if (t == null) {return true;}
+        if (s == null) {return false;}
+        return isSubtree(s.left, t) || isSubtree(s.right, t) || isSameTree(s, t);
+    }
+
+    private static boolean isSameTree(TreeNode s, TreeNode t) {
+        if (s == null && t == null) {return true;}
+        if (s == null || t == null) {return false;}
+        if (s.val != t.val) {return false;}
+        return isSameTree(s.left, t.left) && isSameTree(s.right, t.right);
     }
 }
 ```
