@@ -1136,3 +1136,79 @@ class Solution {
 }
 ```
 
+## 根据二叉树创建字符串（0606）
+
+> *你需要采用前序遍历的方式，将一个二叉树转换成一个由括号和整数组成的字符串。*
+>
+> *空节点则用一对空括号 "()" 表示。而且你需要省略所有不影响字符串与原始二叉树之间的一对一映射关系的空括号对。*
+
+```java
+class Solution {
+    public String tree2str(TreeNode t) {
+        if (t == null) {return "";}
+        if (t.left == null && t.right == null) {return t.val + "";}
+        if (t.right == null) {return t.val + "(" + tree2str(t.left) + ")";}
+        return t.val + "(" + tree2str(t.left) + ")(" + tree2str(t.right) + ")"; 
+    }
+}
+```
+
+## 合并二叉树（0617）
+
+> *给定两个二叉树，想象当你将它们中的一个覆盖到另一个上时，两个二叉树的一些节点便会重叠。*
+>
+> *你需要将他们合并为一个新的二叉树。合并的规则是如果两个节点重叠，那么将他们的值相加作为节点合并后的新值，否则不为 NULL 的节点将直接作为新二叉树的节点。*
+
+```java
+class Solution {
+    public TreeNode mergeTrees(TreeNode root1, TreeNode root2) {
+        if (root1 == null) {return root2;}
+        if (root2 == null) {return root1;}
+
+        TreeNode ans = new TreeNode(root1.val + root2.val);
+        ans.left = mergeTrees(root1.left, root2.left);
+        ans.right = mergeTrees(root1.right, root2.right);
+        return ans;
+    }
+}
+```
+
+## 在二叉树中增加一行（0623）
+
+> *给定一个二叉树，根节点为第1层，深度为 1。在其第 d 层追加一行值为 v 的节点。*
+>
+> *添加规则：给定一个深度值 d （正整数），针对深度为 d-1 层的每一非空节点 N，为 N 创建两个值为 v 的左子树和右子树。*
+>
+> *将 N 原先的左子树，连接为新节点 v 的左子树；将 N 原先的右子树，连接为新节点 v 的右子树。*
+>
+> *如果 d 的值为 1，深度 d - 1 不存在，则创建一个新的根节点 v，原先的整棵树将作为 v 的左子树。*
+
+```java
+class Solution {
+    public TreeNode addOneRow(TreeNode root, int val, int depth) {
+        return myMethod(root, val, depth, true);
+    }
+
+    private static TreeNode myMethod(TreeNode root, int val, int depth, boolean left) {
+        if (depth == 1 && left) {
+            TreeNode ans = new TreeNode(val);
+            ans.left = root;
+            return ans;
+        }
+
+        if (depth == 1 && !left) {
+            TreeNode tmp = new TreeNode(val);
+            tmp.right = root;
+            return tmp;
+        }
+
+        if (root != null) {
+            root.left = myMethod(root.left, val, depth - 1, true);
+            root.right = myMethod(root.right, val, depth - 1, false);
+        }
+
+        return root;
+    }
+}
+```
+
