@@ -623,6 +623,30 @@ class Solution {
 }
 ```
 
+> 平方数之和：*给定一个非负整数 c ，你要判断是否存在两个整数 a 和 b，使得 a2 + b2 = c 。**给定一个非负整数 c ，你要判断是否存在两个整数 a 和 b，使得 a2 + b2 = c 。*
+>
+> *一个非负整数 c 能够表示为两个整数的平方和，当且仅当 c 的所有形如 4k+3 的质因子的幂次均为偶数。*
+
+```java
+public class Solution {
+    public boolean judgeSquareSum(int c) {
+        for (int i = 2; i * i <= c; i++) {
+            int count = 0;
+            if (c % i == 0) {
+                while (c % i == 0) {
+                    count++;
+                    c /= i;
+                }
+                if (i % 4 == 3 && count % 2 != 0)
+                    return false;
+            }
+        }
+        return c % 4 != 3;
+    }
+}
+```
+
+
 > 完美数：
 >
 > *对于一个 正整数，如果它和除了它自身以外的所有 正因子 之和相等，我们称它为 「完美数」。*

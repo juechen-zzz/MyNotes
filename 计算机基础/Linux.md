@@ -1,26 +1,29 @@
 [TOC]
 
 ```shell
-cd -								# 在最近的两个目录切换
-cp ~./Desktop/a.txt ./				# 文件名不改变，后面只需要写目录
-mv -i a.txt b.txt					# 重命名
+cd -											# 在最近的两个目录切换
+cp ~./Desktop/a.txt ./							# 文件名不改变，后面只需要写目录
+mv -i a.txt b.txt								# 重命名
 #########################################################################
-cat -n/ more 				# 都用来查看文件，cat看小文件，全部显示，more看大文件，分屏显示
+cat -n/ more 									# 都用来查看文件，cat看小文件，全部显示，more看大文件，分屏显示
+head -n 200 filename 							# 查看文本文件头部n行,200可替换为任一数字
+tail -n 200 filename 							# 查看文本文件末尾n行, 200可替换为任一数字
+wc -l filename									# 查看文本文件行数
 grep -n XXX 123.txt
 grep -n ^f 123.txt  /  grep -n ke$ 123.txt 		# 查找头尾
 echo XXX > 123.txt  /  echo XXX >> 123.txt 		# >会覆盖，>>是追加 
 scp -P port user@XXX:Desktop/123.txt 123.txt 	# 远程复制，-r可以复制文件夹
 scp -r demp user@XXX:Desktop
 #########################################################################
-ps au								# a查看全部进程，u显示进程详细状态
+ps au											# a查看全部进程，u显示进程详细状态
 ps -ef|grep 进程ID
-top 								# 动态查看进程，退出需要按q
-netstat -nap | grep 5672			# 监听5672接口
+top 											# 动态查看进程，退出需要按q
+netstat -nap | grep 5672						# 监听5672接口
 kill -9 进程号
 find [路径] -name "*.py"
-ln -s 被链接的源文件 链接文件	 # 源文件要用绝对目录
+ln -s 被链接的源文件 链接文件	 					 # 源文件要用绝对目录
 #########################################################################
-tar -zcvf 打包文件.tar.gz 被打包的文件、目录   # z换成j，则为.tar.bz2
+tar -zcvf 打包文件.tar.gz 被打包的文件、目录			# z换成j，则为.tar.bz2
 tar -zxvf 打包文件.tar.gz -C 目标路径
 ```
 

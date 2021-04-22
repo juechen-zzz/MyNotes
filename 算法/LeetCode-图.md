@@ -1,5 +1,43 @@
 [TOC]
 
+## 成环判定
+
+```java
+private static boolean check(int[][] graph) {
+    int n = graph.length;
+    int[] inDegree = new int[n];
+    Queue<Integer> queue = new LinkedList<>();
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (graph[j][i] == 1) {
+                inDegree[i]++;
+            }
+        }
+    }
+
+    for (int i = 0; i < n; i++) {
+        if (inDegree[i] == 0) {
+            queue.offer(i);
+        }
+    }
+
+    int num = 0;
+    while (!queue.isEmpty()) {
+        int cur = queue.poll();
+        num++;
+        for (int i = 0; i < n; i++) {
+            if (graph[cur][i] == 1) {
+                inDegree[i]--;
+                if (inDegree[i] == 0) {queue.offer(i);}
+            }
+        }
+    }
+
+    return num != n;
+}
+```
+
 ## 被围绕的区域（0130）
 
 > *给定一个二维的矩阵，包含 'X' 和 'O'（字母 O）。*
@@ -103,7 +141,7 @@ class Solution {
 }
 ```
 
-## 课程表（0207 && 0210）
+## 课程表
 
 > *你这个学期必须选修 numCourses 门课程，记为 0 到 numCourses - 1 。*
 >
@@ -185,6 +223,33 @@ class Solution {
         }
 
         return numCourses == 0 ? ans : new int[0];
+    }
+}
+```
+
+> *这里有 n 门不同的在线课程，他们按从 1 到 n 编号。每一门课程有一定的持续上课时间（课程时间）t 以及关闭时间第 d 天。一门课要持续学习 t 天直到第 d 天时要完成，你将会从第 1 天开始。*
+>
+> *给出 n 个在线课程用 (t, d) 对表示。你的任务是找出最多可以修几门课。*
+
+```java
+class Solution {
+    public int scheduleCourse(int[][] courses) {
+        Arrays.sort(courses, (a, b) -> a[1] - b[1]);
+        PriorityQueue<Integer> pq = new PriorityQueue<>((a, b) -> b - a);
+        int time = 0;
+
+        for (int[] cur : courses) {
+            if (time + cur[0] <= cur[1]) {
+                pq.offer(cur[0]);
+                time += cur[0];
+            }
+            else if (!pq.isEmpty() && pq.peek() > cur[0]) {
+                time += cur[0] - pq.poll();
+                pq.offer(cur[0]);
+            }
+        }
+
+        return pq.size();
     }
 }
 ```
