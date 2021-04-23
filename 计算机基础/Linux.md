@@ -21,6 +21,7 @@ scp -r demp user@XXX:Desktop
 ps au											# a查看全部进程，u显示进程详细状态
 ps -ef|grep 进程ID
 top 											# 动态查看进程，退出需要按q
+top -H -p <PID> 								# 查看某个进程（PID）的所有线程
 netstat -nap | grep 5672						# 监听5672接口
 kill -9 进程号
 ln -s 被链接的源文件 链接文件	 					 # 源文件要用绝对目录

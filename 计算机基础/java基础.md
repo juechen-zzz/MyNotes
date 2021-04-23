@@ -116,6 +116,9 @@ JVM 内存共分为**虚拟机栈，堆，方法区，程序计数器，本地�
 * **虚拟机栈(线程私有)**
 
 	* <u>每个方法在执行的时候会创建一个栈帧，存储**局部变量、操作数、动态链接和方法返回地址**</u>
+	* 每个线程启动后，虚拟机就会为其分配一块栈内存。
+		* 每个栈由多个栈帧（Frame）组成，对应着每次方法调用时所占用的内存
+		* 每个线程只能有一个活动栈帧，对应着当前正在执行的那个方法
 	* 每个方法从调用到执行完毕，对应一个栈帧在虚拟机栈中的入栈和出栈
 	* 通常所说的栈，一般指虚拟机栈中的局部变量部分，局部变量所需内存在编译期间完成分配
 		* 若线程请求的栈深度大于虚拟机所允许的深度，则StackOverflowError
@@ -939,14 +942,16 @@ public int hashCode() {
 * 创建线程对象，调用**start()**方法启动线程
 
 * ```Java
-	public class StartThread1 extends Thread {
-	    // 线程入口点
+	public class testThread1 extends Thread{
 	    @Override
-	    public void run(){
-	        // 线程体
-	        for (int i = 0; i < 20; i++) {
-	            System.out.println("I am listening " + i);
-	        }
+	    public void run() {
+	        System.out.println("Thread方式创建多线程");
+	    }
+	
+	    public static void main(String[] args) {
+	        testThread1 t = new testThread1();
+	        t.start();
+	        System.out.println("over");
 	    }
 	}
 	```
@@ -960,24 +965,59 @@ public int hashCode() {
 * 创建线程对象，调用**start()**方法启动线程
 
 * ```Java
-	public class StartThread3 implements Runnable{
+	public class testThread2 implements Runnable {
 	    @Override
-	    public void run(){
-	        for (int i = 0; i < 20; i++) {
-	            System.out.println("I am watching " + i);
-	        }
+	    public void run() {
+	        System.out.println("Runnable方式创建多线程");
+	    }
+	
+	    public static void main(String[] args) {
+	        testThread2 myRunnable = new testThread2();
+	        Thread t = new Thread(myRunnable);
+        t.start();
+	        System.out.println("over");
 	    }
 	}
+	
 	```
-
+	
 * **3 实现Callable接口**
 	* 实现Callable接口，需要返回值类型
+	
 	* 重写call，需要抛出异常
+	
 	* 创建目标对象
+	
 	* 创建执行任务 ExecutorService ser = Executors.newFixedThreadPool(1);
+	
 	* 提交执行：Future<Boolean> result1 = ser.submit(1);
+	
 	* 获取结果：boolean r1 = result1.get();
+	
 	* 关闭服务：ser.shutdownNow();
+	
+	* ```java
+		public class testThread3 implements Callable<String> {
+		    @Override
+		    public String call() throws Exception {
+		        return "Callable方式创建多线程 2";
+		    }
+		
+		    public static void main(String[] args) {
+		        ExecutorService threadPool = Executors.newSingleThreadExecutor();
+		        // 启动多线程
+		        Future<String> future = threadPool.submit(new testThread3());
+		        try {
+		            System.out.println("Callable方式创建多线程");
+		            System.out.println(future.get());
+		        } catch (Exception e) {
+		            e.printStackTrace();
+		        }
+		    }
+		}
+		```
+	
+		
 
 <img src="../images/image-20200921100054583.png" alt="image-20200921100054583" style="zoom: 50%;" />
 
@@ -986,6 +1026,15 @@ public int hashCode() {
 
 
 ### 17 多线程的各种方法
+
+**run() 和 start() 有什么区别？**
+
+> start()：启动一个新线程，在新的线程运行run方法中的代码
+>
+> run()：新线程启动后会调用的方法
+
+* run() 可以重复调用，而 start() 只能调用一次。
+* 直接调用 run 是在主线程中执行了 run，没有启动新的线程；而使用 start 是启动新的线程，通过新的线程间接执行 run 中的代码
 
 **sleep() 和 wait() 有什么区别？**
 
@@ -997,11 +1046,6 @@ public int hashCode() {
 
 * notifyAll()会唤醒所有的线程，notify()只会唤醒一个线程。notifyAll() 调用后，会将全部线程由等待池移到锁池，然后参与锁的竞争，竞争成功则继续执行，如果不成功则留在锁池等待锁被释放后再次参与竞争。而 notify()只会唤醒一个线程，具体唤醒哪一个线程由虚拟机控制。
 
-**run() 和 start() 有什么区别？**
-
-* start() 方法用于启动线程，run() 方法用于执行线程的运行时代码。run() 可以重复调用，而 start() 只能调用一次。
-* 调⽤ start() ⽅法⽅可启动线程并使线程进⼊就绪状态，直接执⾏ 以多线程的⽅式执⾏。
-
 **submit() 和 execute() 方法有什么区别？**
 
 - execute()：只能执行 Runnable 类型的任务。
@@ -1009,6 +1053,26 @@ public int hashCode() {
 - Callable 类型的任务可以获取执行的返回值，而 Runnable 执行无返回值。
 - execute() ⽅法⽤于提交不需要返回值的任务，所以⽆法判断任务是否被线程池执⾏成功与否；
 - submit() ⽅法⽤于提交需要返回值的任务。线程池会返回⼀个Future 类型的对象，通过 这个 Future 对象可以判断任务是否执⾏成功，并且可以通过 Future 的 get() ⽅法来获取 返回值， get() ⽅法会阻塞当前线程直到任务完成，⽽使⽤ getlong timeoutTimeUnit unit ⽅法则会阻塞当前线程⼀段时间后⽴即返回，这时候有可能任务没有执⾏完。
+
+| 方法名           | static | 功能说明                                                     | 注意                                                         |
+| ---------------- | ------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| start()          |        | 启动一个新线 程，在新的线程 运行 run 方法 中的代码           | start 方法只是让线程进入就绪，里面代码不一定立刻 运行（CPU 的时间片还没分给它）。每个线程对象的 start方法只能调用一次，如果调用了多次会出现 IllegalThreadStateException |
+| run()            |        | 新线程启动后会 调用的方法                                    | 如果在构造 Thread 对象时传递了 Runnable 参数，则 线程启动后会调用 Runnable 中的 run 方法，否则默 认不执行任何操作。但可以创建 Thread 的子类对象， 来覆盖默认行为 |
+| join()           |        | 等待线程运行结 束                                            |                                                              |
+| join(long n)     |        | 等待线程运行结 束,最多等待 n 毫秒                            |                                                              |
+| getId()          |        | 获取线程长整型 的 id                                         | id 唯一                                                      |
+| getName()        |        | 获取线程名                                                   |                                                              |
+| setName(String)  |        | 修改线程名                                                   |                                                              |
+| getPriority()    |        | 获取线程优先级                                               |                                                              |
+| setPriority(int) |        | 修改线程优先级                                               | java中规定线程优先级是1~10 的整数，较大的优先级 能提高该线程被 CPU 调度的机率 |
+| getState()       |        | 获取线程状态                                                 | Java 中线程状态是用 6 个 enum 表示，分别为： NEW, RUNNABLE, BLOCKED, WAITING, TIMED_WAITING, TERMINATED |
+| isInterrupted()  |        | 判断是否被打断，                                             | 不会清除 打断标记                                            |
+| isAlive()        |        | 线程是否存活 （还没有运行完 毕）                             |                                                              |
+| interrupt()      |        | 打断线程                                                     | 如果被打断线程正在 sleep，wait，join 会导致被打断 的线程抛出 InterruptedException，并清除 打断标 记 ；如果打断的正在运行的线程，则会设置 打断标 记 ；park 的线程被打断，也会设置 打断标记 |
+| interrupted()    | static | 判断当前线程是 否被打断                                      | 会清除 打断标记                                              |
+| currentThread()  | static | 获取当前正在执 行的线程                                      |                                                              |
+| sleep(long n)    | static | 让当前执行的线 程休眠n毫秒， 休眠时让出 cpu 的时间片给其它 线程 |                                                              |
+| yield()          | static | 提示线程调度器让出当前线程对CPU的使用                        | 主要为了测试                                                 |
 
 
 
