@@ -8,7 +8,10 @@ mv -i a.txt b.txt								# 重命名
 cat -n/ more 									# 都用来查看文件，cat看小文件，全部显示，more看大文件，分屏显示
 head -n 200 filename 							# 查看文本文件头部n行,200可替换为任一数字
 tail -n 200 filename 							# 查看文本文件末尾n行, 200可替换为任一数字
+grep "search content" filename1					# 搜索某个文件里面是否包含字符串
 wc -l filename									# 查看文本文件行数
+find [路径] -name "*.py"
+
 grep -n XXX 123.txt
 grep -n ^f 123.txt  /  grep -n ke$ 123.txt 		# 查找头尾
 echo XXX > 123.txt  /  echo XXX >> 123.txt 		# >会覆盖，>>是追加 
@@ -20,7 +23,6 @@ ps -ef|grep 进程ID
 top 											# 动态查看进程，退出需要按q
 netstat -nap | grep 5672						# 监听5672接口
 kill -9 进程号
-find [路径] -name "*.py"
 ln -s 被链接的源文件 链接文件	 					 # 源文件要用绝对目录
 #########################################################################
 tar -zcvf 打包文件.tar.gz 被打包的文件、目录			# z换成j，则为.tar.bz2

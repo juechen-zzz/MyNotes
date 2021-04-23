@@ -528,6 +528,20 @@ where StudentNo = (select SubjectNo from subject where SubjectName = '课程')
 
 ### 4.10 groub by - 分组查询
 
+```sql
+select names,count(1) as number 
+from ceshi 
+GROUP BY names 
+ORDER BY count(1) desc
+
+-- 返回 article_keyword 表中 keyword 重复次数（count） 最多的20条记录
+select distinct count( * ) AS count
+from article_keyword
+group by keyword
+order by count desc
+limit 6
+```
+
 ![image-20210222173058037](../images/image-20210222173058037.png)
 
 
