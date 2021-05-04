@@ -1,3 +1,5 @@
+[TOC]
+
 # 0 排序
 
 ```java
@@ -34,6 +36,8 @@ int[] tmp = new int[nums.length + 2];
 System.arraycopy(nums, 0, tmp, 1, nums.length);
 // 克隆
 int[] nums2 = nums.clone();
+// 求和
+int sum = Arrays.stream(nums).sum();
 ```
 
 # 2 字符串
@@ -49,6 +53,7 @@ ans.chars().filter(c -> c == ':').count() == 7
 // sb
 StringBuilder s = new StringBuilder();
 s.append(j);
+s.deleteCharAt(i);
 s.reverse();
 String s_end = s.toString();
 // 判定是否为数字或字母 
@@ -226,10 +231,5 @@ s.isEmpty();
 s.size();
 ```
 
-# 10 List
 
-```java
-List<Pair>[] edges = new List[stringNum];
-for (int i = 0; i < stringNum; i++){edges[i] = new ArrayList<Pair>();
-```
 

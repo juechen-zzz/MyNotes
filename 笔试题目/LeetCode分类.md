@@ -224,7 +224,6 @@ class Solution {
 ## 连续的子数组和（0523）
 
 > 给定一个包含 非负数 的数组和一个目标 整数 k ，编写一个函数来判断该数组是否含有连续的子数组，其大小至少为 2，且总和为 k 的倍数，即总和为 n * k ，其中 n 也是一个整数。
->
 
 ```java
 class Solution {
@@ -359,6 +358,39 @@ class Solution {
         }
 
         return Math.max((maxTimes - 1) * (n + 1) + maxCount, tasks.length);
+    }
+}
+```
+
+## 分割数组为连续子序列（0659）
+
+> *给你一个按升序排序的整数数组 num（可能包含重复数字），请你将它们分割成一个或多个长度至少为 3 的子序列，其中每个子序列都由连续整数组成。*
+>
+> *如果可以完成上述分割，则返回 true ；否则，返回 false 。*
+
+```java
+class Solution {
+    public boolean isPossible(int[] nums) {
+        Map<Integer, PriorityQueue<Integer>> map = new HashMap<>();
+        for (int x : nums) {
+            if (!map.containsKey(x)) {map.put(x, new PriorityQueue<Integer>());}
+
+            if (map.containsKey(x - 1)) {
+                int preLength = map.get(x - 1).poll();
+                if (map.get(x - 1).isEmpty()) {map.remove(x - 1);}
+                map.get(x).offer(preLength + 1);
+            }
+            else {
+                map.get(x).offer(1);
+            }
+        }
+
+        for (int k : map.keySet()) {
+            PriorityQueue<Integer> queue = map.get(k);
+            if (queue.peek() < 3) {return false;}
+        }
+
+        return true;
     }
 }
 ```
@@ -798,19 +830,15 @@ class Solution {
 ```java
 class Solution {
     public int rob(int[] nums) {
+        if (nums.length == 0) {return 0;}
         int n = nums.length;
-        if (n == 0) {return 0;}
-        else if (n == 1) {return nums[0];}
-        else if (n == 2) {return nums[0] > nums[1] ? nums[0] : nums[1];}
+        if (n == 1) {return nums[0];}
+
         int[] dp = new int[n];
         dp[0] = nums[0];
-        dp[1] = nums[1];
+        dp[1] = Math.max(nums[0], nums[1]);
         for (int i = 2; i < n; i++) {
-            int tmp = dp[0];
-            for (int j = 1; j < i - 1; j++) {
-                if (dp[j] > tmp) {tmp = dp[j];}
-            }
-            dp[i] = Math.max(dp[i - 1], tmp + nums[i]);
+            dp[i] = Math.max(dp[i - 1], dp[i - 2] + nums[i]);
         }
         return dp[n - 1];
     }
@@ -942,116 +970,7 @@ class Solution {
 }
 ```
 
-## 寻找两个正序数组的中位数（0004）
-
-> *给定两个大小为 m 和 n 的正序（从小到大）数组 nums1 和 nums2。请你找出并返回这两个正序数组的中位数。*
->
-> *输入：nums1 = [1,3], nums2 = [2]*
->
-> *输出：2.00000*
->
-> *解释：合并数组 = [1,2,3] ，中位数 2*
-
-```java
-class Solution {
-    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
-        int m = nums1.length;
-        int n = nums2.length;
-        int len = m + n;
-
-        int left = -1, right = -1;
-        int aStart = 0, bStart = 0;
-
-        for (int i = 0; i <= len / 2; i++){
-            left = right;
-            // 如果 aStart 还没有到最后并且此时 nums1 位置的数字小于 nums1 位置的数组，那么就可以后移了。
-            // 如果 B 数组此刻已经没有数字了，继续取数字 B[ bStart ]，则会越界，所以判断下 bStart 是否大于数组长度了，这样 || 后面的不会执行
-            if (aStart < m && (bStart >= n || nums1[aStart] < nums2[bStart])){
-                right = nums1[aStart++];
-            } else {
-                right = nums2[bStart++];
-            }
-        }
-
-        if ((len & 1) == 0) {return (left + right) / 2.0;}
-        else {return right;}
-    }
-}
-```
-
-##  整数转罗马（0012 && 0013）
-
-> *罗马数字包含以下七种字符: I， V， X， L，C，D 和 M。*
->
-> *字符          数值*
->
-> *I             1*
->
-> *V             5*
->
-> *X             10*
->
-> *L             50*
->
-> *C             100*
->
-> *D             500*
->
-> *M             1000*
-
-```java
-class Solution {
-    int[] values = {1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};    
-    String[] symbols = {"M","CM","D","CD","C","XC","L","XL","X","IX","V","IV","I"};
-
-    public String intToRoman(int num) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < values.length && num >= 0; i++) {
-            while (values[i] <= num) {
-                num -= values[i];
-                sb.append(symbols[i]);
-            }
-        }
-        return sb.toString();
-    }
-}
-```
-
-```java
-class Solution {
-    public int romanToInt(String s) {
-        Map<String, Integer> map = new HashMap<>();
-        map.put("I", 1);
-        map.put("IV", 4);
-        map.put("V", 5);
-        map.put("IX", 9);
-        map.put("X", 10);
-        map.put("XL", 40);
-        map.put("L", 50);
-        map.put("XC", 90);
-        map.put("C", 100);
-        map.put("CD", 400);
-        map.put("D", 500);
-        map.put("CM", 900);
-        map.put("M", 1000);
-
-        int ans = 0;
-        for (int i = 0; i < s.length();){
-            if (i + 1 < s.length() && map.containsKey(s.substring(i, i+2))) {
-                ans += map.get(s.substring(i, i+2));
-                i += 2;
-            }
-            else {
-                ans += map.get(s.substring(i, i+1));
-                i++;
-            }
-        }
-        return ans;
-    }
-}
-```
-
-## N数之和（0015 && 0016 && 0018）
+## N数之和
 
 > *给你一个包含 n 个整数的数组 nums，判断 nums 中是否存在三个元素 a，b，c ，使得 a + b + c = 0 ？请你找出所有满足条件且不重复的三元组。*
 >
@@ -1192,7 +1111,7 @@ class Solution {
 }
 ```
 
-## 删除排序数组中的重复项（0026 && 0080）
+## 删除排序数组中的重复项
 
 > *给定一个排序数组，你需要在 原地 删除重复出现的元素，使得每个元素只出现一次，返回移除后数组的新长度。*
 >
@@ -1246,7 +1165,7 @@ class Solution {
 }
 ```
 
-## 跳跃游戏（0045 && 0055）
+## 跳跃游戏
 
 > *给定一个非负整数数组，你最初位于数组的第一个位置。*
 >
@@ -1295,7 +1214,7 @@ class Solution {
 ```
 
 
-## 螺旋矩阵（0054 && 0059）
+## 螺旋矩阵
 
 > *给定一个包含 m x n 个元素的矩阵（m 行, n 列），请按照顺时针螺旋顺序，返回矩阵中的所有元素。*
 
@@ -1389,8 +1308,10 @@ class Solution {
 }
 ```
 
-## 合并区间（0056）
+## 区间问题
 
+> 合并区间（0056）
+>
 > *给出一个区间的集合，请合并所有重叠的区间。*
 
 ```java
@@ -1418,8 +1339,8 @@ class Solution {
 }
 ```
 
-## 插入区间（0057）
-
+> 插入区间（0057）
+>
 > *给出一个无重叠的 ，按照区间起始端点排序的区间列表。*
 >
 > *在列表中插入一个新的区间，你需要确保列表中的区间仍然有序且不重叠（如果有必要的话，可以合并区间）。*
@@ -1463,8 +1384,8 @@ class Solution {
 }
 ```
 
-## 汇总区间（0228）
-
+> 汇总区间（0228）
+>
 > *给定一个无重复元素的有序整数数组 nums 。*
 >
 > *返回 恰好覆盖数组中所有数字 的 最小有序 区间范围列表。也就是说，nums 的每个元素都恰好被某个区间范围所覆盖，并且不存在属于某个范围但不属于 nums 的数字 x 。*
@@ -1495,8 +1416,8 @@ class Solution {
 }
 ```
 
-## 无重叠区间（0435）
-
+> 无重叠区间（0435）
+>
 > *给定一个区间的集合，找到需要移除区间的最小数量，使剩余区间互不重叠。*
 
 ```java
@@ -1681,8 +1602,92 @@ class Solution {
 }
 ```
 
-## 前K个高频元素（0347）
+## 存在重复元素
 
+> *给定一个整数数组，判断是否存在重复元素。*
+
+```java
+class Solution {
+    public boolean containsDuplicate(int[] nums) {
+        Set<Integer> set = new HashSet<Integer>();
+        for (int x : nums) {
+            if (!set.add(x)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+```
+
+> *给定一个整数数组和一个整数 k，判断数组中是否存在两个不同的索引 i 和 j，使得 nums [i] = nums [j]，并且 i 和 j 的差的 绝对值 至多为 k。*
+
+```java
+class Solution {
+    public boolean containsNearbyDuplicate(int[] nums, int k) {
+        Set<Integer> set = new HashSet<>();
+        for (int i = 0; i < nums.length; ++i) {
+            if (set.contains(nums[i])) {return true;}
+            set.add(nums[i]);
+            if (set.size() > k) {
+                set.remove(nums[i - k]);
+            }
+        }
+        return false;
+    }
+}
+```
+
+> *在整数数组 nums 中，是否存在两个下标 i 和 j，使得 nums [i] 和 nums [j] 的差的绝对值小于等于 t ，且满足 i 和 j 的差的绝对值也小于等于 ķ 。*
+>
+> *如果存在则返回 true，不存在返回 false。*
+
+```java
+class Solution {
+    public boolean containsNearbyAlmostDuplicate(int[] nums, int k, int t) {
+        TreeSet<Long> set = new TreeSet<>();
+        int n = nums.length;
+        for (int i = 0; i < n; i++) {
+            if (i > k) {set.remove((long)nums[i - k - 1]);}
+            // 返回在这个集合中大于或者等于给定元素的最小元素
+            Long low = set.ceiling((long) nums[i] - t);
+            if (low != null && low <= (long)nums[i] + t) {return true;}
+            set.add((long) nums[i]);
+        }
+        return false;
+    }
+}
+```
+
+## H指数
+
+> *编写一个方法，计算出研究者的 h 指数。*
+
+```java
+class Solution {
+    public int hIndex(int[] citations) {
+        if (citations.length == 0) {return 0;}
+        Arrays.sort(citations);
+        int cite = 1;
+        int ans = 0;
+        for (int i = citations.length - 1; i >= 0; i--) {
+            if (citations[i] >= cite) {
+                cite++;
+                ans++;
+            }
+            else {
+                return ans;
+            }
+        }
+        return ans;
+    }
+}
+```
+
+## 前K个高频元素
+
+> 前K个高频元素
+>
 > *给定一个非空的整数数组，返回其中出现频率前 k 高的元素。*
 
 ```java
@@ -1721,21 +1726,64 @@ class Solution {
 }
 ```
 
-## 数组中的第K个最大元素（0215）
-
-> 在未排序的数组中找到第 **k** 个最大的元素。请注意，你需要找的是数组排序后的第 k 个最大的元素，而不是第 k 个不同的元素。
+> 前K个高频单词
+>
+> *给一非空的单词列表，返回前 k 个出现次数最多的单词。*
+>
+> *返回的答案应该按单词出现频率由高到低排序。如果不同的单词有相同出现频率，按字母顺序排序。*
 
 ```java
 class Solution {
-    public int findKthLargest(int[] nums, int k) {
-        PriorityQueue<Integer> ans = new PriorityQueue<>();
-
-        for (int n : nums) {
-            ans.offer(n);
-            if (ans.size() > k) {ans.poll();}
+    public List<String> topKFrequent(String[] words, int k) {
+        Map<String, Integer> map = new HashMap<>();
+        for (String s : words) {
+            map.put(s, map.getOrDefault(s, 0) + 1);
         }
 
-        return ans.peek();
+        List<Map.Entry<String, Integer>> curList = new ArrayList<>(map.entrySet());
+        curList.sort((o1, o2) -> o1.getValue() == o2.getValue() ? o1.getKey().compareTo(o2.getKey()) : o2.getValue() - o1.getValue());
+
+        List<String> ans = new ArrayList<>();
+        for (int i = 0; i < k; i++) {
+            ans.add(curList.get(i).getKey());
+        }
+
+        return ans;
+    }
+}
+```
+
+## 查找和最小的K对数字（0373）
+
+> *给定两个以升序排列的整形数组 nums1 和 nums2, 以及一个整数 k。*
+>
+> *定义一对值 (u,v)，其中第一个元素来自 nums1，第二个元素来自 nums2。*
+>
+> *找到和最小的 k 对数字 (u1,v1), (u2,v2) ... (uk,vk)。*
+
+```java
+class Solution {
+    public List<List<Integer>> kSmallestPairs(int[] nums1, int[] nums2, int k) {
+        List<List<Integer>> ans = new ArrayList<>();
+        int m = nums1.length, n = nums2.length;
+        if (m == 0 || n == 0) {return ans;}
+
+        int[] tmp = new int[m];
+        while (ans.size() < k) {
+            int cur = 0;
+            for (int i = 0; i < m; i++) {
+                if (tmp[i] == n) {continue;}
+                if (tmp[cur] == n || nums1[cur] + nums2[tmp[cur]] > nums1[i] + nums2[tmp[i]]) {
+                    cur = i;
+                }
+            }
+
+            if (tmp[cur] == n) {break;}
+            ans.add(Arrays.asList(nums1[cur], nums2[tmp[cur]]));
+            tmp[cur]++;
+        }
+
+        return ans;
     }
 }
 ```
@@ -1776,7 +1824,6 @@ class Solution {
 > 给定一个含有 n 个正整数的数组和一个正整数 target 。
 >
 > 找出该数组中满足其和 ≥ target 的长度最小的 连续子数组 [numsl, numsl+1, ..., numsr-1, numsr] ，并返回其长度。如果不存在符合条件的子数组，返回 0 。
->
 
 ```java
 class Solution {
@@ -1794,6 +1841,66 @@ class Solution {
         }
         
         return min == Integer.MAX_VALUE ? 0 : min;
+    }
+}
+```
+
+## 三个无重叠子数组的最大和（0689）
+
+> *给定数组 nums 由正整数组成，找到三个互不重叠的子数组的最大和。*
+>
+> *每个子数组的长度为k，我们要使这3\*k个项的和最大化。*
+>
+> *返回每个区间起始索引的列表（索引从 0 开始）。如果有多个结果，返回字典序最小的一个。*
+
+```java
+class Solution {
+    public int[] maxSumOfThreeSubarrays(int[] nums, int k) {
+        int n = nums.length;
+        int[] cache = new int[n - k + 1];
+        int[] left = new int[n - k + 1];
+        int[] right = new int[n - k + 1];
+
+        int sum = 0;
+        for (int i = 0; i < k; i++) {sum += nums[i];}
+        cache[0] = sum;
+        
+        for (int i = 1; i < cache.length; i++) {
+            int v = cache[i] = sum = sum + nums[i + k - 1] - nums[i - 1];
+            if (v > cache[left[i - 1]]) {
+                left[i] = i;
+            }
+            else {
+                left[i] = left[i - 1];
+            }
+        }
+        right[n - k] = n - k;
+
+        for (int i = n - k - 1; i >= 0; i--) {
+            if (cache[i] >= cache[right[i + 1]]) {
+                right[i] = i;
+            }
+            else {
+                right[i] = right[i + 1];
+            }
+        }
+
+        int interval = k << 1;
+        int[] ans = new int[]{0, k, interval};
+        int max = Integer.MIN_VALUE;
+        int maxM = cache.length - k;
+
+        for (int m = k; m < maxM; m++) {
+            int v = cache[left[m - k]] + cache[m] + cache[right[m + k]];
+            if (v > max) {
+                max = v;
+                ans[0] = left[m - k];
+                ans[1] = m;
+                ans[2] = right[m + k];
+            }
+        }
+
+        return ans;
     }
 }
 ```
@@ -2317,88 +2424,6 @@ class Solution {
 }
 ```
 
-## 存在重复元素
-
-> *给定一个整数数组，判断是否存在重复元素。*
-
-```java
-class Solution {
-    public boolean containsDuplicate(int[] nums) {
-        Set<Integer> set = new HashSet<Integer>();
-        for (int x : nums) {
-            if (!set.add(x)) {
-                return true;
-            }
-        }
-        return false;
-    }
-}
-```
-
-> *给定一个整数数组和一个整数 k，判断数组中是否存在两个不同的索引 i 和 j，使得 nums [i] = nums [j]，并且 i 和 j 的差的 绝对值 至多为 k。*
-
-```java
-class Solution {
-    public boolean containsNearbyDuplicate(int[] nums, int k) {
-        Set<Integer> set = new HashSet<>();
-        for (int i = 0; i < nums.length; ++i) {
-            if (set.contains(nums[i])) {return true;}
-            set.add(nums[i]);
-            if (set.size() > k) {
-                set.remove(nums[i - k]);
-            }
-        }
-        return false;
-    }
-}
-```
-
-> *在整数数组 nums 中，是否存在两个下标 i 和 j，使得 nums [i] 和 nums [j] 的差的绝对值小于等于 t ，且满足 i 和 j 的差的绝对值也小于等于 ķ 。*
->
-> *如果存在则返回 true，不存在返回 false。*
-
-```java
-class Solution {
-    public boolean containsNearbyAlmostDuplicate(int[] nums, int k, int t) {
-        TreeSet<Long> set = new TreeSet<>();
-        int n = nums.length;
-        for (int i = 0; i < n; i++) {
-            if (i > k) {set.remove((long)nums[i - k - 1]);}
-            // 返回在这个集合中大于或者等于给定元素的最小元素
-            Long low = set.ceiling((long) nums[i] - t);
-            if (low != null && low <= (long)nums[i] + t) {return true;}
-            set.add((long) nums[i]);
-        }
-        return false;
-    }
-}
-```
-
-## H指数
-
-> *编写一个方法，计算出研究者的 h 指数。*
-
-```java
-class Solution {
-    public int hIndex(int[] citations) {
-        if (citations.length == 0) {return 0;}
-        Arrays.sort(citations);
-        int cite = 1;
-        int ans = 0;
-        for (int i = citations.length - 1; i >= 0; i--) {
-            if (citations[i] >= cite) {
-                cite++;
-                ans++;
-            }
-            else {
-                return ans;
-            }
-        }
-        return ans;
-    }
-}
-```
-
 ## 水壶问题（0365）
 
 > *有两个容量分别为 x升 和 y升 的水壶以及无限多的水。请判断能否通过使用这两个水壶，从而可以得到恰好 z升 的水？*
@@ -2421,41 +2446,6 @@ class Solution {
             tmp = x % y;
         }
         return y;
-    }
-}
-```
-
-## 查找和最小的K对数字（0373）
-
-> *给定两个以升序排列的整形数组 nums1 和 nums2, 以及一个整数 k。*
->
-> *定义一对值 (u,v)，其中第一个元素来自 nums1，第二个元素来自 nums2。*
->
-> *找到和最小的 k 对数字 (u1,v1), (u2,v2) ... (uk,vk)。*
-
-```java
-class Solution {
-    public List<List<Integer>> kSmallestPairs(int[] nums1, int[] nums2, int k) {
-        List<List<Integer>> ans = new ArrayList<>();
-        int m = nums1.length, n = nums2.length;
-        if (m == 0 || n == 0) {return ans;}
-
-        int[] tmp = new int[m];
-        while (ans.size() < k) {
-            int cur = 0;
-            for (int i = 0; i < m; i++) {
-                if (tmp[i] == n) {continue;}
-                if (tmp[cur] == n || nums1[cur] + nums2[tmp[cur]] > nums1[i] + nums2[tmp[i]]) {
-                    cur = i;
-                }
-            }
-
-            if (tmp[cur] == n) {break;}
-            ans.add(Arrays.asList(nums1[cur], nums2[tmp[cur]]));
-            tmp[cur]++;
-        }
-
-        return ans;
     }
 }
 ```
@@ -2699,7 +2689,6 @@ class Solution {
 > 与此同时，每一次基因变化的结果，都需要是一个合法的基因串，即该结果属于一个基因库。
 >
 > 现在给定3个参数 — start, end, bank，分别代表起始基因序列，目标基因序列及基因库，请找出能够使起始基因序列变化为目标基因序列所需的最少变化次数。如果无法实现目标变化，请返回 -1。
->
 
 ```java
 class Solution {
@@ -2794,7 +2783,6 @@ class Solution {
 > 在加热器的加热半径范围内的每个房屋都可以获得供暖。
 >
 > 现在，给出位于一条水平线上的房屋 houses 和供暖器 heaters 的位置，请你找出并返回可以覆盖所有房屋的最小加热半径。
->
 
 ```java
 class Solution {
@@ -2985,6 +2973,191 @@ class Solution {
 }
 ```
 
+## Dota2 参议院（0649）
+
+> *Dota2 的世界里有两个阵营：Radiant(天辉)和 Dire(夜魇)*
+>
+> *Dota2 参议院由来自两派的参议员组成。现在参议院希望对一个 Dota2 游戏里的改变作出决定。他们以一个基于轮为过程的投票进行。在每一轮中，每一位参议员都可以行使两项权利中的一项：*
+>
+> *禁止一名参议员的权利：*
+>
+> *参议员可以让另一位参议员在这一轮和随后的几轮中丧失所有的权利。*
+>
+> *宣布胜利：*  *如果参议员发现有权利投票的参议员都是同一个阵营的，他可以宣布胜利并决定在游戏中的有关变化。*
+
+```java
+class Solution {
+    public String predictPartyVictory(String senate) {
+        int n = senate.length();
+        Queue<Integer> radiant = new LinkedList<>();
+        Queue<Integer> dire = new LinkedList<>();
+        for (int i = 0; i < n; i++) {
+            if (senate.charAt(i) == 'R') {
+                radiant.offer(i);
+            }
+            else {
+                dire.offer(i);
+            }
+        }
+
+        while (!radiant.isEmpty() && !dire.isEmpty()) {
+            int radiantIndex = radiant.poll(), direIndex = dire.poll();
+            if (radiantIndex < direIndex) {
+                radiant.offer(radiantIndex + n);
+            }
+            else {
+                dire.offer(direIndex + n);
+            }
+        }
+
+        return !radiant.isEmpty() ? "Radiant" : "Dire";
+    }
+}
+```
+
+## 只有两个键的键盘（0650）
+
+> *最初在一个记事本上只有一个字符 'A'。你每次可以对这个记事本进行两种操作：*
+>
+> *Copy All (复制全部) : 你可以复制这个记事本中的所有字符(部分的复制是不允许的)。*
+>
+> *Paste (粘贴) : 你可以粘贴你上一次复制的字符。*
+>
+> *给定一个数字 n 。你需要使用最少的操作次数，在记事本中打印出恰好 n 个 'A'。输出能够打印出 n 个 'A' 的最少操作次数。*
+
+```java
+class Solution {
+    public int minSteps(int n) {
+        int ans = 0, d = 2;
+        while (n > 1) {
+            while (n % d == 0) {
+                ans += d;
+                n /= d;
+            }
+            d++;
+        }
+        return ans;
+    }
+}
+```
+
+## 非递减数列（0665）
+
+> *给你一个长度为 n 的整数数组，请你判断在 最多 改变 1 个元素的情况下，该数组能否变成一个非递减数列。*
+>
+> *我们是这样定义一个非递减数列的： 对于数组中任意的 i (0 <= i <= n-2)，总满足 nums[i] <= nums[i + 1]。*
+
+```java
+class Solution {
+    public boolean checkPossibility(int[] nums) {
+        int n = nums.length;
+        int count = 0;
+        for (int i = 0; i < n - 1; i++) {
+            int x = nums[i], y = nums[i + 1];
+            if (x > y) {
+                count++;
+                if (count > 1) {return false;}
+                if (i > 0 && y < nums[i - 1]) {nums[i + 1] = x;}
+            }
+        }
+        return true;
+    }
+}
+```
+
+## 最大交换（0670）
+
+> *给定一个非负整数，你至多可以交换一次数字中的任意两位。返回你能得到的最大值。*
+
+```java
+class Solution {
+    public int maximumSwap(int num) {
+        String s = String.valueOf(num);
+        int n = s.length();
+        char[] charArray = s.toCharArray();
+
+        int[] last = new int[10];
+        for (int i = 0; i < n; i++) {
+            last[charArray[i] - '0'] = i;
+        }
+
+        for (int i = 0; i < n - 1; i++) {
+            for (int d = 9; d > charArray[i] - '0'; d--) {
+                if (last[d] > i) {
+                    swap(charArray, i, last[d]);
+                    return Integer.parseInt(new String(charArray));
+                }
+            }
+        }
+        
+        return num;
+    }
+
+    private static void swap(char[] charArray, int index1, int index2) {
+        char tmp = charArray[index1];
+        charArray[index1] = charArray[index2];
+        charArray[index2] = tmp;
+    }
+}
+```
+
+## 24点游戏（0679）
+
+> *你有 4 张写有 1 到 9 数字的牌。你需要判断是否能通过 \*，/，+，-，(，) 的运算得到 24。*
+
+```java
+class Solution {
+    private static final int TARGET = 24;
+    private static final double EPSILON = 1e-6;
+
+    public boolean judgePoint24(int[] cards) {
+        List<Double> ans = new ArrayList<>();
+        for (int n : cards) {ans.add((double) n);}
+        return myMethod(ans);
+    }
+
+    private static boolean myMethod(List<Double> list) {
+        if (list.size() == 0) {return false;}
+        if (list.size() == 1) {return Math.abs(list.get(0) - TARGET) < EPSILON;}
+
+        int size = list.size();
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (i != j) {
+                    List<Double> list2 = new ArrayList<Double>();
+                    for (int k = 0; k < size; k++) {
+                        if (k != i && k != j) {
+                            list2.add(list.get(k));
+                        }
+                    }
+                    for (int k = 0; k < 4; k++) {
+                        if (k < 2 && i > j) {
+                            continue;
+                        }
+                        if (k == 0) {
+                            list2.add(list.get(i) + list.get(j));
+                        } else if (k == 1) {
+                            list2.add(list.get(i) * list.get(j));
+                        } else if (k == 2) {
+                            list2.add(list.get(i) - list.get(j));
+                        } else if (k == 3) {
+                            if (Math.abs(list.get(j)) < EPSILON) {
+                                continue;
+                            } else {
+                                list2.add(list.get(i) / list.get(j));
+                            }
+                        }
+                        if (myMethod(list2)) {return true;}
+                        list2.remove(list2.size() - 1);
+                    }
+                }
+            }
+        }
+        return false;
+    }
+}
+```
+
 ## 验证IP地址
 
 > 编写一个函数来验证输入的字符串是否是有效的 IPv4 或 IPv6 地址。
@@ -2997,7 +3170,6 @@ class Solution {
 > 同时，IPv4 地址内的数不会以 0 开头。比如，地址 172.16.254.01 是不合法的。
 >
 > IPv6 地址由 8 组 16 进制的数字来表示，每组表示 16 比特。这些组数字通过 (":")分割。比如,  2001:0db8:85a3:0000:0000:8a2e:0370:7334 是一个有效的地址。而且，我们可以加入一些以 0 开头的数字，字母可以使用大写，也可以是小写。所以， 2001:db8:85a3:0:0:8A2E:0370:7334 也是一个有效的 IPv6 address地址 (即，忽略 0 开头，忽略大小写)。
->
 
 ```java
 class Solution {
@@ -3037,716 +3209,4 @@ class Solution {
 }
 ```
 
-
-
-# 4 数据结构
-
-## LRU缓存机制（0146）
-
-> *运用你所掌握的数据结构，设计和实现一个 LRU (最近最少使用) 缓存机制 。*
->
-> *实现 LRUCache 类：*
->
-> *LRUCache(int capacity) 以正整数作为容量 capacity 初始化 LRU 缓存*
->
-> *int get(int key) 如果关键字 key 存在于缓存中，则返回关键字的值，否则返回 -1 。*
->
-> *void put(int key, int value) 如果关键字已经存在，则变更其数据值；如果关键字不存在，则插入该组「关键字-值」。当缓存容量达到上限时，它应该在写入新数据之前删除最久未使用的数据值，从而为新的数据值留出空间。*
->
-> 
->
-> *示例：*
->
-> *输入*
->
-> *["LRUCache", "put", "put", "get", "put", "get", "put", "get", "get", "get"]*
->
-> *[[2], [1, 1], [2, 2], [1], [3, 3], [2], [4, 4], [1], [3], [4]]*
->
-> *输出*
->
-> *[null, null, null, 1, null, -1, null, -1, 3, 4]*
-
-```java
-class LRUCache<K, V> extends LinkedHashMap<K, V> {
-    private final int CACHE_SIZE;
-
-    /**
-     * 传递进来最多能缓存多少数据
-     *
-     * @param cacheSize 缓存大小
-     */
-    public LRUCache(int cacheSize) {
-        // true 表示让 linkedHashMap 按照访问顺序来进行排序，最近访问的放在头部，最老访问的放在尾部。
-        super((int) Math.ceil(cacheSize / 0.75) + 1, 0.75f, true);
-        CACHE_SIZE = cacheSize;
-    }
-
-    @Override
-    protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
-        // 当 map中的数据量大于指定的缓存个数的时候，就自动删除最老的数据。
-        return size() > CACHE_SIZE;
-    }
-}
-
-/**
- * Your LRUCache object will be instantiated and called as such:
- * LRUCache obj = new LRUCache(capacity);
- * int param_1 = obj.get(key);
- * obj.put(key,value);
- */
-public class LRUCache {
-    class DLinkedNode {
-        int key;
-        int value;
-        DLinkedNode prev;
-        DLinkedNode next;
-        public DLinkedNode() {}
-        public DLinkedNode(int _key, int _value) {key = _key; value = _value;}
-    }
-
-    private Map<Integer, DLinkedNode> cache = new HashMap<Integer, DLinkedNode>();
-    private int size;
-    private int capacity;
-    private DLinkedNode head, tail;
-
-    public LRUCache(int capacity) {
-        this.size = 0;
-        this.capacity = capacity;
-        // 使用伪头部和伪尾部节点
-        head = new DLinkedNode();
-        tail = new DLinkedNode();
-        head.next = tail;
-        tail.prev = head;
-    }
-
-    public int get(int key) {
-        DLinkedNode node = cache.get(key);
-        if (node == null) {
-            return -1;
-        }
-        // 如果 key 存在，先通过哈希表定位，再移到头部
-        moveToHead(node);
-        return node.value;
-    }
-
-    public void put(int key, int value) {
-        DLinkedNode node = cache.get(key);
-        if (node == null) {
-            // 如果 key 不存在，创建一个新的节点
-            DLinkedNode newNode = new DLinkedNode(key, value);
-            // 添加进哈希表
-            cache.put(key, newNode);
-            // 添加至双向链表的头部
-            addToHead(newNode);
-            ++size;
-            if (size > capacity) {
-                // 如果超出容量，删除双向链表的尾部节点
-                DLinkedNode tail = removeTail();
-                // 删除哈希表中对应的项
-                cache.remove(tail.key);
-                --size;
-            }
-        }
-        else {
-            // 如果 key 存在，先通过哈希表定位，再修改 value，并移到头部
-            node.value = value;
-            moveToHead(node);
-        }
-    }
-
-    private void addToHead(DLinkedNode node) {
-        node.prev = head;
-        node.next = head.next;
-        head.next.prev = node;
-        head.next = node;
-    }
-
-    private void removeNode(DLinkedNode node) {
-        node.prev.next = node.next;
-        node.next.prev = node.prev;
-    }
-
-    private void moveToHead(DLinkedNode node) {
-        removeNode(node);
-        addToHead(node);
-    }
-
-    private DLinkedNode removeTail() {
-        DLinkedNode res = tail.prev;
-        removeNode(res);
-        return res;
-    }
-}
-```
-
-## 最小栈（0155）
-
-> *设计一个支持 push ，pop ，top 操作，并能在常数时间内检索到最小元素的栈。*
->
-> *push(x) —— 将元素 x 推入栈中。*
->
-> *pop() —— 删除栈顶的元素。*
->
-> *top() —— 获取栈顶元素。*
->
-> *getMin() —— 检索栈中的最小元素。*
->
->  
->
-> *示例:*
->
-> *输入：*
->
-> *["MinStack","push","push","push","getMin","pop","top","getMin"]*
->
-> *[[],[-2],[0],[-3],[],[],[],[]]*
->
-> *输出：*
->
-> *[null,null,null,null,-3,null,0,-2]*
-
-```java
-class MinStack {
-    Deque<Integer> stack;
-
-    /** initialize your data structure here. */
-    public MinStack() {
-        stack = new LinkedList<>();
-    }
-    
-    public void push(int x) {
-        stack.offerLast(x);
-    }
-    
-    public void pop() {
-        stack.pollLast();
-    }
-    
-    public int top() {
-        return stack.peekLast();
-    }
-    
-    public int getMin() {
-        int minValue = Integer.MAX_VALUE;
-        for (int n : stack) {
-            if (n < minValue) {
-                minValue = n;
-            }
-        }
-        return minValue;
-    }
-}
-
-/**
- * Your MinStack object will be instantiated and called as such:
- * MinStack obj = new MinStack();
- * obj.push(x);
- * obj.pop();
- * int param_3 = obj.top();
- * int param_4 = obj.getMin();
- */
-```
-
-> *实现一个二叉搜索树迭代器。你将使用二叉搜索树的根节点初始化迭代器。*
-
-```java
-/**
- * Definition for a binary tree node.
- * public class TreeNode {
- *     int val;
- *     TreeNode left;
- *     TreeNode right;
- *     TreeNode() {}
- *     TreeNode(int val) { this.val = val; }
- *     TreeNode(int val, TreeNode left, TreeNode right) {
- *         this.val = val;
- *         this.left = left;
- *         this.right = right;
- *     }
- * }
- */
-class BSTIterator {
-    List<Integer> list;
-    int index;
-
-    public BSTIterator(TreeNode root) {
-        list = new ArrayList<>();
-        this.index = 0;
-        this._inorder(root);
-    }
-
-    public void _inorder(TreeNode root) {
-        if (root == null) {return;}
-        this._inorder(root.left);
-        list.add(root.val);
-        this._inorder(root.right);
-    }
-    
-    public int next() {
-        return list.get(index++);
-    }
-    
-    public boolean hasNext() {
-        return index < list.size();
-    }
-}
-
-/**
- * Your BSTIterator object will be instantiated and called as such:
- * BSTIterator obj = new BSTIterator(root);
- * int param_1 = obj.next();
- * boolean param_2 = obj.hasNext();
- */
-```
-
-## 二叉搜索树迭代器（0173）
-
-> 实现一个二叉搜索树迭代器类BSTIterator ，表示一个按中序遍历二叉搜索树（BST）的迭代器：
-> BSTIterator(TreeNode root) 初始化 BSTIterator 类的一个对象。BST 的根节点 root 会作为构造函数的一部分给出。指针应初始化为一个不存在于 BST 中的数字，且该数字小于 BST 中的任何元素。
-> boolean hasNext() 如果向指针右侧遍历存在数字，则返回 true ；否则返回 false 。
-> int next()将指针向右移动，然后返回指针处的数字。
-> 注意，指针初始化为一个不存在于 BST 中的数字，所以对 next() 的首次调用将返回 BST 中的最小元素。
->
-> 你可以假设 next() 调用总是有效的，也就是说，当调用 next() 时，BST 的中序遍历中至少存在一个下一个数字。
->
-
-```java
-/**
- * Definition for a binary tree node.
- * public class TreeNode {
- *     int val;
- *     TreeNode left;
- *     TreeNode right;
- *     TreeNode() {}
- *     TreeNode(int val) { this.val = val; }
- *     TreeNode(int val, TreeNode left, TreeNode right) {
- *         this.val = val;
- *         this.left = left;
- *         this.right = right;
- *     }
- * }
- */
-class BSTIterator {
-    List<Integer> list;
-    int index;
-
-    public BSTIterator(TreeNode root) {
-        list = new ArrayList<>();
-        this.index = 0;
-        this._inorder(root);
-    }
-
-    public void _inorder(TreeNode root) {
-        if (root == null) {return;}
-        this._inorder(root.left);
-        list.add(root.val);
-        this._inorder(root.right);
-    }
-    
-    public int next() {
-        return list.get(index++);
-    }
-    
-    public boolean hasNext() {
-        return index < list.size();
-    }
-}
-
-/**
- * Your BSTIterator object will be instantiated and called as such:
- * BSTIterator obj = new BSTIterator(root);
- * int param_1 = obj.next();
- * boolean param_2 = obj.hasNext();
- */
-```
-
-## 前缀树（0208）
-
-> *实现一个 Trie (前缀树)，包含 insert, search, 和 startsWith 这三个操作*
-
-```java
-class Trie {
-
-    class TireNode {
-        private boolean isEnd;
-        TireNode[] next;
-
-        public TireNode() {
-            isEnd = false;
-            next = new TireNode[26];
-        }
-    }
-
-    private TireNode root;
-
-    public Trie() {
-        root = new TireNode();
-    }
-
-    public void insert(String word) {
-        TireNode node = root;
-        for (char c : word.toCharArray()) {
-            if (node.next[c - 'a'] == null) {
-                node.next[c - 'a'] = new TireNode();
-            }
-            node = node.next[c - 'a'];
-        }
-        node.isEnd = true;
-    }
-
-    public boolean search(String word) {
-        TireNode node = root;
-        for (char c : word.toCharArray()) {
-            node = node.next[c - 'a'];
-            if (node == null) {
-                return false;
-            }
-        }
-        return node.isEnd;
-    }
-
-    public boolean startsWith(String prefix) {
-        TireNode node = root;
-        for (char c : prefix.toCharArray()) {
-            node = node.next[c - 'a'];
-            if (node == null) {
-                return false;
-            }
-        }
-        return true;
-    }
-}
-/**
- * Your Trie object will be instantiated and called as such:
- * Trie obj = new Trie();
- * obj.insert(word);
- * boolean param_2 = obj.search(word);
- * boolean param_3 = obj.startsWith(prefix);
- */
-```
-
-## 队列实现栈（0225）
-
-> *请你仅使用两个队列实现一个后入先出（LIFO）的栈，并支持普通队列的全部四种操作（push、top、pop 和 empty）。*
-
-```java
-class MyStack {
-    Queue<Integer> queue1;
-    Queue<Integer> queue2;
-
-    /** Initialize your data structure here. */
-    public MyStack() {
-        queue1 = new LinkedList<>();
-        queue2 = new LinkedList<>();
-    }
-    
-    /** Push element x onto stack. */
-    public void push(int x) {
-        queue2.offer(x);
-        while (!queue1.isEmpty()) {
-            queue2.offer(queue1.poll());
-        }
-        Queue<Integer> temp = queue1;
-        queue1 = queue2;
-        queue2 = temp;
-    }
-    
-    /** Removes the element on top of the stack and returns that element. */
-    public int pop() {
-        return queue1.poll();
-    }
-    
-    /** Get the top element. */
-    public int top() {
-        return queue1.peek();
-    }
-    
-    /** Returns whether the stack is empty. */
-    public boolean empty() {
-        return queue1.isEmpty();
-    }
-}
-
-/**
- * Your MyStack object will be instantiated and called as such:
- * MyStack obj = new MyStack();
- * obj.push(x);
- * int param_2 = obj.pop();
- * int param_3 = obj.top();
- * boolean param_4 = obj.empty();
- */
-```
-
-## 栈实现队列（0232）
-
-```java
-import java.util.Stack;
-
-public class MyQueue {
-
-    private Stack<Integer> stackPush;
-    private Stack<Integer> stackPop;
-
-    /**
-     * Initialize your data structure here.
-     */
-    public MyQueue() {
-        stackPush = new Stack<>();
-        stackPop = new Stack<>();
-    }
-
-    /**
-     * Push element x to the back of queue.
-     */
-    public void push(int x) {
-        stackPush.push(x);
-    }
-
-    /**
-     * 辅助方法：一次性将 stackPush 里的所有元素倒入 stackPop
-     * 注意：1、该操作只在 stackPop 里为空的时候才操作，否则会破坏出队入队的顺序
-     * 2、在 peek 和 pop 操作之前调用该方法
-     */
-    private void shift() {
-        if (stackPop.isEmpty()) {
-            while (!stackPush.isEmpty()) {
-                stackPop.push(stackPush.pop());
-            }
-        }
-    }
-
-    /**
-     * Removes the element from in front of queue and returns that element.
-     */
-    public int pop() {
-        shift();
-        if (!stackPop.isEmpty()) {
-            return stackPop.pop();
-        }
-        throw new RuntimeException("队列里没有元素");
-    }
-
-    /**
-     * Get the front element.
-     */
-    public int peek() {
-        shift();
-        if (!stackPop.isEmpty()) {
-            return stackPop.peek();
-        }
-        throw new RuntimeException("队列里没有元素");
-    }
-
-    /**
-     * Returns whether the queue is empty.
-     */
-    public boolean empty() {
-        return stackPush.isEmpty() && stackPop.isEmpty();
-    }
-}
-
-/**
- * Your MyQueue object will be instantiated and called as such:
- * MyQueue obj = new MyQueue();
- * obj.push(x);
- * int param_2 = obj.pop();
- * int param_3 = obj.peek();
- * boolean param_4 = obj.empty();
- */
-
-```
-
-## 二叉树的序列化（0297）
-
-> 序列化是将一个数据结构或者对象转换为连续的比特位的操作，进而可以将转换后的数据存储在一个文件或者内存中，同时也可以通过网络传输到另一个计算机环境，采取相反方式重构得到原数据。
->
-> 请设计一个算法来实现二叉树的序列化与反序列化。这里不限定你的序列 / 反序列化算法执行逻辑，你只需要保证一个二叉树可以被序列化为一个字符串并且将这个字符串反序列化为原始的树结构。
->
-
-```java
-/**
- * Definition for a binary tree node.
- * public class TreeNode {
- *     int val;
- *     TreeNode left;
- *     TreeNode right;
- *     TreeNode(int x) { val = x; }
- * }
- */
-public class Codec {
-    // Encodes a tree to a single string.
-    public String serialize(TreeNode root) {
-        return mySerialize(root, "");
-    }
-
-    public String mySerialize(TreeNode root, String s) {
-        if (root == null) {
-            s += "None,";
-        }
-        else {
-            s += s.valueOf(root.val) + ",";
-            s = mySerialize(root.left, s);
-            s = mySerialize(root.right, s);
-        }
-        return s;
-    }
-
-    // Decodes your encoded data to tree.
-    public TreeNode deserialize(String data) {
-        String[] strs = data.split(",");
-        List<String> datalist = new LinkedList<String>(Arrays.asList(strs));
-        return myDeserialize(datalist);
-    }
-
-    public TreeNode myDeserialize(List<String> datalist) {
-        if (datalist.get(0).equals("None")) {
-            datalist.remove(0);
-            return null;
-        }
-
-        TreeNode root = new TreeNode(Integer.valueOf(datalist.get(0)));
-        datalist.remove(0);
-        root.left = myDeserialize(datalist);
-        root.right = myDeserialize(datalist);
-
-        return root;
-    }
-}
-
-// Your Codec object will be instantiated and called as such:
-// Codec ser = new Codec();
-// Codec deser = new Codec();
-// TreeNode ans = deser.deserialize(ser.serialize(root));
-```
-
-
-
-# 5 排序算法
-
-> 快排：从排序数组中任选一个数据（一般默认最后一个）为分区点，遍历数据，比分区点小的放左边，比分区点大的放右边；再利用分治思想，直到区间缩小到1，就说明数据有序。
-
-```java
-package quickSort;
- 
-public class QuickSort {
-	private static int count;
-	/**
-	 * 测试
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		int[] num = {3,45,78,64,52,11,64,55,99,11,18};
-		System.out.println(arrayToString(num,"未排序"));
-		QuickSort(num,0,num.length-1);
-		System.out.println(arrayToString(num,"排序"));
-		System.out.println("数组个数："+num.length);
-		System.out.println("循环次数："+count);
-		
-	}
-	/**
-	 * 快速排序
-	 * @param num	排序的数组
-	 * @param left	数组的前针
-	 * @param right 数组后针
-	 */
-	private static void QuickSort(int[] num, int left, int right) {
-		//如果left等于right，即数组只有一个元素，直接返回
-		if(left>=right) {
-			return;
-		}
-		//设置最左边的元素为基准值
-		int key=num[left];
-		//数组中比key小的放在左边，比key大的放在右边，key值下标为i
-		int i=left;
-		int j=right;
-		while(i<j){
-			//j向左移，直到遇到比key小的值
-			while(num[j]>=key && i<j){
-				j--;
-			}
-			//i向右移，直到遇到比key大的值
-			while(num[i]<=key && i<j){
-				i++;
-			}
-			//i和j指向的元素交换
-			if(i<j){
-				int temp=num[i];
-				num[i]=num[j];
-				num[j]=temp;
-			}
-		}
-		num[left]=num[i];
-		num[i]=key;
-		count++;
-		QuickSort(num,left,i-1);
-		QuickSort(num,i+1,right);
-	}
-	/**
-	 * 将一个int类型数组转化为字符串
-	 * @param arr
-	 * @param flag
-	 * @return
-	 */
-	private static String arrayToString(int[] arr,String flag) {
-		String str = "数组为("+flag+")：";
-		for(int a : arr) {
-			str += a + "\t";
-		}
-		return str;
-	}
-}
-```
-
-> 归并排序：若要排序一个数组，先把数组从中间分为前后两部分，然后对两部分分别排序，再合并在一起。
-
-```java
-public class MergeSort {
-    public static void main(String[] args) {
-        int a[] = { 51, 46, 20, 18, 65, 97, 82, 30, 77, 50 };
-        mergeSort(a, 0, a.length - 1);
-        System.out.println("排序结果：" + Arrays.toString(a));
-    }
-
-    private static void mergeSort(int[] a, int low, int high) {
-        int mid = (low + high) / 2;
-        if (low < high) {
-            // 左边
-            mergeSort(a, low, mid);
-            // 右边
-            mergeSort(a, mid + 1, high);
-            // 左右归并
-            merge(a, low, mid, high);
-            System.out.println(Arrays.toString(a));
-        }
-    }
-
-    private static void merge(int[] a, int low, int mid, int high) {
-        int[] temp = new int[high - low + 1];
-        int i = low;// 左指针
-        int j = mid + 1;// 右指针
-        int k = 0;
-        // 把较小的数先移到新数组中
-        while (i <= mid && j <= high) {
-            if (a[i] < a[j]) {
-                temp[k++] = a[i++];
-            } else {
-                temp[k++] = a[j++];
-            }
-        }
-        // 把左边剩余的数移入数组
-        while (i <= mid) {
-            temp[k++] = a[i++];
-        }
-        // 把右边边剩余的数移入数组
-        while (j <= high) {
-            temp[k++] = a[j++];
-        }
-        // 把新数组中的数覆盖nums数组
-        for (int k2 = 0; k2 < temp.length; k2++) {
-            a[k2 + low] = temp[k2];
-        }
-    }
-}
-```
 

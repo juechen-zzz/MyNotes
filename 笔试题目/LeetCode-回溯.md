@@ -213,27 +213,6 @@ class Solution {
 }
 ```
 
-> *给你一个由 不同 整数组成的数组 nums ，和一个目标整数 target 。请你从 nums 中找出并返回总和为 target 的元素组合的个数。*
-
-```java
-class Solution {
-    public int combinationSum4(int[] nums, int target) {
-        int[] dp = new int[target + 1];
-        dp[0] = 1;
-        for (int i = 1; i <= target; i++) {
-            for (int x : nums) {
-                if (i >= x) {
-                    dp[i] += dp[i - x];
-                }
-            }
-        }
-        return dp[target];
-    }
-}
-```
-
-## 组合（0077）
-
 > *给定两个整数 n 和 k，返回 1 ... n 中所有可能的 k 个数的组合。*
 
 ```java
@@ -311,6 +290,56 @@ class Solution {
             backtrack(nums, i + 1);
             tmp.remove(tmp.size() - 1);
         }
+    }
+}
+```
+
+## 划分为K个相等的子集（0698）
+
+> *给定一个整数数组 nums 和一个正整数 k，找出是否有可能把这个数组分成 k 个非空子集，其总和都相等。*
+
+```java
+class Solution {
+    public boolean canPartitionKSubsets(int[] nums, int k) {
+        int sum = 0;
+        for (int num : nums) {sum += num;}
+        if (sum % k != 0) {return false;}
+        int target = sum / k;
+        Arrays.sort(nums);
+
+        int row = nums.length - 1;
+        if (nums[row] > target) {return false;}
+        //排除掉nums中与target相同的值。
+        while (row >= 0 && nums[row] == target) {
+            row--;
+            k--;
+        }
+        return search(new int[k], row, nums, target);
+    }
+
+    public boolean search(int[] groups, int row, int[] nums, int target) {
+        if (row < 0) {return true;}
+        // 取出剩下最大的数。
+        int v = nums[row--];
+        for (int i = 0; i < groups.length; i++) {
+            // 放入到总和还未大于等于target的group[i]中
+            if (groups[i] + v <= target) {
+                groups[i] += v;
+                // 递归，继续取出一个数。
+                if (search(groups, row, nums, target)) {return true;}
+                // 递归结束后，有两种情况：
+                // 1. 所有的数都被取出（row为-1返回true）
+                // 2. 其中一次返回了false，说明这种放置方法不能满足正好全部放入，则执行以下代码逻辑。
+
+                //group[i]取出这个数，进入下一次循环，放到另一个group[i+1]中。
+                groups[i] -= v;
+            }
+            // 如果group[i]==0，则表示：
+            // 该group从未放入过除了 v 以外的其他东西 但是依旧放入失败了，说明 v 无论怎样放置都会失败。
+            // 于是，跳出循环返回false
+            if (groups[i] == 0) {break;}
+        }
+        return false;
     }
 }
 ```
@@ -820,7 +849,6 @@ class Solution {
 > 请找出一种能使用所有火柴拼成一个正方形的方法。不能折断火柴，可以把火柴连接起来，并且每根火柴都要用到。
 >
 > 输入为小女孩拥有火柴的数目，每根火柴用其长度表示。输出即为是否能用所有的火柴拼成正方形。
->
 
 ```java
 class Solution {
@@ -887,7 +915,7 @@ class Solution {
 }
 ```
 
-## 优美的排列（0526）
+## 优美的排列
 
 > 假设有从 1 到 N 的 N 个整数，如果从这 N 个数字中成功构造出一个数组，使得数组的第 i 位 (1 <= i <= N) 满足如下两个条件中的一个，我们就称这个数组为一个优美的排列。条件：
 >
@@ -914,6 +942,36 @@ class Solution {
                 backtrack(n, visited, pos + 1);
                 visited[i] = false;
             }
+        }
+    }
+}
+```
+
+> *给定两个整数 n 和 k，你需要实现一个数组，这个数组包含从 1 到 n 的 n 个不同整数，同时满足以下条件：*
+>
+> *① 如果这个数组是 [a1, a2, a3, ... , an] ，那么数组 [|a1 - a2|, |a2 - a3|, |a3 - a4|, ... , |an-1 - an|] 中应该有且仅有 k 个不同整数；.*
+>
+> *② 如果存在多种答案，你只需实现并返回其中任意一种.*
+
+```java
+class Solution {
+    public int[] constructArray(int n, int k) {
+        int[] ans = new int[n];
+        for (int i = 0; i < n; i++) {ans[i] = i + 1;}
+        if (k == 1) {return ans;}
+
+        for (int i = 1; i < k; i++) {myReverse(ans, i, n - 1);}
+
+        return ans;
+    }
+
+    private static void myReverse(int[] ans, int i, int j) {
+        while (i < j) {
+            int tmp = ans[i];
+            ans[i] = ans[j];
+            ans[j] = tmp;
+            i++;
+            j--;
         }
     }
 }
@@ -1027,6 +1085,88 @@ class Solution {
 
         map.put(needs, ans);
         return ans;
+    }
+}
+```
+
+## 为高尔夫比赛砍树（0675）
+
+> *你被请来给一个要举办高尔夫比赛的树林砍树。树林由一个 m x n 的矩阵表示， 在这个矩阵中：*
+>
+> *0 表示障碍，无法触碰*
+>
+> *1 表示地面，可以行走*
+>
+> *比 1 大的数 表示有树的单元格，可以行走，数值表示树的高度*
+>
+> *每一步，你都可以向上、下、左、右四个方向之一移动一个单位，如果你站的地方有一棵树，那么你可以决定是否要砍倒它。*
+>
+> *你需要按照树的高度从低向高砍掉所有的树，每砍过一颗树，该单元格的值变为 1（即变为地面）。*
+>
+> *你将从 (0, 0) 点开始工作，返回你砍完所有树需要走的最小步数。 如果你无法砍完所有的树，返回 -1 。*
+>
+> *可以保证的是，没有两棵树的高度是相同的，并且你至少需要砍倒一棵树。*
+
+```java
+class Solution {
+    int[][] dirs = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+
+    public int cutOffTree(List<List<Integer>> forest) {
+        if (forest.size() == 0 || forest.get(0).size() == 0) {return 0;}
+
+        int n = forest.size(), m = forest.get(0).size();
+        PriorityQueue<int[]> minHeap = new PriorityQueue<int[]>((a, b) -> a[2] - b[2]);
+        for(int i = 0; i < n; i++){
+            for(int j = 0; j < m; j++){
+                if(forest.get(i).get(j) > 1){   
+                    minHeap.add(new int[]{i, j, forest.get(i).get(j)});
+                }
+            }
+        }
+
+        int[] start = new int[2];
+        int ans = 0;
+        while (!minHeap.isEmpty()) {
+            int[] lowest = minHeap.poll();
+            int step = minStep(forest, start, lowest);
+            if (step < 0) {return -1;}
+
+            ans += step;
+            start[0] = lowest[0];
+            start[1] = lowest[1];
+        }
+
+        return ans;
+    }
+
+    private int minStep(List<List<Integer>> forest, int[] start, int[] lowest) {
+        int n = forest.size(), m = forest.get(0).size();
+        int step = 0;
+
+        LinkedList<int[]> queue = new LinkedList<>();
+        boolean[][] visited = new boolean[n][m];
+
+        queue.add(start);
+        visited[start[0]][start[1]] = true;
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                int[] cur = queue.poll();
+                if (cur[0] == lowest[0] && cur[1] == lowest[1]) {return step;}
+
+                for (int[] dir : dirs) {
+                    int nextX = cur[0] + dir[0];
+                    int nextY = cur[1] + dir[1];
+                    if (nextX < 0 || nextX >= n || nextY < 0 || nextY >= m || visited[nextX][nextY] || forest.get(nextX).get(nextY) == 0) {continue;}
+
+                    queue.add(new int[]{nextX, nextY});
+                    visited[nextX][nextY] = true;
+                }
+            }
+            step++;
+        }
+
+        return -1;
     }
 }
 ```

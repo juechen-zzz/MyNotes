@@ -87,6 +87,34 @@ class Solution {
 }
 ```
 
+> *给定一个非空字符串 s，最多删除一个字符。判断是否能成为回文字符串。*
+
+```java
+class Solution {
+    public boolean validPalindrome(String s) {
+        int low = 0, high = s.length() - 1;
+        while (low < high) {
+            char c1 = s.charAt(low), c2 = s.charAt(high);
+            if (c1 == c2) {
+                low++;
+                high--;
+            } else {
+                return validPalindrome(s, low, high - 1) || validPalindrome(s, low + 1, high);
+            }
+        }
+        return true;
+    }
+
+    public boolean validPalindrome(String s, int low, int high) {
+        for (int i = low, j = high; i < j; i++, j--) {
+            char c1 = s.charAt(i), c2 = s.charAt(j);
+            if (c1 != c2) {return false;}
+        }
+        return true;
+    }
+}
+```
+
 ## 分割回文串（0131 && 0132）
 
 > *给定一个字符串 s，将 s 分割成一些子串，使每个子串都是回文串。*
@@ -198,63 +226,6 @@ class Solution {
 }
 ```
 
-## 字符串转换整数（0008）
-
-> *实现一个 atoi 函数，使其能将字符串转换成整数。*
->
-> *首先，该函数会根据需要丢弃无用的开头空格字符，直到寻找到第一个非空格的字符为止。接下来的转化规则如下：*
->
-> *输入: "   -42"*
->
-> *输出: -42*
-
-```java
-public class Solution {
-    public int myAtoi(String str) {
-        int len = str.length();
-        char[] charArray = str.toCharArray();
-
-        // 1、去除前导空格
-        int index = 0;
-        while (index < len && charArray[index] == ' ') {index++;}
-
-        // 2、如果已经遍历完成（针对极端用例 "      "）
-        if (index == len) {return 0;}
-
-        // 3、如果出现符号字符，仅第 1 个有效，并记录正负
-        int sign = 1;
-        char firstChar = charArray[index];
-        if (firstChar == '+') {
-            index++;
-        } else if (firstChar == '-') {
-            index++;
-            sign = -1;
-        }
-
-        // 4、将后续出现的数字字符进行转换
-        int res = 0;
-        while (index < len) {
-            char currChar = charArray[index];
-            // 4.1 先判断不合法的情况
-            if (currChar > '9' || currChar < '0') {break;}
-
-            // 题目中说：环境只能存储 32 位大小的有符号整数，因此，需要提前判断乘以 10 以后是否越界
-            if (res > Integer.MAX_VALUE / 10 || (res == Integer.MAX_VALUE / 10 && (currChar - '0') > Integer.MAX_VALUE % 10)) {
-                return Integer.MAX_VALUE;
-            }
-            if (res < Integer.MIN_VALUE / 10 || (res == Integer.MIN_VALUE / 10 && (currChar - '0') > -(Integer.MIN_VALUE % 10))) {
-                return Integer.MIN_VALUE;
-            }
-
-            // 4.2 合法的情况下，才考虑转换，每一步都把符号位乘进去
-            res = res * 10 + sign * (currChar - '0');
-            index++;
-        }
-        return res;
-    }
-}
-```
-
 ## 串联所有单词的子串（0030）
 
 > *给定一个字符串 s 和一些长度相同的单词 words。找出 s 中恰好可以由 words 中所有单词串联形成的子串的起始位置。*
@@ -300,56 +271,6 @@ class Solution {
         }
 
         return ans;
-    }
-}
-```
-
-## 字符串相乘（0043）
-
-> 给定两个以字符串形式表示的非负整数 num1 和 num2，返回 num1 和 num2 的乘积，它们的乘积也表示为字符串形式。
->
-> 示例 1:
->
-> 输入: num1 = "2", num2 = "3"
-> 输出: "6"
-> 示例 2:
->
-> 输入: num1 = "123", num2 = "456"
-> 输出: "56088"
-> 说明：
->
-> num1 和 num2 的长度小于110。
-> num1 和 num2 只包含数字 0-9。
-> num1 和 num2 均不以零开头，除非是数字 0 本身。
-> 不能使用任何标准库的大数类型（比如 BigInteger）或直接将输入转换为整数来处理。
-
-```java
-class Solution {
-    public String multiply(String num1, String num2) {
-        if (num1.equals("0") || num2.equals("0")) {return "0";}
-
-        int m = num1.length(), n = num2.length();
-        int[] ansArr = new int[m + n];
-        for (int i = m - 1; i >= 0; i--) {
-            int x = num1.charAt(i) - '0';
-            for (int j = n - 1; j >= 0; j--) {
-                int y = num2.charAt(j) - '0';
-                ansArr[i + j + 1] += x * y;
-            }
-        }
-        for (int i = m + n - 1; i > 0; i--) {
-            ansArr[i - 1] += ansArr[i] / 10;
-            ansArr[i] %= 10;
-        }
-
-        int index = ansArr[0] == 0 ? 1 : 0;
-        StringBuilder ans = new StringBuilder();
-        while (index < m + n) {
-            ans.append(ansArr[index]);
-            index++;
-        }
-
-        return ans.toString();
     }
 }
 ```
@@ -413,32 +334,6 @@ class Solution {
             map.put(key, list);
         }
         return new ArrayList<List<String>>(map.values());
-    }
-}
-```
-
-## 最后一个单词的长度（0058）
-
-> *给定一个仅包含大小写字母和空格 ' ' 的字符串 s，返回其最后一个单词的长度。*
->
-> *如果字符串从左向右滚动显示，那么最后一个单词就是最后出现的单词。*
-
-```java
-class Solution {
-    public int lengthOfLastWord(String s) {
-        int count = 0;
-        for (int i = s.length() - 1; i >= 0; i--) {
-            if (s.charAt(i) == ' ' && count == 0) {
-                continue;
-            }
-            else if (s.charAt(i) != ' ') {
-                count++;
-            }
-            else {
-                break;
-            }
-        }
-        return count;
     }
 }
 ```
@@ -1220,7 +1115,6 @@ class Solution {
 > 现在我们有了另一个字符串 p 。你需要的是找出 s 中有多少个唯一的 p 的非空子串，尤其是当你的输入是字符串 p ，你需要输出字符串 s 中 p 的不同的非空子串的数目。 
 >
 > 注意: p 仅由小写的英文字母组成，p 的大小可能超过 10000。
->
 
 ```java
 class Solution {
@@ -1248,7 +1142,6 @@ class Solution {
 > 给定一个 不含重复 单词的字符串数组 words ，编写一个程序，返回 words 中的所有 连接词 。
 >
 > 连接词 的定义为：一个字符串完全是由至少两个给定数组中的单词组成的。
->
 
 ```java
 class Solution {
@@ -1287,7 +1180,6 @@ class Solution {
 > 子序列 可以通过删去字符串中的某些字符实现，但不能改变剩余字符的相对顺序。空序列为所有字符串的子序列，任何字符串为其自身的子序列。
 >
 > 输入为两个字符串，输出最长特殊序列的长度。如果不存在，则返回 -1。
->
 
 ```java
 class Solution {
@@ -1303,7 +1195,6 @@ class Solution {
 > 子序列可以通过删去字符串中的某些字符实现，但不能改变剩余字符的相对顺序。空序列为所有字符串的子序列，任何字符串为其自身的子序列。
 >
 > 输入将是一个字符串列表，输出是最长特殊序列的长度。如果最长特殊序列不存在，返回 -1 。
->
 
 ```java
 class Solution {
@@ -1341,7 +1232,6 @@ class Solution {
 ## 通过删除字母匹配字典里最长单词（0524）
 
 > 给定一个字符串和一个字符串字典，找到字典里面最长的字符串，该字符串可以通过删除给定字符串的某些字符来得到。如果答案不止一个，返回长度最长且字典顺序最小的字符串。如果答案不存在，则返回空字符串。
->
 
 ```java
 class Solution {

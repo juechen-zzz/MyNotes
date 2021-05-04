@@ -10,79 +10,71 @@ public class ListNode {
 }
 ```
 
-## 两数相加（0002 && 0445）
+## 删除链表中的元素
 
-> *给出两个 非空 的链表用来表示两个非负的整数。其中，它们各自的位数是按照 逆序 的方式存储的，并且它们的每个节点只能存储 一位 数字。*
->
-> *将这两个数相加起来，则会返回一个新的链表来表示它们的和。*
->
-> *输入：(2 -> 4 -> 3) + (5 -> 6 -> 4)*
->
-> *输出：7 -> 0 -> 8*
->
-> *原因：342 + 465 = 807*
+> *给定一个排序链表，删除所有重复的元素，使得每个元素只出现一次。*
 
 ```java
 class Solution {
-    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
-        int carry = 0;
-        ListNode head = new ListNode(0);
-        ListNode curr = head;
-
-        while (l1 != null || l2 != null) {
-            if (l1 != null) {
-                carry += l1.val;
-                l1 = l1.next;
+    public ListNode deleteDuplicates(ListNode head) {
+        ListNode tmp = head;
+        while (tmp != null && tmp.next != null) {
+            if (tmp.val == tmp.next.val) {
+                tmp.next = tmp.next.next;
             }
-            if (l2 != null) {
-                carry += l2.val;
-                l2 = l2.next;
+            else {
+                tmp = tmp.next;
             }
-            curr.next = new ListNode(carry % 10);
-            carry = carry / 10;
-            curr = curr.next;
         }
-
-        if (carry == 1) {
-            curr.next = new ListNode(1);
-            curr = curr.next;
-        }
-        return head.next;
+        return head;
     }
 }
 ```
 
-> *输入：(7 -> 2 -> 4 -> 3) + (5 -> 6 -> 4)*
->
-> *输出：7 -> 8 -> 0 -> 7*
+> *给定一个排序链表，删除所有含有重复数字的节点，只保留原始链表中 没有重复出现 的数字。*
 
 ```java
 class Solution {
-    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
-        Stack<Integer> stack1 = new Stack();
-        Stack<Integer> stack2 = new Stack();
-        while (l1 != null) {
-            stack1.push(l1.val);
-            l1 = l1.next;
-        }
-        while (l2 != null) {
-            stack2.push(l2.val);
-            l2 = l2.next;
-        }
+    public ListNode deleteDuplicates(ListNode head) {
+        if (head == null || head.next == null) {return head;}
+        ListNode cur = new ListNode(-1);
+        cur.next = head;
 
-        int carry = 0;
-        ListNode ans = null;
-        while (!stack1.isEmpty() || !stack2.isEmpty() || carry != 0) {
-            int a = stack1.isEmpty() ? 0 : stack1.pop();
-            int b = stack2.isEmpty() ? 0 : stack2.pop();
-            int cur = a + b + carry;
-            ListNode curNode = new ListNode(cur % 10);
-            carry = cur / 10;
-            curNode.next = ans;
-            ans = curNode;
+        ListNode a = cur;
+        ListNode b = head.next;
+        while (b != null) {
+            if (a.next.val != b.val) {
+                a = a.next;
+                b = b.next;
+            }
+            else {
+                while (b != null && a.next.val == b.val) {b = b.next;}
+                a.next = b;
+                b = (b == null) ? null : b.next;
+            }
         }
+        return cur.next;
+    }
+}
+```
 
-        return ans;
+> *删除链表中等于给定值 val 的所有节点*
+
+```java
+class Solution {
+    public ListNode removeElements(ListNode head, int val) {
+        ListNode tmp = new ListNode(-1, head);
+        ListNode cur = tmp;
+        while (head != null) {
+            if (head.val == val) {
+                cur.next = head.next;
+            }
+            else {
+                cur = cur.next;
+            }
+            head = head.next;
+        }
+        return tmp.next;
     }
 }
 ```
@@ -113,6 +105,119 @@ class Solution {
         }
 
         second.next = second.next.next;
+        return tmp.next;
+    }
+}
+```
+
+## 旋转链表（0061）
+
+> *给定一个链表，旋转链表，将链表每个节点向右移动 k 个位置，其中 k 是非负数。*
+
+```java
+class Solution {
+    public ListNode rotateRight(ListNode head, int k) {
+        if (head == null || head.next == null || k == 0) {return head;}
+        ListNode first = head;
+        int num = 1;
+        while (first.next != null) {
+            num++;
+            first = first.next;
+        }
+
+        ListNode second = new ListNode(-1, head);
+        if (k % num == 0) {return head;}
+        int n = num - k % num;
+        while (n > 0) {
+            second = second.next;
+            n--;
+        }
+        ListNode ans = second.next;
+        second.next = null;
+        first.next = head;
+        return ans;
+    }
+}
+```
+
+## 分隔链表（0086）
+
+> *给你一个链表和一个特定值 x ，请你对链表进行分隔，使得所有小于 x 的节点都出现在大于或等于 x 的节点之前。*
+>
+> *你应当保留两个分区中每个节点的初始相对位置。*
+
+```java
+class Solution {
+    public ListNode partition(ListNode head, int x) {
+        if (head == null) {return null;}
+        ListNode cur1 = new ListNode(-1);
+        ListNode cur2 = new ListNode(-1);
+        ListNode p1 = cur1, p2 = cur2;
+        while (head != null) {
+            if (head.val < x){
+                cur1.next = head;
+                cur1 = cur1.next;
+            } else {
+                cur2.next = head;
+                cur2 = cur2.next;
+            }
+            head = head.next;
+        }
+        // 注意考虑最后的结尾部分要指向null
+        cur1.next = p2.next;
+        cur2.next = null;
+        return p1.next;
+    }
+}
+```
+
+## 反转链表（0092 && 0206）
+
+> *反转一个单链表*
+
+```java
+class Solution {
+    public ListNode reverseList(ListNode head) {
+        if (head == null) {return null;}
+        ListNode pre = null;
+        ListNode next = null;
+
+        while (head != null) {
+            next = head.next;
+            head.next = pre;
+
+            pre = head;
+            head = next;
+        }
+        return pre;
+    }
+}
+```
+
+> *反转从位置 m 到 n 的链表。请使用一趟扫描完成反转。*
+
+```java
+class Solution {
+    public ListNode reverseBetween(ListNode head, int m, int n) {
+        ListNode tmp = new ListNode(-1, head);
+
+        ListNode pre = tmp;
+        ListNode cur = head;
+
+        int step = 0;
+        while (step < m - 1) {
+            pre = pre.next;
+            cur = cur.next;
+            step++;
+        }
+
+        for (int i = 0; i < n - m; i++) {
+            ListNode a = cur.next;
+            cur.next = cur.next.next;
+
+            a.next = pre.next;
+            pre.next = a;
+        }
         return tmp.next;
     }
 }
@@ -243,188 +348,6 @@ class Solution {
             head = next;
         }
         return pre;
-    }
-}
-```
-
-## 旋转链表（0061）
-
-> *给定一个链表，旋转链表，将链表每个节点向右移动 k 个位置，其中 k 是非负数。*
-
-```java
-class Solution {
-    public ListNode rotateRight(ListNode head, int k) {
-        if (head == null || head.next == null || k == 0) {return head;}
-        ListNode first = head;
-        int num = 1;
-        while (first.next != null) {
-            num++;
-            first = first.next;
-        }
-
-        ListNode second = new ListNode(-1, head);
-        if (k % num == 0) {return head;}
-        int n = num - k % num;
-        while (n > 0) {
-            second = second.next;
-            n--;
-        }
-        ListNode ans = second.next;
-        second.next = null;
-        first.next = head;
-        return ans;
-    }
-}
-```
-
-## 删除链表中的元素
-
-> *给定一个排序链表，删除所有重复的元素，使得每个元素只出现一次。*
-
-```java
-class Solution {
-    public ListNode deleteDuplicates(ListNode head) {
-        ListNode tmp = head;
-        while (tmp != null && tmp.next != null) {
-            if (tmp.val == tmp.next.val) {
-                tmp.next = tmp.next.next;
-            }
-            else {
-                tmp = tmp.next;
-            }
-        }
-        return head;
-    }
-}
-```
-
-> *给定一个排序链表，删除所有含有重复数字的节点，只保留原始链表中 没有重复出现 的数字。*
-
-```java
-class Solution {
-    public ListNode deleteDuplicates(ListNode head) {
-        if (head == null || head.next == null) {return head;}
-        ListNode cur = new ListNode(-1);
-        cur.next = head;
-
-        ListNode a = cur;
-        ListNode b = head.next;
-        while (b != null) {
-            if (a.next.val != b.val) {
-                a = a.next;
-                b = b.next;
-            }
-            else {
-                while (b != null && a.next.val == b.val) {b = b.next;}
-                a.next = b;
-                b = (b == null) ? null : b.next;
-            }
-        }
-        return cur.next;
-    }
-}
-```
-
-> *删除链表中等于给定值 val 的所有节点*
-
-```java
-class Solution {
-    public ListNode removeElements(ListNode head, int val) {
-        ListNode tmp = new ListNode(-1, head);
-        ListNode cur = tmp;
-        while (head != null) {
-            if (head.val == val) {
-                cur.next = head.next;
-            }
-            else {
-                cur = cur.next;
-            }
-            head = head.next;
-        }
-        return tmp.next;
-    }
-}
-```
-
-## 分隔链表（0086）
-
-> *给你一个链表和一个特定值 x ，请你对链表进行分隔，使得所有小于 x 的节点都出现在大于或等于 x 的节点之前。*
->
-> *你应当保留两个分区中每个节点的初始相对位置。*
-
-```java
-class Solution {
-    public ListNode partition(ListNode head, int x) {
-        if (head == null) {return null;}
-        ListNode cur1 = new ListNode(-1);
-        ListNode cur2 = new ListNode(-1);
-        ListNode p1 = cur1, p2 = cur2;
-        while (head != null) {
-            if (head.val < x){
-                cur1.next = head;
-                cur1 = cur1.next;
-            } else {
-                cur2.next = head;
-                cur2 = cur2.next;
-            }
-            head = head.next;
-        }
-        // 注意考虑最后的结尾部分要指向null
-        cur1.next = p2.next;
-        cur2.next = null;
-        return p1.next;
-    }
-}
-```
-
-## 反转链表（0092 && 0206）
-
-> *反转一个单链表*
-
-```java
-class Solution {
-    public ListNode reverseList(ListNode head) {
-        if (head == null) {return null;}
-        ListNode pre = null;
-        ListNode next = null;
-
-        while (head != null) {
-            next = head.next;
-            head.next = pre;
-
-            pre = head;
-            head = next;
-        }
-        return pre;
-    }
-}
-```
-
-> *反转从位置 m 到 n 的链表。请使用一趟扫描完成反转。*
-
-```java
-class Solution {
-    public ListNode reverseBetween(ListNode head, int m, int n) {
-        ListNode tmp = new ListNode(-1, head);
-
-        ListNode pre = tmp;
-        ListNode cur = head;
-
-        int step = 0;
-        while (step < m - 1) {
-            pre = pre.next;
-            cur = cur.next;
-            step++;
-        }
-
-        for (int i = 0; i < n - m; i++) {
-            ListNode a = cur.next;
-            cur.next = cur.next.next;
-
-            a.next = pre.next;
-            pre.next = a;
-        }
-        return tmp.next;
     }
 }
 ```
@@ -612,6 +535,83 @@ class Solution {
 
         odd.next = evenHead;
         return head;
+    }
+}
+```
+
+## 两数相加（0002 && 0445）
+
+> *给出两个 非空 的链表用来表示两个非负的整数。其中，它们各自的位数是按照 逆序 的方式存储的，并且它们的每个节点只能存储 一位 数字。*
+>
+> *将这两个数相加起来，则会返回一个新的链表来表示它们的和。*
+>
+> *输入：(2 -> 4 -> 3) + (5 -> 6 -> 4)*
+>
+> *输出：7 -> 0 -> 8*
+>
+> *原因：342 + 465 = 807*
+
+```java
+class Solution {
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        int carry = 0;
+        ListNode head = new ListNode(0);
+        ListNode curr = head;
+
+        while (l1 != null || l2 != null) {
+            if (l1 != null) {
+                carry += l1.val;
+                l1 = l1.next;
+            }
+            if (l2 != null) {
+                carry += l2.val;
+                l2 = l2.next;
+            }
+            curr.next = new ListNode(carry % 10);
+            carry = carry / 10;
+            curr = curr.next;
+        }
+
+        if (carry == 1) {
+            curr.next = new ListNode(1);
+            curr = curr.next;
+        }
+        return head.next;
+    }
+}
+```
+
+> *输入：(7 -> 2 -> 4 -> 3) + (5 -> 6 -> 4)*
+>
+> *输出：7 -> 8 -> 0 -> 7*
+
+```java
+class Solution {
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        Stack<Integer> stack1 = new Stack();
+        Stack<Integer> stack2 = new Stack();
+        while (l1 != null) {
+            stack1.push(l1.val);
+            l1 = l1.next;
+        }
+        while (l2 != null) {
+            stack2.push(l2.val);
+            l2 = l2.next;
+        }
+
+        int carry = 0;
+        ListNode ans = null;
+        while (!stack1.isEmpty() || !stack2.isEmpty() || carry != 0) {
+            int a = stack1.isEmpty() ? 0 : stack1.pop();
+            int b = stack2.isEmpty() ? 0 : stack2.pop();
+            int cur = a + b + carry;
+            ListNode curNode = new ListNode(cur % 10);
+            carry = cur / 10;
+            curNode.next = ans;
+            ans = curNode;
+        }
+
+        return ans;
     }
 }
 ```

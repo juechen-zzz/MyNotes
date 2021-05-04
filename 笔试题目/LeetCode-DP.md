@@ -156,6 +156,46 @@ class Solution {
 }
 ```
 
+## 最长递增子序列的个数（0673）
+
+> *给定一个未排序的整数数组，找到最长递增子序列的个数。*
+
+```java
+class Solution {
+    public int findNumberOfLIS(int[] nums) {
+        int n = nums.length;
+        if (n <= 1) {return n;}
+        int[] length = new int[n];
+        int[] count = new int[n];
+        Arrays.fill(count, 1);
+
+        for (int j = 0; j < n; j++) {
+            for (int i = 0; i < j; i++) {
+                if (nums[i] < nums[j]) {
+                    if (length[i] >= length[j]) {
+                        length[j] = length[i] + 1;
+                        count[j] = count[i];
+                    }
+                    else if (length[i] + 1 == length[j]) {
+                        count[j] += count[i];
+                    }
+                }
+            }
+        }
+
+        int longest = 0, ans = 0;
+        for (int l : length) {longest = Math.max(longest, l);}
+        for (int i = 0; i < n; i++) {
+            if (length[i] == longest) {
+                ans += count[i];
+            }
+        }
+        
+        return ans;
+    }
+}
+```
+
 ## 最长公共子序列（1143）
 
 > *给定两个字符串 text1 和 text2，返回这两个字符串的最长公共子序列的长度。*
@@ -625,12 +665,6 @@ class NumMatrix {
         return dp[row2 + 1][col2 + 1] + dp[row1][col1] - dp[row2 + 1][col1] - dp[row1][col2 + 1];
     }
 }
-
-/**
- * Your NumMatrix object will be instantiated and called as such:
- * NumMatrix obj = new NumMatrix(matrix);
- * int param_1 = obj.sumRegion(row1,col1,row2,col2);
- */
 ```
 
 ## 零钱兑换
@@ -828,7 +862,6 @@ class Solution {
 > 例如， [1,7,4,9,2,5] 是一个摆动序列，因为差值 (6,-3,5,-7,3) 是正负交替出现的。相反, [1,4,7,2,5] 和 [1,7,4,5,5] 不是摆动序列，第一个序列是因为它的前两个差值都是正数，第二个序列是因为它的最后一个差值为零。
 >
 > 给定一个整数序列，返回作为摆动序列的最长子序列的长度。 通过从原始序列中删除一些（也可以不删除）元素来获得子序列，剩下的元素保持其原始顺序。
->
 
 ```java
 class Solution {
@@ -971,7 +1004,6 @@ class Solution {
 > 如果我们将游戏规则改为 “玩家不能重复使用整数” 呢？
 >
 > 例如，两个玩家可以轮流从公共整数池中抽取从 1 到 15 的整数（不放回），直到累计整数和 >= 100。
->
 
 ```java
 class Solution {
@@ -1002,7 +1034,6 @@ class Solution {
 > 把字符串 s 看作是“abcdefghijklmnopqrstuvwxyz”的无限环绕字符串，所以 s 看起来是这样的："...zabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcd....". 
 >
 > 现在我们有了另一个字符串 p 。你需要的是找出 s 中有多少个唯一的 p 的非空子串，尤其是当你的输入是字符串 p ，你需要输出字符串 s 中 p 的不同的非空子串的数目。 
->
 
 ```java
 class Solution {
@@ -1073,7 +1104,6 @@ class Solution {
 > 给定一个非负整数数组，a1, a2, ..., an, 和一个目标数，S。现在你有两个符号 + 和 -。对于数组中的任意一个整数，你都可以从 + 或 -中选择一个符号添加在前面。
 >
 > 返回可以使最终数组和为目标数 S 的所有添加符号的方法数。
->
 
 ```java
 class Solution {
@@ -1281,7 +1311,6 @@ class Solution {
 > 逆序对的定义如下：对于数组的第i个和第 j个元素，如果满i < j且 a[i] > a[j]，则其为一个逆序对；否则不是。
 >
 > 由于答案可能很大，只需要返回 答案 mod 109 + 7 的值
->
 
 ```java
 public class Solution {
@@ -1338,6 +1367,113 @@ class Solution {
         }
 
         return ans;
+    }
+}
+```
+
+## 奇怪的打印机（0664）
+
+> *有台奇怪的打印机有以下两个特殊要求：*
+>
+> *打印机每次只能打印同一个字符序列。*
+>
+> *每次可以在任意起始和结束位置打印新字符，并且会覆盖掉原来已有的字符。*
+>
+> *给定一个只包含小写英文字母的字符串，你的任务是计算这个打印机打印它需要的最少次数。*
+
+```java
+class Solution {
+    int[][] memo;
+
+    public int strangePrinter(String s) {
+        int n = s.length();
+        memo = new int[n][n];
+        return myMethod(s, 0, n - 1);
+    }
+
+    private int myMethod(String s, int i, int j) {
+        if (i > j) {return 0;}
+        if (memo[i][j] == 0) {
+            int ans = myMethod(s, i + 1, j) + 1;
+            for (int k = i + 1; k <= j; k++) {
+                if (s.charAt(k) == s.charAt(i)) {
+                    ans = Math.min(ans, myMethod(s, i, k - 1) + myMethod(s, k + 1, j));
+                }
+            }
+            memo[i][j] = ans;
+        }
+        return memo[i][j];
+    }
+}
+```
+
+## 粉刷房子（1473）
+
+> *在一个小城市里，有 m 个房子排成一排，你需要给每个房子涂上 n 种颜色之一（颜色编号为 1 到 n ）。有的房子去年夏天已经涂过颜色了，所以这些房子不需要被重新涂色。*
+>
+> *我们将连续相同颜色尽可能多的房子称为一个街区。（比方说 houses = [1,2,2,3,3,2,1,1] ，它包含 5 个街区 [{1}, {2,2}, {3,3}, {2}, {1,1}] 。）*
+>
+> *给你一个数组 houses ，一个 m \* n 的矩阵 cost 和一个整数 target ，其中：*
+>
+> *houses[i]：是第 i 个房子的颜色，0 表示这个房子还没有被涂色。*
+>
+> *cost[i][j]：是将第 i 个房子涂成颜色 j+1 的花费。*
+>
+> *请你返回房子涂色方案的最小总花费，使得每个房子都被涂色后，恰好组成 target 个街区。如果没有可用的涂色方案，请返回 -1 。*
+
+```java
+class Solution {
+    // 极大值
+    // 选择 Integer.MAX_VALUE / 2 的原因是防止整数相加溢出
+    static final int INFTY = Integer.MAX_VALUE / 2;
+
+    public int minCost(int[] houses, int[][] cost, int m, int n, int target) {
+        // 将颜色调整为从 0 开始编号，没有被涂色标记为 -1
+        for (int i = 0; i < m; ++i) {
+            --houses[i];
+        }
+
+        // dp 所有元素初始化为极大值
+        int[][][] dp = new int[m][n][target];
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                Arrays.fill(dp[i][j], INFTY);
+            }
+        }
+
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (houses[i] != -1 && houses[i] != j) {
+                    continue;
+                }
+                
+                for (int k = 0; k < target; ++k) {
+                    for (int j0 = 0; j0 < n; ++j0) {
+                        if (j == j0) {
+                            if (i == 0) {
+                                if (k == 0) {
+                                    dp[i][j][k] = 0;
+                                }
+                            } else {
+                                dp[i][j][k] = Math.min(dp[i][j][k], dp[i - 1][j][k]);
+                            }
+                        } else if (i > 0 && k > 0) {
+                            dp[i][j][k] = Math.min(dp[i][j][k], dp[i - 1][j0][k - 1]);
+                        }
+                    }
+
+                    if (dp[i][j][k] != INFTY && houses[i] == -1) {
+                        dp[i][j][k] += cost[i][j];
+                    }
+                }
+            }
+        }
+
+        int ans = INFTY;
+        for (int j = 0; j < n; ++j) {
+            ans = Math.min(ans, dp[m - 1][j][target - 1]);
+        }
+        return ans == INFTY ? -1 : ans;
     }
 }
 ```

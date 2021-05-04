@@ -259,7 +259,6 @@ class Solution {
 > 给定一个 m x n 二维字符网格 board 和一个单词（字符串）列表 words，找出所有同时在二维网格和字典中出现的单词。
 >
 > 单词必须按照字母顺序，通过 相邻的单元格 内的字母构成，其中“相邻”单元格是那些水平相邻或垂直相邻的单元格。同一个单元格内的字母在一个单词中不允许被重复使用。
->
 
 ```java
 class Solution {
@@ -307,7 +306,6 @@ class Solution {
 > 可选择树中任何一个节点作为根。当选择节点 x 作为根节点时，设结果树的高度为 h 。在所有可能的树中，具有最小高度的树（即，min(h)）被称为 最小高度树 。
 >
 > 请你找到所有的 最小高度树 并按 任意顺序 返回它们的根节点标签列表。
->
 
 ```java
 class Solution {
@@ -724,7 +722,6 @@ class UnionFind {
 > 岛屿总是被水包围，并且每座岛屿只能由水平方向和/或竖直方向上相邻的陆地连接形成。
 >
 > 此外，你可以假设该网格的四条边均被水包围。
->
 
 ```java
 class Solution {
@@ -1254,6 +1251,237 @@ class Solution {
                 }
             }
         }
+        return ans;
+    }
+}
+```
+
+## 颜色交替的最短路径（1129）
+
+> *在一个有向图中，节点分别标记为 0, 1, ..., n-1。这个图中的每条边不是红色就是蓝色，且存在自环或平行边。*
+>
+> *red_edges 中的每一个 [i, j] 对表示从节点 i 到节点 j 的红色有向边。类似地，blue_edges 中的每一个 [i, j] 对表示从节点 i 到节点 j 的蓝色有向边。*
+>
+> *返回长度为 n 的数组 answer，其中 answer[X] 是从节点 0 到节点 X 的红色边和蓝色边交替出现的最短路径的长度。如果不存在这样的路径，那么 answer[x] = -1。*
+
+```java
+class Solution {
+    public int[] shortestAlternatingPaths(int n, int[][] red_edges, int[][] blue_edges) {
+		List<List<Integer>> rg = new ArrayList<>();//这是 红色线的集合
+		List<List<Integer>> bg = new ArrayList<>();//这是 蓝色线的集合
+
+		for (int i = 0; i < n; i++) {
+			//初始化两条线的集合
+			rg.add(new ArrayList<>());
+			bg.add(new ArrayList<>());
+		}
+
+		//根据数组改变 红蓝色线 集合
+		for (int[] red : red_edges) {rg.get(red[0]).add(red[1]);}
+		for (int[] blue : blue_edges) {bg.get(blue[0]).add(blue[1]);}
+
+		int[][] ans = new int[n][2];
+		for (int[] ansColor : ans) {
+			//初始化所有距离为MAX
+			ansColor[0] = Integer.MAX_VALUE;
+			ansColor[1] = Integer.MAX_VALUE;
+		}
+		//出发点距离设为0
+		ans[0][0] = 0;
+		ans[0][1] = 0;
+
+		dfs(ans, 0, 0, rg, bg);     //从红色线出发
+		dfs(ans, 1, 0, rg, bg);     //从蓝色线出发
+
+		int[] finalAns = new int[n];
+		for (int i = 0; i < n; i++) {
+			//取最小值  没有的话为-1
+			finalAns[i] = Math.min(ans[i][0], ans[i][1]);
+			if (finalAns[i] == Integer.MAX_VALUE)
+				finalAns[i] = -1;
+		}
+		return finalAns;
+	}
+
+	public void dfs(int[][] ans, int color, int i, List<List<Integer>> rg, List<List<Integer>> bg) {
+		List<List<Integer>> g = color == 0 ? rg : bg;		//选择 红蓝色 线
+		for (int j : g.get(i)) {
+			//遍历该线段 以 i 为出发点的终点
+			if (ans[i][color] + 1 < ans[j][1 - color]) {
+				//判断 0 -> i -> j 的长度是否 比 已有的 0 -> j 的路径长度长 若是 则更新 
+				//!!!这个判断是整个算法的核心 
+				//当在也找不到更短的路径时 dfs会停止搜索 否则继续
+				ans[j][1 - color] = ans[i][color] + 1;
+                dfs(ans, 1 - color, j, rg, bg);
+            }
+		}
+	}
+}
+```
+
+## 最小高度树（0310）
+
+> *树是一个无向图，其中任何两个顶点只通过一条路径连接。 换句话说，一个任何没有简单环路的连通图都是一棵树。*
+>
+> *给你一棵包含 n 个节点的树，标记为 0 到 n - 1 。给定数字 n 和一个有 n - 1 条无向边的 edges 列表（每一个边都是一对标签），其中 edges[i] = [ai, bi] 表示树中节点 ai 和 bi 之间存在一条无向边。*
+>
+> *可选择树中任何一个节点作为根。当选择节点 x 作为根节点时，设结果树的高度为 h 。在所有可能的树中，具有最小高度的树（即，min(h)）被称为 最小高度树 。*
+>
+> *请你找到所有的 最小高度树 并按 任意顺序 返回它们的根节点标签列表。*
+
+```java
+class Solution {
+    public List<Integer> findMinHeightTrees(int n, int[][] edges) {
+        List<Integer> ans = new ArrayList<>();
+
+        // 构建邻接表和各个节点的度
+        int[] degree = new int[n];
+        List<List<Integer>> adjency = new ArrayList<>();
+        for (int i = 0; i < n; i++) {adjency.add(new ArrayList<>());}
+        for (int[] edge : edges) {
+            degree[edge[0]]++;
+            degree[edge[1]]++;
+            adjency.get(edge[0]).add(edge[1]);
+            adjency.get(edge[1]).add(edge[0]);
+        }
+
+        // 一度节点(叶子节点)入队
+        Queue<Integer> queue = new LinkedList<>();
+        for (int i = 0; i < n; i++) {
+            if (degree[i] == 1) {
+                queue.offer(i);
+            }
+        }
+
+        // 单独处理只有一个节点的情况
+        int residue = n;
+        if (residue == 1) {ans.add(0);}
+
+        // 剩余的节点不是一个或两个,将叶子节点(度为1)一层一层剥离,最后暴露出来的就是根
+        // 最后的根节点只可能是一个或者两个
+        while (residue != 1 && residue != 2) {
+            int size = queue.size();
+            residue -= size;
+            for (int i = 0; i < size; i++) {
+                int cur = queue.poll();
+                for (int node : adjency.get(cur)) {
+                    if (degree[node] > 0) {
+                        degree[node]--;
+                    }
+                    if (degree[node] == 1) {
+                        queue.offer(node);
+                    }
+                }
+            }
+        }
+
+        // 队列中最后剩下的就是根
+        while (!queue.isEmpty()) {
+            ans.add(queue.poll());
+        }
+        return ans;
+    }
+}
+```
+
+## 员工的重要性（0690）
+
+> *给定一个保存员工信息的数据结构，它包含了员工 唯一的 id ，重要度 和 直系下属的 id 。*
+>
+> *比如，员工 1 是员工 2 的领导，员工 2 是员工 3 的领导。他们相应的重要度为 15 , 10 , 5 。那么员工 1 的数据结构是 [1, 15, [2]] ，员工 2的 数据结构是 [2, 10, [3]] ，员工 3 的数据结构是 [3, 5, []] 。注意虽然员工 3 也是员工 1 的一个下属，但是由于 并不是直系 下属，因此没有体现在员工 1 的数据结构中。*
+>
+> *现在输入一个公司的所有员工信息，以及单个员工 id ，返回这个员工和他所有下属的重要度之和。*
+
+```java
+// BFS
+class Solution {
+    public int getImportance(List<Employee> employees, int id) {
+        Map<Integer, Employee> map = new HashMap<>();
+        for (Employee e : employees) {map.put(e.id, e);}
+
+        int ans = 0;
+        Queue<Integer> queue = new LinkedList<>();
+        queue.offer(id);
+        while (!queue.isEmpty()) {
+            int cur = queue.poll();
+            Employee e = map.get(cur);
+            ans += e.importance;
+
+            List<Integer> sub = e.subordinates;
+            for (int n : sub) {queue.offer(n);}
+        }
+
+        return ans;
+    }
+}
+
+// DFS 
+class Solution {
+    Map<Integer, Employee> map = new HashMap<>();
+
+    public int getImportance(List<Employee> employees, int id) {
+        for (Employee e : employees) {
+            map.put(e.id, e);
+        }    
+        return dfs(id);
+    }
+
+    private int dfs(int id) {
+        Employee e = map.get(id);
+        int ans = e.importance;
+        List<Integer> sub = e.subordinates;
+        for (int n : sub) {
+            ans += dfs(n);
+        }
+        return ans;
+    }
+}
+```
+
+## 马在棋盘上的概率（0688）
+
+> *已知一个 NxN 的国际象棋棋盘，棋盘的行号和列号都是从 0 开始。即最左上角的格子记为 (0, 0)，最右下角的记为 (N-1, N-1)。* 
+>
+> *现有一个 “马”（也译作 “骑士”）位于 (r, c) ，并打算进行 K 次移动。* 
+>
+> *如下图所示，国际象棋的 “马” 每一步先沿水平或垂直方向移动 2 个格子，然后向与之相垂直的方向再移动 1 个格子，共有 8 个可选的位置。*
+>
+> *现在 “马” 每一步都从可选的位置（包括棋盘外部的）中独立随机地选择一个进行移动，直到移动了 K 次或跳到了棋盘外面。*
+>
+> *求移动结束后，“马” 仍留在棋盘上的概率。*
+
+```java
+class Solution {
+    public double knightProbability(int n, int k, int row, int col) {
+        double[][] dp = new double[n][n];
+        int[] dirRow = new int[]{2, 2, 1, 1, -1, -1, -2, -2};
+        int[] dirCol = new int[]{1, -1, 2, -2, 2, -2, 1, -1};
+
+        dp[row][col] = 1;
+        while (k > 0) {
+            double[][] dp2 = new double[n][n];
+            for (int i = 0; i < n ; i++) {
+                for (int j = 0; j < n; j++) {
+                    for (int t = 0; t < 8; t++) {
+                        int nextX = i + dirRow[t];
+                        int nextY = j + dirCol[t];
+                        if (nextX >= 0 && nextX < n && nextY >= 0 && nextY < n) {
+                            dp2[nextX][nextY] += dp[i][j] / 8.0;
+                        }
+                    }
+                }
+            }
+            dp = dp2;
+            k--;
+        }
+
+        double ans = 0.0;
+        for (double[] r : dp) {
+            for (double num : r) {
+                ans += num;
+            }
+        }
+
         return ans;
     }
 }

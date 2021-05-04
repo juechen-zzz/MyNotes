@@ -36,6 +36,67 @@ class Solution {
 }
 ```
 
+## 有效的括号字符串（0678）
+
+> *给定一个只包含三种字符的字符串：（ ，） 和 \*，写一个函数来检验这个字符串是否为有效字符串。有效字符串具有如下规则：*
+>
+> *任何左括号 ( 必须有相应的右括号 )。*
+>
+> *任何右括号 ) 必须有相应的左括号 ( 。*
+>
+> *左括号 ( 必须在对应的右括号之前 )。*
+>
+> ** 可以被视为单个右括号 ) ，或单个左括号 ( ，或一个空字符串。*
+>
+> *一个空字符串也被视为有效字符串。*
+
+```java
+// solution 1
+class Solution {
+    public boolean checkValidString(String s) {
+        int left = 0, right = 0, n = s.length();
+        for (int i = 0; i < n; i++) {
+            left += (s.charAt(i) == ')') ? -1 : 1;
+            right += (s.charAt(n - i - 1) == '(') ? -1 : 1;
+            if (left < 0 || right < 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
+// solution 2 stack
+class Solution {
+    public boolean checkValidString(String s) {
+        int n = s.length();
+        Stack<Integer> left = new Stack<>();
+        Stack<Integer> star = new Stack<>();
+
+        for (int i = 0; i < n; i++) {
+            char c = s.charAt(i);
+            if (c == '(') {left.push(i);}
+            else if (c == '*') {star.push(i);}
+            else {
+                if (!left.isEmpty()) {left.pop();}
+                else if (!star.isEmpty()) {star.pop();}
+                else {return false;}
+            }
+        }
+
+        if (left.size() > star.size()) {return false;}
+        else {
+            while (!left.isEmpty() && !star.isEmpty()) {
+                if (left.peek() > star.peek()) {return false;}
+                star.pop();
+                left.pop();
+            }
+            return true;
+        }
+    }
+}
+```
+
 ## 柱状图中最大的矩形（0084）
 
 > *给定 n 个非负整数，用来表示柱状图中各个柱子的高度。每个柱子彼此相邻，且宽度为 1 。*
@@ -229,7 +290,6 @@ class Solution {
 > 请你找出 nums1 中每个元素在 nums2 中的下一个比其大的值。
 >
 > nums1 中数字 x 的下一个更大元素是指 x 在 nums2 中对应位置的右边的第一个比 x 大的元素。如果不存在，对应位置输出 -1 。
->
 
 ```java
 class Solution {
@@ -258,7 +318,6 @@ class Solution {
 ```
 
 > 给定一个循环数组（最后一个元素的下一个元素是数组的第一个元素），输出每个元素的下一个更大元素。数字 x 的下一个更大的元素是按数组遍历顺序，这个数字之后的第一个比它更大的数，这意味着你应该循环地搜索它的下一个更大的数。如果不存在，则输出 -1。
->
 
 ```java
 class Solution {
@@ -406,6 +465,49 @@ class Solution {
             }
         }
 
+        return ans;
+    }
+}
+```
+
+## 棒球比赛（0682）
+
+> *你现在是一场采用特殊赛制棒球比赛的记录员。这场比赛由若干回合组成，过去几回合的得分可能会影响以后几回合的得分。*
+>
+> *比赛开始时，记录是空白的。你会得到一个记录操作的字符串列表 ops，其中 ops[i] 是你需要记录的第 i 项操作，ops 遵循下述规则：*
+>
+> *整数 x - 表示本回合新获得分数 x*
+>
+> *"+" - 表示本回合新获得的得分是前两次得分的总和。题目数据保证记录此操作时前面总是存在两个有效的分数。*
+>
+> *"D" - 表示本回合新获得的得分是前一次得分的两倍。题目数据保证记录此操作时前面总是存在一个有效的分数。*
+>
+> *"C" - 表示前一次得分无效，将其从记录中移除。题目数据保证记录此操作时前面总是存在一个有效的分数。*
+>
+> *请你返回记录中所有得分的总和。*
+
+```java
+class Solution {
+    public int calPoints(String[] ops) {
+        Stack<Integer> stack = new Stack<>();
+
+        for(String op : ops) {
+            if (op.equals("+")) {
+                int top = stack.pop();
+                int newtop = top + stack.peek();
+                stack.push(top);
+                stack.push(newtop);
+            } else if (op.equals("C")) {
+                stack.pop();
+            } else if (op.equals("D")) {
+                stack.push(2 * stack.peek());
+            } else {
+                stack.push(Integer.valueOf(op));
+            }
+        }
+
+        int ans = 0;
+        for(int score : stack) {ans += score;}
         return ans;
     }
 }
