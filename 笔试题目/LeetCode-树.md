@@ -538,62 +538,92 @@ class Solution {
 }
 ```
 
-## 不同的二叉搜索树（0095 && 0096）
+## 二叉搜索树查找、插入和删除
 
-> *给定一个整数 n，求以 1 ... n 为节点组成的二叉搜索树有多少种？*
+> 二叉查找树的搜索
 
 ```java
 class Solution {
-    public int numTrees(int n) {
-        int[] dp = new int[n + 1];
-        dp[0] = 1;
-        dp[1] = 1;
+    public TreeNode searchBST(TreeNode root, int val) {
+        if (root == null || root.val == val) {return root;}
 
-        for (int i = 2; i <= n; i++) {
-            for (int j = 1; j <= i; j++) {
-                dp[i] += dp[j - 1] * dp[i - j];
-            }
-        }
-        return dp[n];
+        return root.val > val ? searchBST(root.left, val) : searchBST(root.right, val);
     }
 }
 ```
 
-> *给定一个整数 n，生成所有由 1 ... n 为节点所组成的 二叉搜索树 。*
+> 二叉查找树的插入
 
 ```java
 class Solution {
-    public List<TreeNode> generateTrees(int n) {
-        if (n == 0) {return new LinkedList<TreeNode>();}
-        return generateTrees(1, n);
-    }
+    public TreeNode insertIntoBST(TreeNode root, int val) {
+        if (root == null) {return new TreeNode(val);}
 
-    public List<TreeNode> generateTrees(int start, int end) {
-        List<TreeNode> allTrees = new LinkedList<TreeNode>();
-        if (start > end) {
-            allTrees.add(null);
-            return allTrees;
-        }
-
-        // 枚举可行根节点
-        for (int i = start; i <= end; i++) {
-            // 获得所有可行的左子树集合
-            List<TreeNode> leftTrees = generateTrees(start, i - 1);
-
-            // 获得所有可行的右子树集合
-            List<TreeNode> rightTrees = generateTrees(i + 1, end);
-
-            // 从左子树集合中选出一棵左子树，从右子树集合中选出一棵右子树，拼接到根节点上
-            for (TreeNode left : leftTrees) {
-                for (TreeNode right : rightTrees) {
-                    TreeNode currTree = new TreeNode(i);
-                    currTree.left = left;
-                    currTree.right = right;
-                    allTrees.add(currTree);
+        TreeNode pos = root;
+        while (pos != null) {
+            if (val < pos.val) {
+                if (pos.left == null) {
+                    pos.left = new TreeNode(val);
+                    break;
+                }
+                else {
+                    pos = pos.left;
+                }
+            }
+            else {
+                if (pos.right == null) {
+                    pos.right = new TreeNode(val);
+                    break;
+                }
+                else {
+                    pos = pos.right;
                 }
             }
         }
-        return allTrees;
+
+        return root;
+    }
+}
+```
+
+> 删除二叉搜索树的节点
+>
+> *给定一个二叉搜索树的根节点 root 和一个值 key，删除二叉搜索树中的 key 对应的节点，并保证二叉搜索树的性质不变。返回二叉搜索树（有可能被更新）的根节点的引用。*
+
+```java
+class Solution {
+    public TreeNode deleteNode(TreeNode root, int key) {
+        if (root == null) {return null;}
+
+        if (key > root.val) {root.right = deleteNode(root.right, key);}
+        else if (key < root.val) {root.left = deleteNode(root.left, key);}
+        else {
+            if (root.left == null && root.right == null) {root = null;}
+            else if (root.right != null) {
+                root.val = successor(root);
+                root.right = deleteNode(root.right, root.val);
+            }
+            else {
+                root.val = predecessor(root);
+                root.left = deleteNode(root.left, root.val);
+            }
+        }
+
+        return root;
+    }
+
+    // 代表的是中序遍历序列的下一个节点
+    public int successor(TreeNode root) {
+        root = root.right;
+        while (root.left != null) {root = root.left;}
+        return root.val;
+    }
+
+    // 代表的是中序遍历序列的上一个节点
+    public int predecessor(TreeNode root) {
+        root = root.left;
+        while (root.right != null) {root = root.right;}
+        return root.val;
     }
 }
 ```
@@ -735,44 +765,62 @@ class Solution {
 }
 ```
 
-## 删除二叉搜索树的节点（0450）
+## 不同的二叉搜索树（0095 && 0096）
 
-> *给定一个二叉搜索树的根节点 root 和一个值 key，删除二叉搜索树中的 key 对应的节点，并保证二叉搜索树的性质不变。返回二叉搜索树（有可能被更新）的根节点的引用。*
+> *给定一个整数 n，求以 1 ... n 为节点组成的二叉搜索树有多少种？*
 
 ```java
 class Solution {
-    public TreeNode deleteNode(TreeNode root, int key) {
-        if (root == null) {return null;}
+    public int numTrees(int n) {
+        int[] dp = new int[n + 1];
+        dp[0] = 1;
+        dp[1] = 1;
 
-        if (key > root.val) {root.right = deleteNode(root.right, key);}
-        else if (key < root.val) {root.left = deleteNode(root.left, key);}
-        else {
-            if (root.left == null && root.right == null) {root = null;}
-            else if (root.right != null) {
-                root.val = successor(root);
-                root.right = deleteNode(root.right, root.val);
-            }
-            else {
-                root.val = predecessor(root);
-                root.left = deleteNode(root.left, root.val);
+        for (int i = 2; i <= n; i++) {
+            for (int j = 1; j <= i; j++) {
+                dp[i] += dp[j - 1] * dp[i - j];
             }
         }
+        return dp[n];
+    }
+}
+```
 
-        return root;
+> *给定一个整数 n，生成所有由 1 ... n 为节点所组成的 二叉搜索树 。*
+
+```java
+class Solution {
+    public List<TreeNode> generateTrees(int n) {
+        if (n == 0) {return new LinkedList<TreeNode>();}
+        return generateTrees(1, n);
     }
 
-    // 代表的是中序遍历序列的下一个节点
-    public int successor(TreeNode root) {
-        root = root.right;
-        while (root.left != null) {root = root.left;}
-        return root.val;
-    }
+    public List<TreeNode> generateTrees(int start, int end) {
+        List<TreeNode> allTrees = new LinkedList<TreeNode>();
+        if (start > end) {
+            allTrees.add(null);
+            return allTrees;
+        }
 
-    // 代表的是中序遍历序列的上一个节点
-    public int predecessor(TreeNode root) {
-        root = root.left;
-        while (root.right != null) {root = root.right;}
-        return root.val;
+        // 枚举可行根节点
+        for (int i = start; i <= end; i++) {
+            // 获得所有可行的左子树集合
+            List<TreeNode> leftTrees = generateTrees(start, i - 1);
+
+            // 获得所有可行的右子树集合
+            List<TreeNode> rightTrees = generateTrees(i + 1, end);
+
+            // 从左子树集合中选出一棵左子树，从右子树集合中选出一棵右子树，拼接到根节点上
+            for (TreeNode left : leftTrees) {
+                for (TreeNode right : rightTrees) {
+                    TreeNode currTree = new TreeNode(i);
+                    currTree.left = left;
+                    currTree.right = right;
+                    allTrees.add(currTree);
+                }
+            }
+        }
+        return allTrees;
     }
 }
 ```

@@ -225,6 +225,34 @@ class Solution {
 }
 ```
 
+## 找出第K小的距离对（0719）
+
+> *给定一个整数数组，返回所有数对之间的第 k 个最小距离。一对 (A, B) 的距离被定义为 A 和 B 之间的绝对差值。*
+
+```java
+class Solution {
+    public int smallestDistancePair(int[] nums, int k) {
+        Arrays.sort(nums);
+
+        int n = nums.length;
+        int low = 0, high = nums[n - 1] - nums[0];
+        while (low < high) {
+            int mid = low + (high - low) / 2;
+            int count = 0, left = 0;
+            for (int right = 0; right < n; right++) {
+                while (nums[right] - nums[left] > mid) {left++;}
+                count += right - left;
+            }
+
+            if (count >= k) {high = mid;}
+            else {low = mid + 1;}
+        }
+        
+        return low;
+    }
+}
+```
+
 ## x的平方根（0069）
 
 > *实现 int sqrt(int x) 函数。*
@@ -494,6 +522,58 @@ class Solution {
             count += Math.min(x / i, n);
         }
         return count >= k;
+    }
+}
+```
+
+## 制作m束花所需的最少天数（1482）
+
+> *给你一个整数数组 bloomDay，以及两个整数 m 和 k 。*
+>
+> *现需要制作 m 束花。制作花束时，需要使用花园中 相邻的 k 朵花 。*
+>
+> *花园中有 n 朵花，第 i 朵花会在 bloomDay[i] 时盛开，恰好 可以用于 一束 花中。*
+>
+> *请你返回从花园中摘 m 束花需要等待的最少的天数。如果不能摘到 m 束花则返回 -1 。*
+
+```java
+class Solution {
+    public int minDays(int[] bloomDay, int m, int k) {
+        if (m * k > bloomDay.length) {return -1;}
+
+        int low = 1, high = 1;
+        int n = bloomDay.length;
+        for (int i = 0; i < n; i++) {high = Math.max(high, bloomDay[i]);}
+
+        while (low < high) {
+            int days = low + (high - low) / 2;
+            if (myMethod(bloomDay, m, k, days)) {
+                high = days;
+            }
+            else {
+                low = days + 1;
+            }
+        }
+        
+        return low;
+    }
+
+    private boolean myMethod(int[] bloomDay, int m, int k, int days) {
+        int count = 0, cur = 0;
+        int n = bloomDay.length;
+        for (int i = 0; i < n && count < m; i++) {
+            if (bloomDay[i] <= days) {
+                cur++;
+                if (cur == k) {
+                    count++;
+                    cur = 0;
+                }
+            }
+            else {
+                cur = 0;
+            }
+        }
+        return count >= m;
     }
 }
 ```

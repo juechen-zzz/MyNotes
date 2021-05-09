@@ -232,6 +232,29 @@ class Solution {
 }
 ```
 
+## 最长重复子数组（0718）
+
+> *给两个整数数组 A 和 B ，返回两个数组中公共的、长度最长的子数组的长度。*
+
+```java
+class Solution {
+    public int findLength(int[] nums1, int[] nums2) {
+        int n = nums1.length, m = nums2.length;
+        int[][] dp = new int[n + 1][m + 1];
+        int ans = 0;
+
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = m - 1; j >= 0; j--) {
+                dp[i][j] = (nums1[i] == nums2[j]) ? dp[i + 1][j + 1] + 1 : 0;
+                ans = Math.max(ans, dp[i][j]);
+            }
+        }
+        
+        return ans;
+    }
+}
+```
+
 ## 两个字符串的删除操作（0583）
 
 > *给定两个单词 word1 和 word2，找到使得 word1 和 word2 相同所需的最小步数，每步可以删除任意一个字符串中的一个字符。*
@@ -274,6 +297,39 @@ class Solution {
         }
 
         return dp[word1.length()][word2.length()];
+    }
+}
+```
+
+## 两个字符串的最小ASCII删除和（0712）
+
+> *给定两个字符串s1, s2，找到使两个字符串相等所需删除字符的ASCII值的最小和。*
+
+```java
+class Solution {
+    public int minimumDeleteSum(String s1, String s2) {
+        int[][] dp = new int[s1.length() + 1][s2.length() + 1];
+
+        for (int i = s1.length() - 1; i >= 0; i--) {
+            dp[i][s2.length()] = dp[i + 1][s2.length()] + s1.codePointAt(i);
+        }
+
+        for (int j = s2.length() - 1; j >= 0; j--) {
+            dp[s1.length()][j] = dp[s1.length()][j + 1] + s2.codePointAt(j);
+        }
+
+        for (int i = s1.length() - 1; i >= 0; i--) {
+            for (int j = s2.length() - 1; j >= 0; j--) {
+                if (s1.charAt(i) == s2.charAt(j)) {
+                    dp[i][j] = dp[i + 1][j + 1];
+                }
+                else {
+                    dp[i][j] = Math.min(dp[i + 1][j] + s1.codePointAt(i), dp[i][j + 1] + s2.codePointAt(j));
+                }
+            }
+        }
+
+        return dp[0][0];
     }
 }
 ```
@@ -1477,4 +1533,51 @@ class Solution {
     }
 }
 ```
+
+## 完成所有工作的最短时间（1723）
+
+> *给你一个整数数组 jobs ，其中 jobs[i] 是完成第 i 项工作要花费的时间。*
+>
+> 
+>
+> *请你将这些工作分配给 k 位工人。所有工作都应该分配给工人，且每项工作只能分配给一位工人。*
+>
+> *工人的 工作时间 是完成分配给他们的所有工作花费时间的总和。*
+>
+> *请你设计一套最佳的工作分配方案，使工人的 最大工作时间 得以 最小化 。*
+>
+> 
+>
+> *返回分配方案中尽可能 最小 的 最大工作时间 。*
+
+```java
+class Solution {
+    public int minimumTimeRequired(int[] jobs, int k) {
+        int n = jobs.length;
+        // 用一个 n 位的二进制整数来表示哪些工作已经被分配，哪些工作尚未被分配
+        int[] sum = new int[1 << n];
+        for (int i = 1; i < (1 << n); i++) {
+            int x = Integer.numberOfTrailingZeros(i), y = i - (1 << x);
+            sum[i] = sum[y] + jobs[x];
+        }
+
+        int[][] dp = new int[k][1 << n];
+        for (int i = 0; i < (1 << n); i++) {dp[0][i] = sum[i];}
+
+        for (int i = 1; i < k; i++) {
+            for (int j = 0; j < (1 << n); j++) {
+                int minN = Integer.MAX_VALUE;
+                for (int x = j; x != 0; x = (x - 1) & j) {
+                    minN = Math.min(minN, Math.max(dp[i - 1][j - x], sum[x]));
+                }
+                dp[i][j] = minN;
+            }
+        }
+
+        return dp[k - 1][(1 << n) - 1];
+    }
+}
+```
+
+
 

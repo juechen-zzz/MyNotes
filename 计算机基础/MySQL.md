@@ -85,7 +85,7 @@ ALTER TABLE table_name DROP PRIMARY KEY
 
 
 
-### 13 聚集索引与非聚集索引
+### 4 聚集索引与非聚集索引
 
 **聚集索引**
 

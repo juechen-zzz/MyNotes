@@ -821,6 +821,28 @@ class Solution {
 }
 ```
 
+> *给定一个整数数组 prices，其中第 i 个元素代表了第 i 天的股票价格 ；非负整数 fee 代表了交易股票的手续费用。*
+>
+> *你可以无限次地完成交易，但是你每笔交易都需要付手续费。如果你已经购买了一个股票，在卖出它之前你就不能再继续购买股票了。*
+
+```java
+class Solution {
+    public int maxProfit(int[] prices, int fee) {
+        int n = prices.length;
+        int[][] dp = new int[n][2];
+
+        dp[0][0] = 0;
+        dp[0][1] = -prices[0];
+
+        for (int i = 1; i < n; i++) {
+            dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][1] + prices[i] - fee);
+            dp[i][1] = Math.max(dp[i - 1][1], dp[i - 1][0] - prices[i]);
+        }
+        return dp[n - 1][0];
+    }
+}
+```
+
 ## 打家劫舍
 
 > *你是一个专业的小偷，计划偷窃沿街的房屋。每间房内都藏有一定的现金，影响你偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。*
@@ -910,6 +932,34 @@ class Solution {
 }
 ```
 
+> *给你一个整数数组 nums ，你可以对它进行一些操作。*
+>
+> *每次操作中，选择任意一个 nums[i] ，删除它并获得 nums[i] 的点数。之后，你必须删除每个等于 nums[i] - 1 或 nums[i] + 1 的元素。*
+>
+> *开始你拥有 0 个点数。返回你能通过这些操作获得的最大点数。*
+
+```java
+// 类似于打家劫舍，先统计出相同数字一共有多少点数，然后就等价于打家劫舍里不能偷相邻两家
+class Solution {
+    public int deleteAndEarn(int[] nums) {
+        int maxVal = 0;
+        for (int n : nums) {maxVal = Math.max(maxVal, n);}
+
+        int[] sum = new int[maxVal + 1];
+        for (int n : nums) {sum[n] += n;}
+
+        int len = sum.length;
+        int first = sum[0], second = Math.max(sum[0], sum[1]);
+        for (int i = 2; i < len; i++) {
+            int tmp = second;
+            second = Math.max(first + sum[i], second);
+            first = tmp;
+        }
+        return second;
+    }
+}
+```
+
 ## 接雨水
 
 > *给定 n 个非负整数表示每个宽度为 1 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。*
@@ -925,6 +975,42 @@ class Solution {
             ans += (leftMax + rightMax - height[i]);
         }
         return ans - leftMax * height.length;
+    }
+}
+
+// 单独算每个坑，求出坑的最小值
+class Solution {
+    public int trap(int[] height) {
+        int n = height.length;
+        if (n == 0) {return 0;}
+
+        int[] leftMax = new int[n];
+        leftMax[0] = height[0];
+        for (int i = 1; i < n; ++i) {
+            leftMax[i] = Math.max(leftMax[i - 1], height[i]);
+        }
+
+        int[] rightMax = new int[n];
+        rightMax[n - 1] = height[n - 1];
+        for (int i = n - 2; i >= 0; --i) {
+            rightMax[i] = Math.max(rightMax[i + 1], height[i]);
+        }
+
+        int ans = 0;
+        int min = Integer.MAX_VALUE;
+        // 单独算每个坑，求出坑的最小值
+        for (int i = 0; i < n; ++i) {
+            if (height[i] < leftMax[i] && height[i] > rightMax[i]) {
+                ans += Math.min(leftMax[i], rightMax[i]) - height[i];
+            }
+            else {
+                if (ans != 0) {
+                    min = Math.min(min, ans);
+                    ans = 0;
+                }
+            }
+        }
+        return min == Integer.MAX_VALUE ? 0 : min;
     }
 }
 ```
@@ -3208,5 +3294,50 @@ class Solution {
     }
 }
 ```
+
+## 掉落的方块（0699）
+
+> *在无限长的数轴（即 x 轴）上，我们根据给定的顺序放置对应的正方形方块。*
+>
+> *第 i 个掉落的方块（positions[i] = (left, side_length)）是正方形，其中 left 表示该方块最左边的点位置(positions[i][0])，side_length 表示该方块的边长(positions[i][1])。*
+>
+> *每个方块的底部边缘平行于数轴（即 x 轴），并且从一个比目前所有的落地方块更高的高度掉落而下。在上一个方块结束掉落，并保持静止后，才开始掉落新方块。*
+>
+> *方块的底边具有非常大的粘性，并将保持固定在它们所接触的任何长度表面上（无论是数轴还是其他方块）。邻接掉落的边不会过早地粘合在一起，因为只有底边才具有粘性。*
+>
+> *返回一个堆叠高度列表 ans 。每一个堆叠高度 ans[i] 表示在通过 positions[0], positions[1], ..., positions[i] 表示的方块掉落结束后，目前所有已经落稳的方块堆叠的最高高度。*
+
+```java
+class Solution {
+    public List<Integer> fallingSquares(int[][] positions) {
+        int n = positions.length;
+        int[] heights = new int[n];
+        for (int i = 0; i < n; i++) {
+            int left = positions[i][0];
+            int size = positions[i][1];
+            int right = left + size;
+            heights[i] += size;
+
+            for (int j = i + 1; j < n; j++) {
+                int left2 = positions[j][0];
+                int size2 = positions[j][1];
+                int right2 = left2 + size2;
+                if (left2 < right && left < right2) {
+                    heights[j] = Math.max(heights[j], heights[i]);
+                }
+            }
+        }
+
+        List<Integer> ans = new ArrayList<>();
+        int cur = -1;
+        for (int x : heights) {
+            cur = Math.max(cur, x);
+            ans.add(cur);
+        }
+        return ans;
+    }
+}
+```
+
 
 
