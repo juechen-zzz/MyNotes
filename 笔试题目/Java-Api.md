@@ -40,7 +40,7 @@ int[] nums2 = nums.clone();
 int sum = Arrays.stream(nums).sum();
 ```
 
-# 2 字符串
+# 2 String
 
 ```java
 // 转换成char[]数组
