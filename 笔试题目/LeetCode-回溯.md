@@ -791,6 +791,48 @@ class Solution {
 }
 ```
 
+## 特殊的二进制序列（0761）
+
+> *特殊的二进制序列是具有以下两个性质的二进制序列：*
+>
+> 
+>
+> *0 的数量与 1 的数量相等。*
+>
+> *二进制序列的每一个前缀码中 1 的数量要大于等于 0 的数量。*
+>
+> *给定一个特殊的二进制序列 S，以字符串形式表示。定义一个操作 为首先选择 S 的两个连续且非空的特殊的子串，然后将它们交换。（两个子串为连续的当且仅当第一个子串的最后一个字符恰好为第二个子串的第一个字符的前一个字符。)*
+>
+> 
+>
+> *在任意次数的操作之后，交换后的字符串按照字典序排列的最大的结果是什么？*
+
+```java
+class Solution {
+    public String makeLargestSpecial(String s) {
+        StringBuilder sb = new StringBuilder();
+        List<String> list = new ArrayList<>();
+
+        int start = 0, countOne = 0;
+        for (int i = 0; i < s.length(); i++) {
+            countOne += (s.charAt(i) == '1' ? 1 : -1);
+            if (countOne == 0) {
+                String cur = s.substring(start + 1, i);
+                list.add("1" + makeLargestSpecial(cur) + "0");
+                start = i + 1;
+            }
+        }
+
+        Collections.sort(list);
+        for (int i = list.size() - 1; i >= 0; i--) {
+            sb.append(list.get(i));
+        }
+
+        return sb.toString();
+    }
+}
+```
+
 ## 最小基因变化（0433）
 
 > *一条基因序列由一个带有8个字符的字符串表示，其中每个字符都属于 "A", "C", "G", "T"中的任意一个。*
@@ -1167,6 +1209,201 @@ class Solution {
         }
 
         return -1;
+    }
+}
+```
+
+## 图像渲染（0733）
+
+> *有一幅以二维整数数组表示的图画，每一个整数表示该图画的像素值大小，数值在 0 到 65535 之间。*
+>
+> *给你一个坐标 (sr, sc) 表示图像渲染开始的像素值（行 ，列）和一个新的颜色值 newColor，让你重新上色这幅图像。*
+>
+> *为了完成上色工作，从初始坐标开始，记录初始坐标的上下左右四个方向上像素值与初始坐标相同的相连像素点，接着再记录这四个方向上符合条件的像素点与他们对应四个方向上像素值与初始坐标相同的相连像素点，……，重复该过程。将所有有记录的像素点的颜色值改为新的颜色值。*
+>
+> *最后返回经过上色渲染后的图像。*
+
+```java
+// BFS
+class Solution {
+    int[] dx = {1, 0, 0, -1};
+    int[] dy = {0, 1, -1, 0};
+
+    public int[][] floodFill(int[][] image, int sr, int sc, int newColor) {
+        int curColor = image[sr][sc];
+        if (curColor == newColor) {return image;}
+
+        int m = image.length, n = image[0].length;
+        Queue<int[]> queue = new LinkedList<>();
+        queue.offer(new int[]{sr, sc});
+        image[sr][sc] = newColor;
+
+        while (!queue.isEmpty()) {
+            int[] cur = queue.poll();
+            int x = cur[0], y = cur[1];
+            for (int i = 0; i < 4; i++) {
+                int nextX = x + dx[i], nextY = y + dy[i];
+                if (nextX >= 0 && nextX < m && nextY >= 0 && nextY < n && image[nextX][nextY] == curColor) {
+                    queue.offer(new int[]{nextX, nextY});
+                    image[nextX][nextY] = newColor;
+                }
+            }
+        }
+
+        return image;
+    }
+}
+
+// DFS
+class Solution {
+    int[] dx = {1, 0, 0, -1};
+    int[] dy = {0, 1, -1, 0};
+
+    public int[][] floodFill(int[][] image, int sr, int sc, int newColor) {
+        int curColor = image[sr][sc];
+        if (curColor != newColor) {
+            dfs(image, sr, sc, curColor, newColor);
+        }
+        return image;
+    }
+
+    private void dfs(int[][] image, int x, int y, int color, int newColor) {
+        int m = image.length, n = image[0].length;
+
+        if (image[x][y] == color) {
+            image[x][y] = newColor;
+            for (int i = 0; i < 4; i++) {
+                int nextX = x + dx[i], nextY = y + dy[i];
+                if (nextX >= 0 && nextX < m && nextY >= 0 && nextY < n) {
+                    dfs(image, nextX, nextY, color, newColor);
+                }
+            }
+        }
+    }
+}
+```
+
+## 破解保险箱（0753）
+
+> *有一个需要密码才能打开的保险箱。密码是 n 位数, 密码的每一位是 k 位序列 0, 1, ..., k-1 中的一个 。*
+>
+> *你可以随意输入密码，保险箱会自动记住最后 n 位输入，如果匹配，则能够打开保险箱。*
+>
+> *举个例子，假设密码是 "345"，你可以输入 "012345" 来打开它，只是你输入了 6 个字符.*
+>
+> *请返回一个能打开保险箱的最短字符串。*
+
+```java
+class Solution {
+    Set<Integer> visited = new HashSet<>();
+    StringBuffer ans = new StringBuffer();
+    int highest;
+    int k;
+
+    public String crackSafe(int n, int k) {
+        highest = (int)Math.pow(10, n - 1);
+        this.k = k;
+        dfs(0);
+        for (int i = 1; i < n; i++) {ans.append('0');}
+        return ans.toString();
+    }
+
+    private void dfs(int node) {
+        for (int x = 0; x < k; x++) {
+            int neigh = node * 10 + x;
+            if (!visited.contains(neigh)) {
+                visited.add(neigh);
+                dfs(neigh % highest);
+                ans.append(x);
+            }
+        }
+    }
+}
+```
+
+## 金字塔转换矩阵（0756）
+
+> *现在，我们用一些方块来堆砌一个金字塔。 每个方块用仅包含一个字母的字符串表示。*
+>
+> *使用三元组表示金字塔的堆砌规则如下：*
+>
+> *对于三元组 ABC ，C 为顶层方块，方块 A 、B 分别作为方块 C 下一层的的左、右子块。当且仅当 ABC 是被允许的三元组，我们才可以将其堆砌上。*
+>
+> *初始时，给定金字塔的基层 bottom，用一个字符串表示。一个允许的三元组列表 allowed，每个三元组用一个长度为 3 的字符串表示。*
+>
+> *如果可以由基层一直堆到塔尖就返回 true ，否则返回 false 。*
+
+```java
+class Solution {
+    int[][] T;
+    Set<Long> seen;
+
+    public boolean pyramidTransition(String bottom, List<String> allowed) {
+        T = new int[7][7];
+        for (String a: allowed)
+            T[a.charAt(0) - 'A'][a.charAt(1) - 'A'] |= 1 << (a.charAt(2) - 'A');
+
+        seen = new HashSet();
+        int N = bottom.length();
+        int[][] A = new int[N][N];
+        int t = 0;
+        for (char c: bottom.toCharArray())
+            A[N-1][t++] = c - 'A';
+        return solve(A, 0, N-1, 0);
+    }
+
+    //A[i] - the ith row of the pyramid
+    //R - integer representing the current row of the pyramid
+    //N - length of current row we are calculating
+    //i - index of how far in the current row we are calculating
+    //Returns true iff pyramid can be built
+    public boolean solve(int[][] A, long R, int N, int i) {
+        if (N == 1 && i == 1) { // If successfully placed entire pyramid
+            return true;
+        } else if (i == N) {
+            if (seen.contains(R)) return false; // If we've already tried this row, give up
+            seen.add(R); // Add row to cache
+            return solve(A, 0, N-1, 0); // Calculate next row
+        } else {
+            // w's jth bit is true iff block #j could be
+            // a parent of A[N][i] and A[N][i+1]
+            int w = T[A[N][i]][A[N][i+1]];
+            // for each set bit in w...
+            for (int b = 0; b < 7; ++b) if (((w >> b) & 1) != 0) {
+                A[N-1][i] = b; //set parent to be equal to block #b
+                //If rest of pyramid can be built, return true
+                //R represents current row, now with ith bit set to b+1
+                // in base 8.
+                if (solve(A, R * 8 + (b+1), N, i+1)) return true;
+            }
+            return false;
+        }
+    }
+}
+```
+
+## 达到终点（0780）
+
+> *从点 (x, y) 可以转换到 (x, x+y) 或者 (x+y, y)。*
+>
+> *给定一个起点 (sx, sy) 和一个终点 (tx, ty)，如果通过一系列的转换可以从起点到达终点，则返回 True ，否则返回 False。*
+
+```java
+// 回溯
+class Solution {
+    public boolean reachingPoints(int sx, int sy, int tx, int ty) {
+        while (tx >= sx && ty >= sy) {
+            if (tx == ty) {break;}
+            if (tx > ty) {
+                if (ty > sy) {tx %= ty;}
+                else {return (tx - sx) % ty == 0;}
+            }
+            else {
+                if (tx > sx) {ty %= tx;}
+                else {return (ty - sy) % tx == 0;}
+            }
+        }
+        return (tx == sx && ty == sy);
     }
 }
 ```

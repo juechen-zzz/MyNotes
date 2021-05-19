@@ -1,5 +1,9 @@
 [TOC]
 
+```
+
+```
+
 ## 最长回文子串（0005）      
 
 > *给定一个字符串 s，找到 s 中最长的回文子串。你可以假设 s 的最大长度为 1000。*
@@ -54,6 +58,64 @@ class Solution {
                 ans = s.substring(left + 1, right);
             }
         }
+        return ans;
+    }
+}
+```
+
+> 统计不同回文子序列
+
+```java
+class Solution {
+    int[][] memo, prv, nxt;
+    byte[] A;
+    int MOD = 1_000_000_007;
+
+    public int countPalindromicSubsequences(String S) {
+        int N = S.length();
+        prv = new int[N][4];
+        nxt = new int[N][4];
+        memo = new int[N][N];
+        for (int[] row: prv) Arrays.fill(row, -1);
+        for (int[] row: nxt) Arrays.fill(row, -1);
+
+        A = new byte[N];
+        int ix = 0;
+        for (char c: S.toCharArray()) {
+            A[ix++] = (byte) (c - 'a');
+        }
+
+        int[] last = new int[4];
+        Arrays.fill(last, -1);
+        for (int i = 0; i < N; ++i) {
+            last[A[i]] = i;
+            for (int k = 0; k < 4; ++k)
+                prv[i][k] = last[k];
+        }
+
+        Arrays.fill(last, -1);
+        for (int i = N-1; i >= 0; --i) {
+            last[A[i]] = i;
+            for (int k = 0; k < 4; ++k)
+                nxt[i][k] = last[k];
+        }
+
+        return dp(0, N-1) - 1;
+    }
+
+    public int dp(int i, int j) {
+        if (memo[i][j] > 0) return memo[i][j];
+        int ans = 1;
+        if (i <= j) {
+            for (int k = 0; k < 4; ++k) {
+                int i0 = nxt[i][k];
+                int j0 = prv[j][k];
+                if (i <= i0 && i0 <= j) ans++;
+                if (-1 < i0 && i0 < j0) ans += dp(i0 + 1, j0 - 1);
+                if (ans >= MOD) ans -= MOD;
+            }
+        }
+        memo[i][j] = ans;
         return ans;
     }
 }
@@ -192,6 +254,47 @@ class Solution {
         }
         
         return ans;
+    }
+}
+```
+
+## 使序列递增的最小交换次数（0801）
+
+> *我们有两个长度相等且不为空的整型数组 A 和 B 。*
+>
+> *我们可以交换 A[i] 和 B[i] 的元素。注意这两个元素在各自的序列中应该处于相同的位置。*
+>
+> *在交换过一些元素之后，数组 A 和 B 都应该是严格递增的（数组严格递增的条件仅为A[0] < A[1] < A[2] < ... < A[A.length - 1]）。*
+>
+> *给定数组 A 和 B ，请返回使得两个数组均保持严格递增状态的最小交换次数。假设给定的输入总是有效的。*
+
+```java
+class Solution {
+    public int minSwap(int[] nums1, int[] nums2) {
+        int ans = 0;
+        int n = nums1.length;
+        int[][] dp = new int[n][2];
+        dp[0][0] = 0;
+        dp[0][1] = 1;
+
+        for (int i = 1; i < n; i++) {
+            if (nums1[i - 1] < nums1[i] && nums2[i - 1] < nums2[i]) {
+                if (nums1[i - 1] < nums2[i] && nums2[i - 1] < nums1[i]) {
+                    dp[i][0] = Math.min(dp[i - 1][0], dp[i - 1][1]);
+                    dp[i][1] = Math.min(dp[i - 1][0], dp[i - 1][1]) + 1;
+                }
+                else {
+                    dp[i][0] = dp[i - 1][0];
+                    dp[i][1] = dp[i - 1][1] + 1;
+                }
+            }
+            else {
+                dp[i][0] = dp[i - 1][1];
+                dp[i][1] = dp[i - 1][0] + 1;
+            }
+        }
+
+        return Math.min(dp[n - 1][0], dp[n - 1][1]);
     }
 }
 ```
@@ -1579,5 +1682,129 @@ class Solution {
 }
 ```
 
+## 停在原地的方案数（1269）
 
+> *有一个长度为 arrLen 的数组，开始有一个指针在索引 0 处。*
+>
+> *每一步操作中，你可以将指针向左或向右移动 1 步，或者停在原地（指针不能被移动到数组范围外）。*
+>
+> *给你两个整数 steps 和 arrLen ，请你计算并返回：在恰好执行 steps 次操作以后，指针仍然指向索引 0 处的方案数。*
+>
+> *由于答案可能会很大，请返回方案数 模 10^9 + 7 后的结果。*
+
+```java
+class Solution {
+    private static final int MOD = 10_0000_0007;
+
+    public int numWays(int steps, int arrLen) {
+        int maxDis = Math.min(arrLen - 1, steps);
+        int[][] dp = new int[steps + 1][maxDis + 1];
+        dp[0][0] = 1;
+
+        for (int i = 1; i <= steps; i++) {
+            for (int j = 0; j <= maxDis; j++) {
+                dp[i][j] = dp[i - 1][j];
+                if (j - 1 >= 0) {
+                    dp[i][j] = (dp[i][j] + dp[i - 1][j - 1]) % MOD;
+                }
+                if (j + 1 <= maxDis) {
+                    dp[i][j] = (dp[i][j] + dp[i - 1][j + 1]) % MOD;
+                }
+            }
+        }
+
+        return dp[steps][0];
+    }
+}
+```
+
+## 最大加号标志（0764）
+
+> *在一个大小在 (0, 0) 到 (N-1, N-1) 的2D网格 grid 中，除了在 mines 中给出的单元为 0，其他每个单元都是 1。*
+>
+> *网格中包含 1 的最大的轴对齐加号标志是多少阶？返回加号标志的阶数。如果未找到加号标志，则返回 0。*
+>
+> 
+>
+> *一个 k" 阶由 1 组成的“轴对称”加号标志具有中心网格 grid[x][y] = 1 ，*
+>
+> *以及4个从中心向上、向下、向左、向右延伸，长度为 k-1，由 1 组成的臂。下面给出 k" 阶“轴对称”加号标志的示例。*
+>
+> *注意，只有加号标志的所有网格要求为 1，别的网格可能为 0 也可能为 1。*
+
+```java
+class Solution {
+    public int orderOfLargestPlusSign(int n, int[][] mines) {
+        Set<Integer> ban = new HashSet<>();
+        for (int[] cur : mines) {ban.add(cur[0] * n + cur[1]);}
+
+        int[][] dp = new int[n][n];
+        int ans = 0, count;
+
+        for (int r = 0; r < n; r++) {
+            count = 0;
+            for (int c = 0; c < n; c++) {
+                count = ban.contains(r * n + c) ? 0 : count + 1;
+                dp[r][c] = count;
+            }
+
+            count = 0;
+            for (int c = n - 1; c >= 0; c--) {
+                count = ban.contains(r * n + c) ? 0 : count + 1;
+                dp[r][c] = Math.min(dp[r][c], count);
+            }
+        }
+
+        for (int c = 0; c < n; c++) {
+            count = 0;
+            for (int r = 0; r < n; r++) {
+                count = ban.contains(r * n + c) ? 0 : count + 1;
+                dp[r][c] = Math.min(dp[r][c], count);
+            }
+
+            count = 0;
+            for (int r = n - 1; r >= 0; r--) {
+                count = ban.contains(r * n + c) ? 0 : count + 1;
+                dp[r][c] = Math.min(dp[r][c], count);
+                ans = Math.max(ans, dp[r][c]);
+            }
+        }
+
+        return ans;
+    }
+}
+```
+
+## 多米诺和托米诺平铺（0790）
+
+> *有两种形状的瓷砖：一种是 2x1 的多米诺形，另一种是形如 "L" 的托米诺形。两种形状都可以旋转。*
+>
+> *XX  <- 多米诺*
+>
+> *XX  <- "L" 托米诺*
+>
+> *X*
+>
+> *给定 N 的值，有多少种方法可以平铺 2 x N 的面板？返回值 mod 10^9 + 7。*
+>
+> *（平铺指的是每个正方形都必须有瓷砖覆盖。两个平铺不同，当且仅当面板上有四个方向上的相邻单元中的两个，使得恰好有一个平铺有一个瓷砖占据两个正方形。）*
+
+```java
+class Solution {
+    private static final int MOD = 1_000_000_007;
+
+    public int numTilings(int n) {
+        long[] dp = new long[]{1, 0, 0, 0};
+        for (int i = 0; i < n; i++) {
+            long[] ndp = new long[4];
+            ndp[0] = (dp[0] + dp[3]) % MOD;
+            ndp[1] = (dp[0] + dp[2]) % MOD;
+            ndp[2] = (dp[0] + dp[1]) % MOD;
+            ndp[3] = (dp[0] + dp[1] + dp[2]) % MOD;
+            dp = ndp;
+        }
+        return (int)dp[0];
+    }
+}
+```
 

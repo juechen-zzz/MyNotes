@@ -254,6 +254,80 @@ class Solution {
 }
 ```
 
+> 华为真题：返回课程表指定课程的所有课程号，按序号排序，但是会存在环，存在返回-1
+
+```java
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Scanner;
+
+/**
+ * @description: 课程表的改进，输出所有的前置课程名单，按大小序号排序，可能存在环
+ * @author: Komorebi
+ * @time: 2021/5/12 20:33
+ */
+public class Huawei0512_2 {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int N = sc.nextInt();
+        sc.nextLine();
+
+        int M = sc.nextInt();
+        sc.nextLine();
+
+        List<List<Integer>> nums = new ArrayList<>();
+        for (int i = 0; i < N; i++) {
+            List<Integer> cur = new ArrayList<>();
+            String[] tmp = sc.nextLine().split(",");
+            if (tmp.length == 1) {
+                nums.add(new ArrayList<>());
+            }
+            else {
+                for (int j = 1; j < tmp.length; j++) {
+                    int t = Integer.parseInt(tmp[j]);
+                    cur.add(t);
+                }
+                nums.add(new ArrayList<>(cur));
+            }
+        }
+
+        List<Integer> ans = new ArrayList<>();
+        int[] visited = new int[N];
+        int[] curVisited = new int[N];
+        
+        if (!dfs(M, nums, ans, visited, curVisited)) {System.out.println(-1);}
+        else {
+            ans.remove(ans.size() - 1);
+            if (ans.size() == 0) {System.out.println("null");}
+            else {
+                Collections.sort(ans);
+                String ret = "";
+                for (int i = 0; i < ans.size() - 1; i++) {ret += (ans.get(i) + ",");}
+                ret += ans.get(ans.size() - 1);
+                System.out.println(ret);
+            }
+        }
+    }
+
+    private static boolean dfs(int M, List<List<Integer>> nums, List<Integer> ans, int[] visited, int[] curVisited) {
+        if (curVisited[M] == 1) {return false;}
+        if (visited[M] == 1) {return true;}
+
+        curVisited[M] = 1;
+
+        for (int n : nums.get(M)) {
+            if (!dfs(n, nums, ans, visited, curVisited)) {return false;}
+        }
+
+        ans.add(M);
+        curVisited[M] = 0;
+        visited[M] = 1;
+        return true;
+    }
+}
+```
+
 ## 单词搜索2（0212）
 
 > 给定一个 m x n 二维字符网格 board 和一个单词（字符串）列表 words，找出所有同时在二维网格和字典中出现的单词。
@@ -385,6 +459,118 @@ class Solution {
             dfs(tmp);
         }
         ans.add(cur);
+    }
+}
+```
+
+## K站中转内最便宜的航班（0787）
+
+> *有 n 个城市通过 m 个航班连接。每个航班都从城市 u 开始，以价格 w 抵达 v。*
+>
+> *现在给定所有的城市和航班，以及出发城市 src 和目的地 dst，你的任务是找到从 src 到 dst 最多经过 k 站中转的最便宜的价格。 如果没有这样的路线，则输出 -1。*
+
+```java
+// BFS
+import javafx.util.Pair;
+class Solution {
+    public int findCheapestPrice(int n, int[][] flights, int src, int dst, int k) {
+        List<List<Pair<Integer, Integer>>> graph = new ArrayList<>();
+        for (int i = 0; i < n; i++) {graph.add(new ArrayList<Pair<Integer, Integer>>());}
+        for (int[] cur : flights) {graph.get(cur[0]).add(new Pair(cur[1], cur[2]));}
+
+        int ans = Integer.MAX_VALUE;
+        Queue<Pair<Integer, Pair<Integer, Integer>>> queue = new LinkedList<>();
+        queue.offer(new Pair(src, new Pair(0, 0)));
+
+        while (!queue.isEmpty() && queue.peek().getValue().getKey() <= k + 1) {
+            Pair<Integer, Pair<Integer, Integer>> tmp = queue.peek();
+            if (tmp.getKey() == dst) {ans = Math.min(ans, tmp.getValue().getValue());}
+
+            for (Pair<Integer, Integer> m : graph.get(tmp.getKey())) {
+                if (m.getValue() + tmp.getValue().getValue() < ans) {
+                    queue.offer(new Pair(m.getKey(), new Pair(tmp.getValue().getKey() + 1, m.getValue() + tmp.getValue().getValue())));
+                }
+            }
+
+            queue.poll();
+        }
+
+        return ans == Integer.MAX_VALUE ? -1 : ans;
+    }
+}
+
+// DFS
+class Solution {
+    private int[][] graph;
+    private boolean[] visited;
+    private int ans = Integer.MAX_VALUE;
+
+    public int findCheapestPrice(int n, int[][] flights, int src, int dst, int k) {
+        k = Math.min(k, n - 2);
+        this.graph = new int[n][n];
+        this.visited = new boolean[n];
+        for (int[] cur : flights) {graph[cur[0]][cur[1]] = cur[2];}
+
+        dfs(src, dst, k + 1, 0);
+
+        if (ans == Integer.MAX_VALUE) {return -1;}
+        return ans;
+    }
+
+    private void dfs(int src, int dst, int k, int cost) {
+        if (src == dst) {
+            ans = cost;
+            return;
+        }
+
+        if (k == 0) {return;}
+
+        for (int i = 0; i < graph[src].length; i++) {
+            if (graph[src][i] > 0) {
+                if (visited[i]) {continue;}
+                if (cost + graph[src][i] > ans) {continue;}
+
+                visited[i] = true;
+                dfs(i, dst, k - 1, cost + graph[src][i]);
+                visited[i] = false;
+            }
+        }
+    }
+}
+
+// Dijkstra 算法
+public class Solution {
+    public int findCheapestPrice(int n, int[][] flights, int src, int dst, int K) {
+        // 使用邻接矩阵表示有向图，0 表示不连通
+        int[][] graph = new int[n][n];
+        for (int[] flight : flights) {
+            graph[flight[0]][flight[1]] = flight[2];
+        }
+
+        PriorityQueue<int[]> minHeap = new PriorityQueue<>(Comparator.comparingInt(a -> a[1]));
+        // 向集合添加一个记录（起点, 费用, 站数限制）的数组，K + 1 表示可以走过站点的个数
+        minHeap.offer(new int[]{src, 0, K + 1});
+
+        while (!minHeap.isEmpty()) {
+            int[] front = minHeap.poll();
+            int v = front[0];
+            int price = front[1];
+            int k = front[2];
+
+            if (v == dst) {return price;}
+
+            // 如果还可以中转一个站
+            if (k > 0) {
+                for (int i = 0; i < n; i++) {
+                    // 并且存在一条有向边
+                    if (graph[v][i] > 0 ) {
+                        // 优先队列中存入：有向边指向的顶点 i、从起点 src 到 i 的总路径长度、还有多少站可以中转
+                        minHeap.offer(new int[]{i, price + graph[v][i]  , k - 1});
+                    }
+                }
+            }
+        }
+        return -1;
     }
 }
 ```

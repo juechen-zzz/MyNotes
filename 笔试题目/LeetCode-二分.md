@@ -37,7 +37,9 @@ class Solution {
 }
 ```
 
-## 搜索旋转排序数组
+## 排序数组
+
+### 搜索旋转排序数组
 
 > *升序排列的整数数组 nums 在预先未知的某个点上进行了旋转（例如， [0,1,2,4,5,6,7] 经旋转后可能变为 [4,5,6,7,0,1,2] ）。*
 >
@@ -124,7 +126,7 @@ class Solution {
 }
 ```
 
-## 寻找旋转排序数组中的最小值（0153）
+### 寻找旋转排序数组中的最小值（0153）
 
 > *假设按照升序排序的数组在预先未知的某个点上进行了旋转。例如，数组 [0,1,2,4,5,6,7] 可能变为 [4,5,6,7,0,1,2] 。*
 >
@@ -150,7 +152,7 @@ class Solution {
 }
 ```
 
-## 在排序数组中查找元素的第一个和最后一个位置（0034）
+### 在排序数组中查找元素的第一个和最后一个位置（0034）
 
 > *给定一个按照升序排列的整数数组 nums，和一个目标值 target。找出给定目标值在数组中的开始位置和结束位置。*
 >
@@ -187,7 +189,9 @@ class Solution {
 }
 ```
 
-## 有序数组中第K小的元素（0378）
+## 第K小
+
+### 有序数组中第K小的元素（0378）
 
 > *给你一个 n x n 矩阵 matrix ，其中每行和每列元素均按升序排序，找到矩阵中第 k 小的元素。*
 
@@ -208,24 +212,24 @@ class Solution {
         return left;
     }
 
-    public boolean check(int[][] matrix, int mid, int k, int n) {
-        int i = n - 1;
-        int j = 0;
-        int num = 0;
+    private boolean check(int[][] matrix, int mid, int k, int n) {
+        int i = n - 1, j = 0;
+        int count = 0;
         while (i >= 0 && j < n) {
             if (matrix[i][j] <= mid) {
-                num += i + 1;
+                count += (i + 1);
                 j++;
-            } else {
+            }
+            else {
                 i--;
             }
         }
-        return num >= k;
+        return count >= k;
     }
 }
 ```
 
-## 找出第K小的距离对（0719）
+### 找出第K小的距离对（0719）
 
 > *给定一个整数数组，返回所有数对之间的第 k 个最小距离。一对 (A, B) 的距离被定义为 A 和 B 之间的绝对差值。*
 
@@ -249,6 +253,82 @@ class Solution {
         }
         
         return low;
+    }
+}
+```
+
+### 乘法表中第K小的数（0668）
+
+> *几乎每一个人都用 乘法表。但是你能在乘法表中快速找到第k小的数字吗？*
+>
+> *给定高度m 、宽度n 的一张 m \* n的乘法表，以及正整数k，你需要返回表中第k小的数字。*
+
+```java
+class Solution {
+    public int findKthNumber(int m, int n, int k) {
+        int left = 1, right = m * n;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (!enough(m, n, k, mid)) {left = mid + 1;}
+            else {right = mid;}
+        }
+        return left;
+    }
+
+    private static boolean enough(int m, int n, int k, int x) {
+        int count = 0;
+        for (int i = 1; i <= m; i++) {
+            count += Math.min(x / i, n);
+        }
+        return count >= k;
+    }
+}
+```
+
+### 第K个最小的素数分数（0786）
+
+> *给你一个按递增顺序排序的数组 arr 和一个整数 k 。数组 arr 由 1 和若干 素数 组成，且其中所有整数互不相同。*
+>
+> *对于每对满足 0 < i < j < arr.length 的 i 和 j ，可以得到分数 arr[i] / arr[j] 。*
+>
+> *那么第 k 个最小的分数是多少呢? 以长度为 2 的整数数组返回你的答案, 这里 answer[0] == arr[i] 且 answer[1] == arr[j] 。*
+
+```java
+class Solution {
+    public int[] kthSmallestPrimeFraction(int[] arr, int k) {
+        double low = 0, high = 1;
+        int[] ans = new int[]{0, 1};
+
+        while (high - low > 1e-9) {
+            double mid = low + (high - low) / 2.0;
+            int[] cur = myMethod(mid, arr);
+
+            if (cur[0] < k) {
+                low = mid;
+            }
+            else {
+                ans[0] = cur[1];
+                ans[1] = cur[2];
+                high = mid;
+            }
+        }
+
+        return ans;
+    }
+
+    // 用来求解小于x的分数数量以及最大的那个分数的分子和分母
+    public int[] myMethod(double x, int[] arr) {
+        int left = 0, right = 1, count = 0, i = -1;
+        for (int j = 1; j < arr.length; j++) {
+            while (arr[i+1] < arr[j] * x) {i++;}
+
+            count += i+1;
+            if (i >= 0 && left * arr[j] < right * arr[i]) {
+                left = arr[i];
+                right = arr[j];
+            }
+        }
+        return new int[]{count, left, right};
     }
 }
 ```
@@ -366,44 +446,6 @@ class Solution {
 }
 ```
 
-## 有序数组中第K小的元素（0378）
-
-> *给你一个 n x n 矩阵 matrix ，其中每行和每列元素均按升序排序，找到矩阵中第 k 小的元素。*
-
-```java
-class Solution {
-    public int kthSmallest(int[][] matrix, int k) {
-        int n = matrix.length;
-        int left = matrix[0][0];
-        int right = matrix[n - 1][n - 1];
-        while (left < right) {
-            int mid = left + ((right - left) >> 1);
-            if (check(matrix, mid, k, n)) {
-                right = mid;
-            } else {
-                left = mid + 1;
-            }
-        }
-        return left;
-    }
-
-    private boolean check(int[][] matrix, int mid, int k, int n) {
-        int i = n - 1, j = 0;
-        int count = 0;
-        while (i >= 0 && j < n) {
-            if (matrix[i][j] <= mid) {
-                count += (i + 1);
-                j++;
-            }
-            else {
-                i--;
-            }
-        }
-        return count >= k;
-    }
-}
-```
-
 ## 翻转对（0493）
 
 > 给定一个数组 nums ，如果 i < j 且 nums[i] > 2*nums[j] 我们就将 (i, j) 称作一个重要翻转对。
@@ -498,34 +540,6 @@ class Solution {
 }
 ```
 
-## 乘法表中第K小的数（0668）
-
-> *几乎每一个人都用 乘法表。但是你能在乘法表中快速找到第k小的数字吗？*
->
-> *给定高度m 、宽度n 的一张 m \* n的乘法表，以及正整数k，你需要返回表中第k小的数字。*
-
-```java
-class Solution {
-    public int findKthNumber(int m, int n, int k) {
-        int left = 1, right = m * n;
-        while (left < right) {
-            int mid = left + (right - left) / 2;
-            if (!enough(m, n, k, mid)) {left = mid + 1;}
-            else {right = mid;}
-        }
-        return left;
-    }
-
-    private static boolean enough(int m, int n, int k, int x) {
-        int count = 0;
-        for (int i = 1; i <= m; i++) {
-            count += Math.min(x / i, n);
-        }
-        return count >= k;
-    }
-}
-```
-
 ## 制作m束花所需的最少天数（1482）
 
 > *给你一个整数数组 bloomDay，以及两个整数 m 和 k 。*
@@ -574,6 +588,99 @@ class Solution {
             }
         }
         return count >= m;
+    }
+}
+```
+
+## 水位上升的泳池中游泳（0778）
+
+> *在一个 N x N 的坐标方格 grid 中，每一个方格的值 grid[i][j] 表示在位置 (i,j) 的平台高度。*
+>
+> 
+>
+> *现在开始下雨了。当时间为 t 时，此时雨水导致水池中任意位置的水位为 t 。*
+>
+> *你可以从一个平台游向四周相邻的任意一个平台，但是前提是此时水位必须同时淹没这两个平台。*
+>
+> *假定你可以瞬间移动无限距离，也就是默认在方格内部游动是不耗时的。*
+>
+> *当然，在你游泳的时候你必须待在坐标方格里面。*
+>
+> 
+>
+> *你从坐标方格的左上平台 (0，0) 出发。最少耗时多久你才能到达坐标方格的右下平台 (N-1, N-1)？*
+
+```java
+class Solution {
+    public int swimInWater(int[][] grid) {
+        int n = grid.length;
+        int left = 0, right = n * n - 1;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (check(grid, mid)) {
+                right = mid;
+            }
+            else {
+                left = mid + 1;
+            }
+        }
+        return left;
+    }
+
+    private static boolean check(int[][] grid, int threshold) {
+        if (grid[0][0] > threshold) {return false;}
+
+        int n = grid.length;
+        boolean[][] visited = new boolean[n][n];
+        visited[0][0] = true;
+
+        Queue<int[]> queue = new LinkedList<>();
+        queue.offer(new int[]{0, 0});
+
+        int[][] dir = new int[][]{{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+        while (!queue.isEmpty()) {
+            int[] square = queue.poll();
+            int x = square[0], y = square[1];
+
+            for (int[] d : dir) {
+                int nextX = x + d[0], nextY = y + d[1];
+                if (nextX >= 0 && nextX < n && nextY >= 0 && nextY < n) {
+                    if (!visited[nextX][nextY] && grid[nextX][nextY] <= threshold) {
+                        queue.offer(new int[]{nextX, nextY});
+                        visited[nextX][nextY] = true;
+                    }
+                }
+            }
+        }
+
+        return visited[n - 1][n - 1];
+    }
+}
+```
+
+## 阶乘函数后K个零（0793）
+
+> *f(x) 是 x! 末尾是 0 的数量。（回想一下 x! = 1 \* 2 \* 3 \* ... \* x，且 0! = 1 ）*
+>
+> *例如， f(3) = 0 ，因为 3! = 6 的末尾没有 0 ；而 f(11) = 2 ，因为 11!= 39916800 末端有 2 个 0 。给定 K，找出多少个非负整数 x ，能满足 f(x) = K 。*
+
+```java
+class Solution {
+    public int preimageSizeFZF(long k) {
+        long low = k, high = 10 * k + 1;
+        while (low < high) {
+            long mid = low + (high - low) / 2;
+            long zmid = myMethod(mid);
+            if (zmid == k) {return 5;}
+            else if (zmid < k) {low = mid + 1;}
+            else {high = mid;}
+        }
+        return 0;
+    }
+
+    public long myMethod(long x) {
+        if (x == 0) {return 0;}
+        return x / 5 + myMethod(x / 5);
     }
 }
 ```

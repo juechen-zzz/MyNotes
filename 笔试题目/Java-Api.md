@@ -15,6 +15,7 @@ Collections.sort(ans);
 Collections.reverse(tmp);
 
 //把其他进制字符串key，转成10进制整数
+Integer.bitCount(i)
 Integer.parseInt(a, 2)
 Integer.parseInt(a, 8)
 Integer.parseInt(a, 16)

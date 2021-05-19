@@ -2,7 +2,7 @@
 
 > Zhu X, Su W, Lu L, et al. Deformable DETR: Deformable Transformers for End-to-End Object Detection[J]. arXiv preprint arXiv:2010.04159, 2020.
 
-### 1 abstract
+### 1 Abstract
 
 ​		这篇文章主要针对的是**DETR收敛速度较慢**以**及空间分辨率因计算资源受限**问题，提出使用==deformable cnn的方式以临近区域采样计算attention取代transformer中全局的self-attention==，提升了收敛速度并获得超于DETR的检测性能，尤其是**小目标**上。
 
@@ -24,7 +24,7 @@ PS：其实DETR文章中的Figure7可以发现，queries具有一定的位置识
 
 <img src="../images/image-20210416095146360.png" alt="image-20210416095146360" style="zoom: 60%;" />
 
-* 本文还提出了两种提升检测性能的策略：迭代标定框细化策略 和两阶段deformable DETR。
+* 本文还提出了两种提升检测性能的策略：迭代标定框细化策略和两阶段deformable DETR。
 
 
 

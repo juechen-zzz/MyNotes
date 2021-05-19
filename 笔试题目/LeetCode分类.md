@@ -492,7 +492,74 @@ class Solution {
 }
 ```
 
+## 形成两个异或相等数组的三元组数目（1442）
 
+> *给你一个整数数组 arr 。*
+>
+> *现需要从数组中取三个下标 i、j 和 k ，其中 (0 <= i < j <= k < arr.length) 。*
+>
+> *a 和 b 定义如下：*
+>
+> *a = arr[i] ^ arr[i + 1] ^ ... ^ arr[j - 1]*
+>
+> *b = arr[j] ^ arr[j + 1] ^ ... ^ arr[k]*
+>
+> *注意：^ 表示 按位异或 操作。*
+>
+> *请返回能够令 a == b 成立的三元组 (i, j , k) 的数目。*
+
+```java
+class Solution {
+    public int countTriplets(int[] arr) {
+        int n = arr.length;
+        int[] s = new int[n + 1];
+        for (int i = 0; i < n; i++) {
+            s[i + 1] = s[i] ^ arr[i];
+        }
+
+        int ans = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                if (s[i] == s[j + 1]) {
+                    ans += j - i;
+                }
+            }
+        }
+
+        return ans;
+    }
+}
+```
+
+## 找出第K大的异或坐标值（1738）
+
+> *给你一个二维矩阵 matrix 和一个整数 k ，矩阵大小为 m x n 由非负整数组成。*
+>
+> *矩阵中坐标 (a, b) 的 值 可由对所有满足 0 <= i <= a < m 且 0 <= j <= b < n 的元素 matrix[i][j]（下标从 0 开始计数）执行异或运算得到。*
+>
+> *请你找出 matrix 的所有坐标中第 k 大的值（k 的值从 1 开始计数）。*
+
+```java
+class Solution {
+    public int kthLargestValue(int[][] matrix, int k) {
+        int n = matrix.length, m = matrix[0].length;
+        int[][] pre = new int[n + 1][m + 1];
+        List<Integer> ans = new ArrayList<>();
+
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= m; j++) {
+                pre[i][j] = pre[i - 1][j] ^ pre[i][j - 1] ^ pre[i - 1][j - 1] ^ matrix[i - 1][j - 1];
+                ans.add(pre[i][j]);
+            }
+        }
+
+        Collections.sort(ans);
+        Collections.reverse(ans);
+
+        return ans.get(k - 1);
+    }
+}
+```
 
 
 
@@ -1658,6 +1725,67 @@ class Solution {
             }
         }
 
+        return ans;
+    }
+}
+```
+
+## 区间子数组个数（0795）
+
+> *给定一个元素都是正整数的数组A ，正整数 L 以及 R (L <= R)。*
+>
+> *求连续、非空且其中最大元素满足大于等于L 小于等于R的子数组个数。*
+
+```java
+class Solution {
+    public int numSubarrayBoundedMax(int[] nums, int left, int right) {
+        // myMethod(x) 用于计算所有元素都小于等于 x 的子数组数量
+        return myMethod(nums, right) - myMethod(nums, left - 1);
+    }
+
+    // 使用 cur 记录在 x 的左边，小于等于 x 的连续元素数量。
+    // 当找到一个这样的元素时，在此位置上结束的有效子数组的数量为 cur + 1。
+    // 当遇到一个元素大于 x 时，则在此位置结束的有效子数组的数量为 0。
+    private int myMethod(int[] nums, int bound) {
+        int ans = 0, cur = 0;
+        for (int x : nums) {
+            cur = (x <= bound ? cur + 1 : 0);
+            ans += cur; 
+        }
+        return ans;
+    }
+}
+```
+
+## 设置交集大小至少为2（0757）
+
+> *一个整数区间 [a, b] ( a < b ) 代表着从 a 到 b 的所有连续整数，包括 a 和 b。*
+>
+> *给你一组整数区间intervals，请找到一个最小的集合 S，使得 S 里的元素与区间intervals中的每一个整数区间都至少有2个元素相交。*
+>
+> *输出这个最小集合S的大小。*
+
+```java
+class Solution {
+    public int intersectionSizeTwo(int[][] intervals) {
+        Arrays.sort(intervals, (a, b) -> a[0] != b[0] ? a[0] - b[0] : b[1] - a[1]);
+        int[] todo = new int[intervals.length];
+        Arrays.fill(todo, 2);
+
+        int ans = 0, idx = intervals.length;
+        while (--idx >= 0) {
+            int left = intervals[idx][0], right = intervals[idx][1];
+            int m = todo[idx];
+            for (int i = left; i < left + m; i++) {
+                for (int j = 0; j <= idx; j++) {
+                    if (todo[j] > 0 && i <= intervals[j][1]) {
+                        todo[j]--;
+                    }
+                }
+                ans++;
+            } 
+        }
+        
         return ans;
     }
 }
@@ -3414,6 +3542,91 @@ class UnionFind {
             parent[index] = find(parent[index]);
         }
         return parent[index];
+    }
+}
+```
+
+## 单调递增的数字（0738）
+
+> *给定一个非负整数 N，找出小于或等于 N 的最大的整数，同时这个整数需要满足其各个位数上的数字是单调递增。*
+>
+> *（当且仅当每个相邻位数上的数字 x 和 y 满足 x <= y 时，我们称这个整数是单调递增的。）*
+
+```java
+class Solution {
+    public int monotoneIncreasingDigits(int n) {
+        char[] nums = Integer.toString(n).toCharArray();
+        int idx = 1;
+        while (idx < nums.length && nums[idx - 1] <= nums[idx]) {idx += 1;}
+
+        if (idx < nums.length) {
+            while (idx > 0 && nums[idx - 1] > nums[idx]) {
+                nums[idx - 1] -= 1;
+                idx -= 1;
+            }
+            idx += 1;
+            while (idx < nums.length) {
+                nums[idx] = '9';
+                idx++;
+            }
+        }
+
+        return Integer.parseInt(new String(nums));
+    }
+}
+```
+
+## 最多能完成排序的块
+
+> *数组arr是[0, 1, ..., arr.length - 1]的一种排列，我们将这个数组分割成几个“块”，并将这些块分别进行排序。之后再连接起来，使得连接的结果和按升序排序后的原数组相同。*
+>
+> *我们最多能将数组分成多少块？*
+
+```java
+// 如果当前下标i(含)之前的最大值为i，则说明可以切一刀；否则前半部分有大于i的元素，后半部分有小于i的元素，必不满足题意
+class Solution {
+    public int maxChunksToSorted(int[] arr) {
+        int ans = 0, max = 0;
+        for (int i = 0; i < arr.length; ++i) {
+            max = Math.max(max, arr[i]);
+            if (max == i) {ans++;}
+        }
+        return ans;
+    }
+}
+```
+
+> *这个问题和“最多能完成排序的块”相似，但给定数组中的元素可以重复，输入数组最大长度为2000，其中的元素最大为10**8。*
+>
+> *arr是一个可能包含重复元素的整数数组，我们将这个数组分割成几个“块”，并将这些块分别进行排序。之后再连接起来，使得连接的结果和按升序排序后的原数组相同。*
+>
+> *我们最多能将数组分成多少块？*
+
+```java
+// 滑动窗口
+class Solution {
+    public int maxChunksToSorted(int[] arr) {
+        Map<Integer, Integer> count = new HashMap<>();
+        int ans = 0, nonzero = 0;
+
+        int[] arr2 = arr.clone();
+        Arrays.sort(arr2);
+
+        for (int i = 0; i < arr.length; i++) {
+            int x = arr[i], y = arr2[i];
+
+            count.put(x, count.getOrDefault(x, 0) + 1);
+            if (count.get(x) == 0) {nonzero--;}
+            if (count.get(x) == 1) {nonzero++;}
+
+            count.put(y, count.getOrDefault(y, 0) - 1);
+            if (count.get(y) == -1) {nonzero++;}
+            if (count.get(y) == 0) {nonzero--;}
+
+            if (nonzero == 0) {ans++;} 
+        }
+
+        return ans;
     }
 }
 ```

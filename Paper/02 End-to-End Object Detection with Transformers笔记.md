@@ -1,4 +1,4 @@
-# End-to-End Object Detection with Transformers笔记
+# End-to-End Object Detection with Transformers
 
 > Carion N, Massa F, Synnaeve G, et al. End-to-end object detection with transformers[C]//European Conference on Computer Vision. Springer, Cham, 2020: 213-229.
 

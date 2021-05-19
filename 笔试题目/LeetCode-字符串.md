@@ -656,6 +656,51 @@ class Solution {
 }
 ```
 
+## 重构字符串（0767）
+
+> *给定一个字符串S，检查是否能重新排布其中的字母，使得两相邻的字符不同。*
+>
+> *若可行，输出任意可行的结果。若不可行，返回空字符串。*
+
+```java
+class Solution {
+    public String reorganizeString(String s) {
+        char[] charArray = s.toCharArray();
+        int[] dist = new int[26];
+        int n = s.length();
+        for (int i = 0; i < n; i++) {dist[charArray[i] - 'a']++;}
+
+        int maxCount = 0, alphabet = 0;
+        for (int i = 0; i < 26; i++) {
+            if (dist[i] > maxCount) {
+                maxCount = dist[i];
+                alphabet = i;
+                if (maxCount > (n + 1) / 2) {return "";}
+            }
+        }
+
+        char[] ans = new char[n];
+        int idx = 0;
+        while (dist[alphabet] > 0) {
+            ans[idx] = (char)(alphabet + 'a');
+            idx += 2;
+            dist[alphabet]--;
+        }
+
+        for (int i = 0; i < 26; i++) {
+            while (dist[i] > 0) {
+                if (idx >= n) {idx = 1;}
+                ans[idx] = (char)(i + 'a');
+                idx += 2;
+                dist[i]--;
+            }
+        }
+
+        return new String(ans);
+    }
+}
+```
+
 ## 反转字符串（0541）
 
 > *给定一个字符串 s 和一个整数 k，你需要对从字符串开头算起的每隔 2k 个字符的前 k 个字符进行反转。*
@@ -1259,6 +1304,32 @@ class Solution {
 }
 ```
 
+## 匹配子序列的单词数（0792）
+
+> *给定字符串 S 和单词字典 words, 求 words[i] 中是 S 的子序列的单词个数。*
+
+```java
+class Solution {
+    public int numMatchingSubseq(String s, String[] words) {
+        int ans = 0;
+        Map<String, Integer> map = new HashMap<>();
+        for (String w : words) {map.put(w, map.getOrDefault(w, 0) + 1);}
+
+        for (String cur : map.keySet()) {
+            int j = 0;
+            for (int i = 0; i < s.length() && j < cur.length(); i++) {
+                if (cur.charAt(j) == s.charAt(i)) {
+                    j++;
+                }
+            }
+            if (j == cur.length()) {ans += map.get(cur);}
+        }
+        
+        return ans;
+    }
+}
+```
+
 ## 字符串的排列（0567）
 
 > *给定两个字符串 s1 和 s2，写一个函数来判断 s2 是否包含 s1 的排列。*
@@ -1298,6 +1369,74 @@ class Solution {
         }
 
         return false;
+    }
+}
+```
+
+## 自定义字符串排序（0791）
+
+> *字符串S和 T 只包含小写字符。在S中，所有字符只会出现一次。*
+>
+> *S 已经根据某种规则进行了排序。我们要根据S中的字符顺序对T进行排序。更具体地说，如果S中x在y之前出现，那么返回的字符串中x也应出现在y之前。*
+>
+> *返回任意一种符合条件的字符串T。*
+
+```java
+class Solution {
+    public String customSortString(String order, String str) {
+        int[] count = new int[26];
+        for (char c : str.toCharArray()) {count[c - 'a']++;}
+
+        StringBuilder ans = new StringBuilder();
+        // 先找出在 str 中出现的所有的 order 的元素，并且将这些元素按照 order 中出现的相对顺序排序
+        for (char c : order.toCharArray()) {
+            for (int i = 0; i < count[c - 'a']; i++) {
+                ans.append(c);
+            }
+            count[c - 'a'] = 0;
+        }
+
+        // 将 str 中出现的但不在 order 中的元素添加到字符串时，无序关注顺序，因为这些元素并没有在 order 中出现，不需要满足排序关系
+        for (char c = 'a'; c <= 'z'; c++) {
+            for (int i = 0; i < count[c - 'a']; i++) {
+                ans.append(c);
+            }
+        }
+
+        return ans.toString();
+    }
+}
+```
+
+## 字母大小写全排列（0784）
+
+> *给定一个字符串S，通过将字符串S中的每个字母转变大小写，我们可以获得一个新的字符串。返回所有可能得到的字符串集合。*
+
+```java
+class Solution {
+    public List<String> letterCasePermutation(String s) {
+        List<StringBuilder> cur = new ArrayList<>();
+        cur.add(new StringBuilder());
+
+        for (char c : s.toCharArray()) {
+            int n = cur.size();
+            if (Character.isLetter(c)) {
+                for (int i = 0; i < n; i++) {
+                    cur.add(new StringBuilder(cur.get(i)));
+                    cur.get(i).append(Character.toLowerCase(c));
+                    cur.get(n + i).append(Character.toUpperCase(c));
+                }
+            }
+            else {
+                for (int i = 0; i < n; i++) {
+                    cur.get(i).append(c);
+                }
+            }
+        }
+
+        List<String> ans = new ArrayList<>();
+        for (StringBuilder sb : cur) {ans.add(sb.toString());}
+        return ans;
     }
 }
 ```
@@ -1372,3 +1511,119 @@ class Solution {
     }
 }
 ```
+
+## 原子的数量（0726）
+
+> *给定一个化学式formula（作为字符串），返回每种原子的数量。*
+>
+> *原子总是以一个大写字母开始，接着跟随0个或任意个小写字母，表示原子的名字。*
+>
+> *如果数量大于 1，原子后会跟着数字表示原子的数量。如果数量等于 1 则不会跟数字。例如，H2O 和 H2O2 是可行的，但 H1O2 这个表达是不可行的。*
+>
+> *两个化学式连在一起是新的化学式。例如 H2O2He3Mg4 也是化学式。*
+>
+> *一个括号中的化学式和数字（可选择性添加）也是化学式。例如 (H2O2) 和 (H2O2)3 是化学式。*
+>
+> *给定一个化学式，输出所有原子的数量。格式为：第一个（按字典序）原子的名子，跟着它的数量（如果数量大于 1），然后是第二个原子的名字（按字典序），跟着它的数量（如果数量大于 1），以此类推。*
+
+```java
+class Solution {
+    public String countOfAtoms(String formula) {
+        int N = formula.length();
+        Stack<Map<String, Integer>> stack = new Stack();
+        stack.push(new TreeMap());
+
+        for (int i = 0; i < N;) {
+            if (formula.charAt(i) == '(') {
+                stack.push(new TreeMap());
+                i++;
+            } else if (formula.charAt(i) == ')') {
+                Map<String, Integer> top = stack.pop();
+                int iStart = ++i, multiplicity = 1;
+                while (i < N && Character.isDigit(formula.charAt(i))) i++;
+                if (i > iStart) multiplicity = Integer.parseInt(formula.substring(iStart, i));
+                for (String c: top.keySet()) {
+                    int v = top.get(c);
+                    stack.peek().put(c, stack.peek().getOrDefault(c, 0) + v * multiplicity);
+                }
+            } else {
+                int iStart = i++;
+                while (i < N && Character.isLowerCase(formula.charAt(i))) i++;
+                String name = formula.substring(iStart, i);
+                iStart = i;
+                while (i < N && Character.isDigit(formula.charAt(i))) i++;
+                int multiplicity = i > iStart ? Integer.parseInt(formula.substring(iStart, i)) : 1;
+                stack.peek().put(name, stack.peek().getOrDefault(name, 0) + multiplicity);
+            }
+        }
+
+        StringBuilder ans = new StringBuilder();
+        for (String name: stack.peek().keySet()) {
+            ans.append(name);
+            int multiplicity = stack.peek().get(name);
+            if (multiplicity > 1) ans.append("" + multiplicity);
+        }
+        return new String(ans);
+    }
+}
+```
+
+## 划分字母区间（0763）
+
+> *字符串 S 由小写字母组成。我们要把这个字符串划分为尽可能多的片段，同一字母最多出现在一个片段中。*
+>
+> *返回一个表示每个字符串片段的长度的列表。*
+
+```java
+class Solution {
+    public List<Integer> partitionLabels(String s) {
+        int[] dist = new int[26];
+        for (int i = 0; i < s.length(); i++) {
+            dist[s.charAt(i) - 'a'] = i;
+        }
+
+        List<Integer> ans = new ArrayList<>();
+        int start = 0, end = 0;
+        for (int i = 0; i < s.length(); i++) {
+            end = Math.max(end, dist[s.charAt(i) - 'a']);
+            if (i == end) {
+                ans.add(end - start + 1);
+                start = end + 1;
+            }
+        }
+
+        return ans;
+    }
+}
+```
+
+## 在LR字符串中交换相邻字符（0777）
+
+> *在一个由 'L' , 'R' 和 'X' 三个字符组成的字符串（例如"RXXLRXRXL"）中进行移动操作。一次移动操作指用一个"LX"替换一个"XL"，或者用一个"XR"替换一个"RX"。现给定起始字符串start和结束字符串end，请编写代码，当且仅当存在一系列移动操作使得start可以转换成end时， 返回True。*
+
+```java
+class Solution {
+    public boolean canTransform(String start, String end) {
+        if (!start.replace("X", "").equals(end.replace("X", ""))) {return false;}
+
+        int t = 0;
+        for (int i = 0; i < start.length(); i++) {
+            if (start.charAt(i) == 'L') {
+                while (end.charAt(t) != 'L') {t++;}
+                if (i < t++) {return false;}
+            }
+        }
+
+        t = 0;
+        for (int i = 0; i < start.length(); i++) {
+            if (start.charAt(i) == 'R') {
+                while (end.charAt(t) != 'R') {t++;}
+                if (i > t++) {return false;}
+            }
+        }
+
+        return true;
+    }
+}
+```
+
