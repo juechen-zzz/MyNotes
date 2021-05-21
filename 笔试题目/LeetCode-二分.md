@@ -82,7 +82,7 @@ class Solution {
 }
 ```
 
-> *假设按照升序排序的数组在预先未知的某个点上进行了旋转。*
+> *假设按照升序排序的数组在预先未知的某个点上进行了旋转。*(数组中有重复元素)
 >
 > *( 例如，数组 [0,0,1,2,2,5,6] 可能变为 [2,5,6,0,0,1,2] )。*
 >
@@ -173,10 +173,10 @@ class Solution {
         return new int[]{-1, -1};
     }
 
-    public int binarySearch(int[] nums, int target, boolean lower) {
+    private int binarySearch(int[] nums, int target, boolean lower) {
         int left = 0, right = nums.length - 1;
         while (left <= right) {
-            int mid = (left + right) / 2;
+            int mid = left + (right - left) / 2;
             if (nums[mid] > target || (lower && nums[mid] >= target)) {
                 right = mid - 1;
             }
@@ -199,20 +199,23 @@ class Solution {
 class Solution {
     public int kthSmallest(int[][] matrix, int k) {
         int n = matrix.length;
-        int left = matrix[0][0];
-        int right = matrix[n - 1][n - 1];
+        int left = matrix[0][0], right = matrix[n - 1][n - 1];
+
         while (left < right) {
-            int mid = left + ((right - left) >> 1);
-            if (check(matrix, mid, k, n)) {
+            int mid = left + (right - left) / 2;
+            if (myMethod(matrix, mid, k, n)) {
                 right = mid;
-            } else {
+            }
+            else {
                 left = mid + 1;
             }
         }
+
         return left;
     }
 
-    private boolean check(int[][] matrix, int mid, int k, int n) {
+    // 从左下角往右上走，每次加上这一列小于目标值的个数
+    private boolean myMethod(int[][] matrix, int mid, int k, int n) {
         int i = n - 1, j = 0;
         int count = 0;
         while (i >= 0 && j < n) {
@@ -239,20 +242,22 @@ class Solution {
         Arrays.sort(nums);
 
         int n = nums.length;
-        int low = 0, high = nums[n - 1] - nums[0];
-        while (low < high) {
-            int mid = low + (high - low) / 2;
-            int count = 0, left = 0;
-            for (int right = 0; right < n; right++) {
-                while (nums[right] - nums[left] > mid) {left++;}
-                count += right - left;
+        int left = 0, right = nums[n - 1] - nums[0];
+
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            int count = 0;
+            int low = 0;
+            for (int high = 0; high < n; high++) {
+                while (nums[high] - nums[low] > mid) {low++;}
+                count += high - low;
             }
 
-            if (count >= k) {high = mid;}
-            else {low = mid + 1;}
+            if (count >= k) {right = mid;}
+            else {left = mid + 1;}
         }
-        
-        return low;
+
+        return left;
     }
 }
 ```
@@ -269,16 +274,16 @@ class Solution {
         int left = 1, right = m * n;
         while (left < right) {
             int mid = left + (right - left) / 2;
-            if (!enough(m, n, k, mid)) {left = mid + 1;}
+            if (!myMethod(m, n, k, mid)) {left = mid + 1;}
             else {right = mid;}
         }
         return left;
     }
 
-    private static boolean enough(int m, int n, int k, int x) {
+    private static boolean myMethod(int m, int n, int k, int mid) {
         int count = 0;
         for (int i = 1; i <= m; i++) {
-            count += Math.min(x / i, n);
+            count += Math.min(mid / i, n);
         }
         return count >= k;
     }
@@ -296,20 +301,20 @@ class Solution {
 ```java
 class Solution {
     public int[] kthSmallestPrimeFraction(int[] arr, int k) {
-        double low = 0, high = 1;
+        double left = 0, right = 1;
         int[] ans = new int[]{0, 1};
 
-        while (high - low > 1e-9) {
-            double mid = low + (high - low) / 2.0;
-            int[] cur = myMethod(mid, arr);
+        while (right - left > 1e-9) {
+            double mid = left + (right - left) / 2.0;
+            int[] cur = myMethod(arr, mid);
 
             if (cur[0] < k) {
-                low = mid;
+                left = mid;
             }
             else {
                 ans[0] = cur[1];
                 ans[1] = cur[2];
-                high = mid;
+                right = mid;
             }
         }
 
@@ -317,17 +322,20 @@ class Solution {
     }
 
     // 用来求解小于x的分数数量以及最大的那个分数的分子和分母
-    public int[] myMethod(double x, int[] arr) {
-        int left = 0, right = 1, count = 0, i = -1;
+    private int[] myMethod(int[] arr, double x) {
+        int left = 0, right = 1;
+        int count = 0;
+        int i = -1;
         for (int j = 1; j < arr.length; j++) {
-            while (arr[i+1] < arr[j] * x) {i++;}
+            while (arr[i + 1] < arr[j] * x) {i++;}
 
-            count += i+1;
+            count += (i + 1);
             if (i >= 0 && left * arr[j] < right * arr[i]) {
                 left = arr[i];
                 right = arr[j];
             }
         }
+
         return new int[]{count, left, right};
     }
 }
@@ -513,12 +521,13 @@ class Solution {
 
 ```java
 class Solution {
-    public int shipWithinDays(int[] weights, int D) {
+    public int shipWithinDays(int[] weights, int days) {
         // 确定二分查找左右边界
         int left = Arrays.stream(weights).max().getAsInt();
         int right = Arrays.stream(weights).sum();
+
         while (left < right) {
-            int mid = (left + right) / 2;
+            int mid = left + (right - left) / 2;
             // need 为需要运送的天数
             // cur 为当前这一天已经运送的包裹重量之和
             int need = 1, cur = 0;
@@ -529,12 +538,11 @@ class Solution {
                 }
                 cur += w;
             }
-            if (need <= D) {
-                right = mid;
-            } else {
-                left = mid + 1;
-            }
+
+            if (need <= days) {right = mid;}
+            else {left = mid + 1;}
         }
+
         return left;
     }
 }
@@ -555,23 +563,24 @@ class Solution {
     public int minDays(int[] bloomDay, int m, int k) {
         if (m * k > bloomDay.length) {return -1;}
 
-        int low = 1, high = 1;
+        int left = 1, right = 1;
         int n = bloomDay.length;
-        for (int i = 0; i < n; i++) {high = Math.max(high, bloomDay[i]);}
+        for (int i = 0; i < n; i++) {right = Math.max(right, bloomDay[i]);}
 
-        while (low < high) {
-            int days = low + (high - low) / 2;
-            if (myMethod(bloomDay, m, k, days)) {
-                high = days;
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (myMethod(bloomDay, m, k, mid)) {
+                right = mid;
             }
             else {
-                low = days + 1;
+                left = mid + 1;
             }
         }
         
-        return low;
+        return left;
     }
 
+    // 判断在给定的天数内能否制作出指定数量的花束
     private boolean myMethod(int[] bloomDay, int m, int k, int days) {
         int count = 0, cur = 0;
         int n = bloomDay.length;
@@ -617,7 +626,7 @@ class Solution {
         int left = 0, right = n * n - 1;
         while (left < right) {
             int mid = left + (right - left) / 2;
-            if (check(grid, mid)) {
+            if (myMethod(grid, mid)) {
                 right = mid;
             }
             else {
@@ -627,7 +636,7 @@ class Solution {
         return left;
     }
 
-    private static boolean check(int[][] grid, int threshold) {
+    private static boolean myMethod(int[][] grid, int threshold) {
         if (grid[0][0] > threshold) {return false;}
 
         int n = grid.length;

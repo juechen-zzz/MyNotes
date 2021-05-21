@@ -10,6 +10,10 @@ Arrays.sort(nums2, (a, b) -> a[0] == b[0] ? a[1] - b[1] : a[0] - b[0]);
 Arrays.sort(nums, startIndex, endIndex+1);
 Arrays.sort(points, Collections.reverseOrder());
 
+// 数组求和
+Arrays.stream(weights).max().getAsInt();
+Arrays.stream(weights).sum();
+
 // ArrayList排序 反转
 Collections.sort(ans);
 Collections.reverse(tmp);

@@ -12,27 +12,29 @@
 
 ```java
 class Solution {
-    public String[] map = {"abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
-    public StringBuilder sb = new StringBuilder();
-    public List<String> ans = new ArrayList<>();
+    private static String[] dict = new String[]{"abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
 
     public List<String> letterCombinations(String digits) {
-        if (digits.length() == 0) {return ans;}
-        backtrack(digits, 0);
+        if (digits.length() == 0) {return new ArrayList<>();}
+
+        StringBuilder sb = new StringBuilder();
+        List<String> ans = new ArrayList<>();
+        myMethod(digits, ans, sb, 0);
+        
         return ans;
     }
 
-    public void backtrack(String digits, int index) {
+    private static void myMethod(String digits, List<String> ans, StringBuilder sb, int idx) {
         if (sb.length() == digits.length()) {
             ans.add(sb.toString());
             return;
         }
 
-        String val = map[digits.charAt(index) - '2'];
+        String cur = dict[digits.charAt(idx) - '2'];
 
-        for (char ch : val.toCharArray()) {
-            sb.append(ch);
-            backtrack(digits, index + 1);
+        for (char c : cur.toCharArray()) {
+            sb.append(c);
+            myMethod(digits, ans, sb, idx + 1);
             sb.deleteCharAt(sb.length() - 1);
         }
     }
@@ -63,11 +65,12 @@ class Solution {
 class Solution {
     public List<String> generateParenthesis(int n) {
         List<String> ans = new ArrayList<>();
-        backtrack(ans, new StringBuilder(), 0, 0, n);
+        StringBuilder sb = new StringBuilder();
+        myMethod(ans, sb, n, 0, 0);
         return ans;
     }
 
-    public void backtrack(List<String> ans, StringBuilder sb, int start, int end, int n) {
+    private static void myMethod(List<String> ans, StringBuilder sb, int n, int start, int end) {
         if (sb.length() == 2 * n) {
             ans.add(sb.toString());
             return;
@@ -75,13 +78,13 @@ class Solution {
 
         if (start < n) {
             sb.append('(');
-            backtrack(ans, sb, start + 1, end, n);
+            myMethod(ans, sb, n, start + 1, end);
             sb.deleteCharAt(sb.length() - 1);
         }
 
         if (end < start) {
             sb.append(')');
-            backtrack(ans, sb, start, end + 1, n);
+            myMethod(ans, sb, n, start, end + 1);
             sb.deleteCharAt(sb.length() - 1);
         }
     }
@@ -90,6 +93,8 @@ class Solution {
 
 ## 组合总数
 
+> 39
+>
 > *给定一个无重复元素的数组 candidates 和一个目标数 target ，找出 candidates 中所有可以使数字和为 target 的组合。*
 >
 > *candidates 中的数字可以无限制重复被选取。*
@@ -98,33 +103,35 @@ class Solution {
 class Solution {
     public List<List<Integer>> combinationSum(int[] candidates, int target) {
         Arrays.sort(candidates);
+        
         List<List<Integer>> ans = new ArrayList<>();
-        List<Integer> track = new ArrayList<>();
-        backtrack(candidates, target, ans, track, 0, 0);
+        List<Integer> path = new ArrayList<>();
+        myMethod(candidates, target, ans, path, 0, 0);
+        
         return ans;
     }
 
-    public void backtrack(int[] candidates, int target, List<List<Integer>> ans, List<Integer> track, int sum, int begin) {
+    private static void myMethod(int[] candidates, int target, List<List<Integer>> ans, List<Integer> path, int sum, int begin) {
         if (sum == target) {
-            ans.add(new ArrayList(track));
+            ans.add(new ArrayList<>(path));
             return;
         }
+
         for (int i = begin; i < candidates.length; i++) {
-            if (i > begin && candidates[i] == candidates[i - 1]) {continue;}
-            int curSum = candidates[i] + sum;
+            int curSum = sum + candidates[i];
             if (curSum <= target) {
-                track.add(candidates[i]);
-                backtrack(candidates, target, ans, track, curSum, i);
-                track.remove(track.size() - 1);
+                path.add(candidates[i]);
+                myMethod(candidates, target, ans, path, curSum, i);
+                path.remove(path.size() - 1);
             }
-            else {
-                break;
-            }
+            else {break;}
         }
     }
 }
 ```
 
+> 40
+>
 > *给定一个数组 candidates 和一个目标数 target ，找出 candidates 中所有可以使数字和为 target 的组合。*
 >
 > *candidates 中的每个数字在每个组合中只能使用一次。*
@@ -133,67 +140,73 @@ class Solution {
 class Solution {
     public List<List<Integer>> combinationSum2(int[] candidates, int target) {
         Arrays.sort(candidates);
+        
         List<List<Integer>> ans = new ArrayList<>();
-        List<Integer> track = new ArrayList<>();
-        backtrack(candidates, target, ans, track, 0, 0);
+        List<Integer> path = new ArrayList<>();
+        myMethod(candidates, target, ans, path, 0, 0);
+        
         return ans;
     }
 
-    public void backtrack(int[] candidates, int target, List<List<Integer>> ans, List<Integer> track, int sum, int begin) {
+    private static void myMethod(int[] candidates, int target, List<List<Integer>> ans, List<Integer> path, int sum, int begin) {
         if (sum == target) {
-            ans.add(new ArrayList(track));
+            ans.add(new ArrayList<>(path));
             return;
         }
 
         for (int i = begin; i < candidates.length; i++) {
+            // 解集不能包含重复的组合,所以在重复数字时需要跳过
             if (i > begin && candidates[i] == candidates[i - 1]) {continue;}
-            int curSum = candidates[i] + sum;
+            int curSum = sum + candidates[i];
             if (curSum <= target) {
-                track.add(candidates[i]);
-                backtrack(candidates, target, ans, track, curSum, i + 1);
-                track.remove(track.size() - 1);
+                path.add(candidates[i]);
+                myMethod(candidates, target, ans, path, curSum, i + 1);
+                path.remove(path.size() - 1);
             }
-            else {
-                break;
-            }
+            else {break;}
         }
     }
 }
 ```
 
+> 216
+>
 > *找出所有相加之和为 n 的 k 个数的组合。组合中只允许含有 1 - 9 的正整数，并且每种组合中不存在重复的数字。*
 
 ```java
 class Solution {
-    List<List<Integer>> ans = new ArrayList<>();
-    List<Integer> tmp = new ArrayList<>();
-
     public List<List<Integer>> combinationSum3(int k, int n) {
-        dfs(k, n, 1, 9);
+        int[] nums = new int[9];
+        for (int i = 0; i < 9; i++) {nums[i] = i + 1;}
+
+        List<List<Integer>> ans = new ArrayList<>();
+        List<Integer> path = new ArrayList<>();
+        myMethod(nums, n, k, ans, path, 0, 0);
+
         return ans;
     }
 
-    public void dfs(int k, int n, int start, int end) {
-        if (tmp.size() + (end - start + 1) < k || tmp.size() > k) {return;}
-
-        if (tmp.size() == k) {
-            int sum = 0;
-            for (int num : tmp) {sum += num;}
-            if (sum == n) {
-                ans.add(new ArrayList<>(tmp));
-                return;
-            }
+    private static void myMethod(int[] nums, int n, int k, List<List<Integer>> ans, List<Integer> path, int sum, int begin) {
+        if (sum == n && path.size() == k) {
+            ans.add(new ArrayList<>(path));
+            return;
         }
-        
-        dfs(k, n, start + 1, end);
 
-        tmp.add(start);
-        dfs(k, n, start + 1, end);
-        tmp.remove(tmp.size() - 1);
+        for (int i = begin; i < nums.length; i++) {
+            int curSum = sum + nums[i];
+            if (curSum <= n) {
+                path.add(nums[i]);
+                myMethod(nums, n, k, ans, path, curSum, i + 1);
+                path.remove(path.size() - 1);
+            }
+            else {break;} 
+        }
     }
 }
 ```
 
+> 377
+>
 > *给你一个由 不同 整数组成的数组 nums ，和一个目标整数 target 。请你从 nums 中找出并返回总和为 target 的元素组合的个数。*
 
 ```java
@@ -213,31 +226,34 @@ class Solution {
 }
 ```
 
+> 77
+>
 > *给定两个整数 n 和 k，返回 1 ... n 中所有可能的 k 个数的组合。*
 
 ```java
 class Solution {
-    List<List<Integer>> ans = new ArrayList<>();
-    List<Integer> tmp = new ArrayList<>();
-
     public List<List<Integer>> combine(int n, int k) {
-        dfs(n, k, 1);
+        int[] nums = new int[n];
+        for (int i = 0; i < n; i++) {nums[i] = i + 1;}
+
+        List<List<Integer>> ans = new ArrayList<>();
+        List<Integer> path = new ArrayList<>();
+        myMethod(nums, k, ans, path, 0);
+
         return ans;
     }
 
-    public void dfs(int n, int k, int cur) {
-        if (tmp.size() + (n - cur + 1) < k) {return;}
-
-        if (tmp.size() == k) {
-            ans.add(new ArrayList<>(tmp));
+    private static void myMethod(int[] nums, int k, List<List<Integer>> ans, List<Integer> path, int begin) {
+        if (path.size() == k) {
+            ans.add(new ArrayList<>(path));
             return;
         }
 
-        tmp.add(cur);
-        dfs(n, k, cur + 1);
-        tmp.remove(tmp.size() - 1);
-
-        dfs(n, k, cur + 1);
+        for (int i = begin; i < nums.length; i++) {
+            path.add(nums[i]);
+            myMethod(nums, k, ans, path, i + 1);
+            path.remove(path.size() - 1);
+        }
     }
 }
 ```
