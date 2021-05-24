@@ -255,56 +255,60 @@ class Solution {
             path.remove(path.size() - 1);
         }
     }
-}
+} 
 ```
 
-## 子集（0078 && 0090）
+## 子集
 
+> 78
+>
 > *给你一个整数数组 nums ，数组中的元素 互不相同 。返回该数组所有可能的子集（幂集）。*
 
 ```java
 class Solution {
-    List<List<Integer>> ans = new ArrayList<>();
-    List<Integer> tmp = new ArrayList<>();
-
     public List<List<Integer>> subsets(int[] nums) {
-        backtrack(nums, 0);
+        List<List<Integer>> ans = new ArrayList<>();
+        List<Integer> path = new ArrayList<>();
+        myMethod(nums, ans, path, 0);
         return ans;
     }
 
-    public void backtrack(int[] nums, int idx) {
-        ans.add(new ArrayList<>(tmp));
-        for (int i = idx; i < nums.length; i++) {
-            tmp.add(nums[i]);
-            backtrack(nums, i + 1);
-            tmp.remove(tmp.size() - 1);
+    private static void myMethod(int[] nums, List<List<Integer>> ans, List<Integer> path, int begin) {
+        ans.add(new ArrayList<>(path));
+        for (int i = begin; i < nums.length; i++) {
+            path.add(nums[i]);
+            myMethod(nums, ans, path, i + 1);
+            path.remove(path.size() - 1);
         }
     }
 }
 ```
 
+> 90
+>
 > *给定一个可能包含重复元素的整数数组 nums，返回该数组所有可能的子集（幂集）。*
 >
 > *说明：解集不能包含重复的子集。*
 
 ```java
 class Solution {
-    List<List<Integer>> ans = new ArrayList<>();
-    List<Integer> tmp = new ArrayList<>();
-
     public List<List<Integer>> subsetsWithDup(int[] nums) {
         Arrays.sort(nums);
-        backtrack(nums, 0);
+
+        List<List<Integer>> ans = new ArrayList<>();
+        List<Integer> path = new ArrayList<>();
+        myMethod(nums, ans, path, 0);
+
         return ans;
     }
 
-    public void backtrack(int[] nums, int idx) {
-        Collections.sort(tmp);
-        if (!ans.contains(tmp)) {ans.add(new ArrayList<>(tmp));}
-        for (int i = idx; i < nums.length; i++) {
-            tmp.add(nums[i]);
-            backtrack(nums, i + 1);
-            tmp.remove(tmp.size() - 1);
+    private static void myMethod(int[] nums, List<List<Integer>> ans, List<Integer> path, int begin) {
+        Collections.sort(path);
+        if (!ans.contains(path)) {ans.add(new ArrayList<>(path));}
+        for (int i = begin; i < nums.length; i++) {
+            path.add(nums[i]);
+            myMethod(nums, ans, path, i + 1);
+            path.remove(path.size() - 1);
         }
     }
 }
@@ -317,44 +321,42 @@ class Solution {
 ```java
 class Solution {
     public boolean canPartitionKSubsets(int[] nums, int k) {
-        int sum = 0;
-        for (int num : nums) {sum += num;}
+        int sum = Arrays.stream(nums).sum();
         if (sum % k != 0) {return false;}
         int target = sum / k;
         Arrays.sort(nums);
 
         int row = nums.length - 1;
         if (nums[row] > target) {return false;}
-        //排除掉nums中与target相同的值。
-        while (row >= 0 && nums[row] == target) {
+        while (row >= 0 && nums[row] == target) {		//排除掉nums中与target相同的值。
             row--;
             k--;
         }
-        return search(new int[k], row, nums, target);
+
+        return myMethod(nums, target, new int[k], row);
     }
 
-    public boolean search(int[] groups, int row, int[] nums, int target) {
+    private static boolean myMethod(int[] nums, int target, int[] groups, int row) {
         if (row < 0) {return true;}
-        // 取出剩下最大的数。
-        int v = nums[row--];
+        int value = nums[row--];						// 取出剩下最大的数。
+
         for (int i = 0; i < groups.length; i++) {
-            // 放入到总和还未大于等于target的group[i]中
-            if (groups[i] + v <= target) {
-                groups[i] += v;
-                // 递归，继续取出一个数。
-                if (search(groups, row, nums, target)) {return true;}
+            if (groups[i] + value <= target) {			// 放入到总和还未大于等于target的group[i]中
+                groups[i] += value;    
+                if (myMethod(nums, target, groups, row)) {return true;}		// 递归，继续取出一个数
                 // 递归结束后，有两种情况：
                 // 1. 所有的数都被取出（row为-1返回true）
                 // 2. 其中一次返回了false，说明这种放置方法不能满足正好全部放入，则执行以下代码逻辑。
-
                 //group[i]取出这个数，进入下一次循环，放到另一个group[i+1]中。
-                groups[i] -= v;
+                groups[i] -= value;
+
             }
             // 如果group[i]==0，则表示：
             // 该group从未放入过除了 v 以外的其他东西 但是依旧放入失败了，说明 v 无论怎样放置都会失败。
             // 于是，跳出循环返回false
             if (groups[i] == 0) {break;}
         }
+
         return false;
     }
 }
@@ -375,90 +377,93 @@ class Solution {
 ```java
 class Solution {
     public void nextPermutation(int[] nums) {
-        int index = nums.length - 1;
-        while (index >= 1) {
-            if (nums[index - 1] >= nums[index]) {
-                index--;
+        int idx = nums.length - 1;
+        while (idx >= 1) {
+            if (nums[idx - 1] >= nums[idx]) {
+                idx--;
             }
             else {break;}
         }
 
-        if (index > 0) {
-            int left = index - 1;
-            int right = nums.length - 1;
-            while (nums[left] >= nums[right]) {
-                right--;
-            }
+        if (idx > 0) {
+            int left = idx - 1, right = nums.length - 1;
+            while (nums[left] >= nums[right]) {right--;}
+
             int tmp = nums[left];
             nums[left] = nums[right];
             nums[right] = tmp;
-            Arrays.sort(nums, index, nums.length);
+            Arrays.sort(nums, idx, nums.length);
         }
-        else {
-            Arrays.sort(nums);
-        }
-        return;
+        else {Arrays.sort(nums);}
     }
 }
 ```
 
-## 全排列（0046 && 0047）
+## 全排列
 
+> 46
+>
 > *给定一个 没有重复 数字的序列，返回其所有可能的全排列。*
 
 ```java
 class Solution {
     public List<List<Integer>> permute(int[] nums) {
-        List<List<Integer>> ans = new ArrayList<>();
-        List<Integer> track = new ArrayList<>();
         Arrays.sort(nums);
-        backtrack(nums, ans, track);
+
+        List<List<Integer>> ans = new ArrayList<>();
+        List<Integer> path = new ArrayList<>();
+        myMethod(nums, ans, path);
+
         return ans;
     }
 
-    public void backtrack(int[] nums, List<List<Integer>> ans, List<Integer> track) {
-        if (track.size() == nums.length) {
-            ans.add(new ArrayList(track));
+    private static void myMethod(int[] nums, List<List<Integer>> ans, List<Integer> path) {
+        if (path.size() == nums.length) {
+            ans.add(new ArrayList<>(path));
             return;
         }
 
         for (int i = 0; i < nums.length; i++) {
-            if (track.contains(nums[i])) {continue;}
-            track.add(nums[i]);
-            backtrack(nums, ans, track);
-            track.remove(track.size() - 1);
+            if (path.contains(nums[i])) {continue;}
+            path.add(nums[i]);
+            myMethod(nums, ans, path);
+            path.remove(path.size() - 1);
         }
     }
 }
 ```
 
+> 47
+>
 > *给定一个可包含重复数字的序列 nums ，按任意顺序 返回所有不重复的全排列。*
 
 ```java
 class Solution {
     public List<List<Integer>> permuteUnique(int[] nums) {
-        List<List<Integer>> ans = new ArrayList<>();
-        List<Integer> track = new ArrayList<>();
-        boolean[] visited = new boolean[nums.length];
         Arrays.sort(nums);
-        backtrack(nums, ans, track, visited);
+
+        List<List<Integer>> ans = new ArrayList<>();
+        List<Integer> path = new ArrayList<>();
+        boolean[] visited = new boolean[nums.length];
+        myMethod(nums, ans, path, visited);
+
         return ans;
     }
 
-    public void backtrack(int[] nums, List<List<Integer>> ans, List<Integer> track, boolean[] visited) {
-        if (track.size() == nums.length) {
-            ans.add(new ArrayList(track));
+    private static void myMethod(int[] nums, List<List<Integer>> ans, List<Integer> path, boolean[] visited) {
+        if (path.size() == nums.length) {
+            ans.add(new ArrayList<>(path));
             return;
         }
+
         for (int i = 0; i < nums.length; i++) {
-            if (visited[i] || (i > 0 && nums[i] == nums[i - 1] && !visited[i - 1])) {
-                continue;
-            }
-            track.add(nums[i]);
+            if (visited[i] || (i > 0 && nums[i] == nums[i - 1] && !visited[i - 1])) {continue;}
+
+            path.add(nums[i]);
             visited[i] = true;
-            backtrack(nums, ans, track, visited);
+            myMethod(nums, ans, path, visited);
             visited[i] = false;
-            track.remove(track.size() - 1);
+            path.remove(path.size() - 1);
         }
     }
 }
@@ -477,18 +482,18 @@ class Solution {
     public String getPermutation(int n, int k) {
         k--;
 
-        int [] factorial = new int[n];
-        factorial[0] = 1;
-        for (int i = 1; i < n; i++) {factorial[i] = factorial[i - 1] * i;}
+        int[] count = new int[n];
+        count[0] = 1;
+        for (int i = 1; i < n; i++) {count[i] = count[i - 1] * i;}
 
         List<Integer> nums = new ArrayList<>();
         for (int i = 1; i <= n; i++) {nums.add(i);}
 
         StringBuilder ans = new StringBuilder();
         for (int i = n - 1; i >= 0; i--) {
-            int index = k / factorial[i];
-            ans.append(nums.remove(index));
-            k -= index * factorial[i];
+            int idx = k / count[i];
+            ans.append(nums.remove(idx));
+            k -= idx * count[i];
         }
 
         return ans.toString();
@@ -502,7 +507,7 @@ class Solution {
 
 ```java
 class Solution {
-    List<List<String>> res = new ArrayList<>();					// int res = 0;
+    List<List<String>> ans = new ArrayList<>();				
 
     public List<List<String>> solveNQueens(int n) {
         char[][] board = new char[n][n];
@@ -510,7 +515,7 @@ class Solution {
             Arrays.fill(i, '.');                
         }
         backtrack(board, 0);
-        return res;
+        return ans;
     }
 
     // 路径：board 中小于 row 的那些行都已经成功放置了皇后
@@ -518,7 +523,7 @@ class Solution {
     // 结束条件：row 超过 board 的最后一行
     void backtrack(char[][] board, int row){
         if (row == board.length) {
-            res.add(array2list(board));							// res++;
+            ans.add(array2list(board));							
             return;
         }
 
@@ -533,15 +538,15 @@ class Solution {
     }
 
     List<String> array2list(char[][] board){
-        List<String> res = new ArrayList<>();
+        List<String> ans = new ArrayList<>();
         for (char[] i : board){
             StringBuilder s = new StringBuilder();
             for (char j : i){
                 s.append(j);
             }
-            res.add(s.toString());
+            ans.add(s.toString());
         }
-        return res;
+        return ans;
     }
 
     boolean check(char[][] board, int row, int col){
@@ -566,6 +571,71 @@ class Solution {
 }
 ```
 
+> 给你一个整数 n ，返回 n 皇后问题不同的解决方案的数量。
+
+```java
+class Solution {
+    int res = 0;
+
+    public int totalNQueens(int n) {
+        char[][] board = new char[n][n];
+        for (char[] i : board) {
+            Arrays.fill(i, '.');
+        }
+        backtrack(board, 0);
+        return res;
+    }
+
+    public void backtrack(char[][] board, int row) {
+        if (row == board.length) {
+            res++;
+            return;
+        }
+
+        for (int col = 0; col < board.length; col++) {
+            if (!check(board, row, col)) {continue;}
+            board[row][col] = 'Q';
+            backtrack(board, row + 1);
+            board[row][col] = '.';
+        }
+    }
+
+    public List<String> array2list(char[][] board) {
+        List<String> res = new ArrayList<>();
+        for (char[] i : board) {
+            StringBuilder s = new StringBuilder();
+            for (char j : i) {
+                s.append(j);
+            }
+            res.add(s.toString());
+        }
+        return res;
+    }
+
+    public boolean check(char[][] board, int row, int col) {
+        int n = board.length;
+
+        for (int i = 0; i < n; i++) {
+            if (board[i][col] == 'Q') {
+                return false;
+            }
+        }
+
+        for (int i = row - 1, j = col + 1; i >= 0 && j < n; i--, j++) {
+            if (board[i][j] == 'Q') {
+                return false;
+            }
+        }
+
+        for (int i = row - 1, j = col - 1; i >= 0 && j >= 0; i--, j--) {
+            if (board[i][j] == 'Q')
+                return false;
+        }
+        return true;
+    }
+}
+```
+
 ## 单词搜索（0079）
 
 > *给定一个二维网格和一个单词，找出该单词是否存在于网格中。*
@@ -576,14 +646,16 @@ class Solution {
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[0].length; j++) {
                 if (board[i][j] == word.charAt(0)) {
-                    if (dfs(board, word, 0, i, j)) {return true;}
+                    if (dfs(board, word, 0, i, j)) {
+                        return true;
+                    }
                 }
             }
         }
         return false;
     }
 
-    public boolean dfs(char[][] board, String word, int idx, int row, int col) {
+    private static boolean dfs(char[][] board, String word, int idx, int row, int col) {
         if (row < 0 || row > board.length - 1 || col < 0 || col > board[0].length - 1) {return false;}
         if (board[row][col] == word.charAt(idx)) {
             board[row][col] = '0';
@@ -624,14 +696,13 @@ class Solution {
 ```java
 class Solution {
     public int numIslands(char[][] grid) {
-        if (grid == null || grid.length == 0) {return 0;}
+        if (grid.length == 0 || grid[0].length == 0) {return 0;}
 
-        int m = grid.length;
-        int n = grid[0].length;
+        int n = grid.length, m = grid[0].length;
         int ans = 0;
 
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
                 if (grid[i][j] == '1') {
                     ans++;
                     dfs(grid, i, j);
@@ -642,20 +713,20 @@ class Solution {
         return ans;
     }
 
-    public void dfs(char[][] grid, int row, int col) {
-        int m = grid.length;
-        int n = grid[0].length;
+    private static void dfs(char[][] grid, int row, int col) {
+        int n = grid.length, m = grid[0].length;
 
-        if (row < 0 || row >= m || col < 0 || col >= n || grid[row][col] == '0') {return;}
+        if (row < 0 || row >= n || col < 0 || col >= m || grid[row][col] == '0') {
+            return;
+        }
 
         grid[row][col] = '0';
         dfs(grid, row - 1, col);
         dfs(grid, row + 1, col);
-        dfs(grid, row, col - 1);
         dfs(grid, row, col + 1);
+        dfs(grid, row, col - 1);
     }
 }
-
 ```
 
 ## 累加数（0306）
@@ -679,27 +750,28 @@ class Solution {
      * @param idx    当前处理下标
      * @param sum    前面的两个数字之和
      * @param pre    前一个数字
-     * @param k      当前是处理的第几个数字
+     * @param count  已经生成几个数字
      */
-    private boolean dfs(String num, int len, int idx, long sum, long pre, int k) {
-        if (idx == len) {return k > 2;}
+    private static boolean dfs(String num, int len, int idx, long sum, long pre, int count) {
+        if (idx == len) {return count > 2;}
 
         for (int i = idx; i < len; i++) {
             long cur = getCurValue(num, idx, i);
-            if (cur < 0 || (k >= 2 && cur != sum)) {continue;}
-            if (dfs(num, len, i + 1, pre + cur, cur, k + 1)) {return true;}
+            if (cur < 0 || (count >= 2 && cur != sum)) {continue;}
+            if (dfs(num, len, i + 1, pre + cur, cur, count + 1)) {return true;}
         }
+
         return false;
     }
 
-    private long getCurValue(String num, int left, int right) {
+    private static long getCurValue(String num, int left, int right) {
         if (left < right && num.charAt(left) == '0') {return -1;}
         long ans = 0;
         while (left <= right) {
             ans = ans * 10 + (num.charAt(left++) - '0');
         }
         return ans;
-    }
+    } 
 }
 ```
 
@@ -709,11 +781,12 @@ class Solution {
 class Solution {
     public int longestIncreasingPath(int[][] matrix) {
         if (matrix.length == 0) {return 0;}
-        int[][] visited = new int[matrix.length][matrix[0].length];
+        int n = matrix.length, m = matrix[0].length;
+        int[][] visited = new int[n][m];
         int ans = 0;
 
-        for (int i = 0; i < matrix.length; i++) {
-            for (int j = 0; j < matrix[0].length; j++) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
                 if (visited[i][j] == 0) {
                     ans = Math.max(ans, dfs(matrix, visited, i, j));
                 }
@@ -723,7 +796,7 @@ class Solution {
         return ans;
     }
 
-    private int dfs(int[][] matrix, int[][] visited, int row, int col) {
+    private static int dfs(int[][] matrix, int[][] visited, int row, int col) {
         if (row < 0 || row >= matrix.length || col < 0 || col >= matrix[0].length) {return 0;}
         if (visited[row][col] > 0) {return visited[row][col];}
 
@@ -759,17 +832,17 @@ class Solution {
 class Solution {
     public List<Integer> lexicalOrder(int n) {
         List<Integer> ans = new ArrayList<>();
-        for (int i = 1; i < 10; i++){
-            dfs(n, i, ans);
+        for (int i = 1; i < 10; i++) {
+            dfs(n, ans, i);
         }
         return ans;
     }
 
-    private void dfs(int n, int i, List<Integer> list){
-        if(i > n) {return;}
-        list.add(i);
-        for(int j = 0; j <= 9; j++){
-            dfs(n, i * 10 + j, list);
+    private static void dfs(int n, List<Integer> ans, int i) {
+        if (i > n) {return;}
+        ans.add(i);
+        for (int j = 0; j <= 9; j++) {
+            dfs(n, ans, i * 10 + j);
         }
     }
 }
@@ -780,27 +853,28 @@ class Solution {
 > *二进制手表顶部有 4 个 LED 代表 小时（0-11），底部的 6 个 LED 代表 分钟（0-59）。*
 >
 > *每个 LED 代表一个 0 或 1，最低位在右侧。*
+>
+> 给你一个整数 `turnedOn` ，表示当前亮着的 LED 的数量，返回二进制手表可以表示的所有可能时间。你可以 **按任意顺序** 返回答案。
 
 ```java
 class Solution {
-    List<String> ans = new ArrayList<>();
-    int[] dic = new int[]{1, 2, 4, 8, 1, 2, 4, 8, 16, 32};
+    private static int[] dict = new int[]{1, 2, 4, 8, 1, 2, 4, 8, 16, 32};
 
-    public List<String> readBinaryWatch(int num) {
-        dfs(num, 0, 0, 0);
+    public List<String> readBinaryWatch(int turnedOn) {
+        List<String> ans = new ArrayList<>();
+        dfs(turnedOn, ans, 0, 0, 0);
         return ans;
     }
 
-    private void dfs(int count, int hour, int minute, int index) {
-        if (count == 0) {
-            ans.add(hour + ":" + (minute > 9 ? minute : "0" + minute));
-        }
-        for (int i = index; i < 10; i++) {
-            if (i < 4 && hour + dic[i] < 12) {
-                dfs(count - 1, hour + dic[i], minute, i + 1);
+    private static void dfs(int count, List<String> ans, int hour, int minute, int idx) {
+        if (count == 0) {ans.add(hour + ":" + (minute > 9 ? minute : "0" + minute));}
+
+        for (int i = idx; i < 10; i++) {
+            if (i < 4 && hour + dict[i] < 12) {
+                dfs(count - 1, ans, hour + dict[i], minute, i + 1);
             }
-            if (i >= 4 && minute + dic[i] < 60) {
-                dfs(count - 1, hour, minute + dic[i], i + 1);
+            if (i >= 4 && minute + dict[i] < 60) {
+                dfs(count - 1, ans, hour, minute + dict[i], i + 1);
             }
         }
     }
@@ -811,40 +885,38 @@ class Solution {
 
 > *特殊的二进制序列是具有以下两个性质的二进制序列：*
 >
-> 
->
 > *0 的数量与 1 的数量相等。*
 >
 > *二进制序列的每一个前缀码中 1 的数量要大于等于 0 的数量。*
 >
 > *给定一个特殊的二进制序列 S，以字符串形式表示。定义一个操作 为首先选择 S 的两个连续且非空的特殊的子串，然后将它们交换。（两个子串为连续的当且仅当第一个子串的最后一个字符恰好为第二个子串的第一个字符的前一个字符。)*
 >
-> 
->
 > *在任意次数的操作之后，交换后的字符串按照字典序排列的最大的结果是什么？*
 
 ```java
+// 两个连续的非空特殊子串才可以交换。如对于序列10110100，头部的特殊子串10可以和后面紧接的特殊子串110100交换，但头部的10却不能和110100内部的特殊子串10进行交换(中间隔了一个1)，故原问题可以变成更小的子问题，即对10和110100内部分别进行排序交换，再对两者进行排序交换。
+// 对于10，已达字典序排列最大的结果。而对于110100，无法再划分为多个连续的非空特殊子串，此时可以发现，所有特殊二进制序列都满足第一个为1最后一个为0。故取掉首尾的10对中间1010再进行排序交换，最后对字符串多段内部排序交换完成后的子串再进行字典序排序，然后合并在一起，得到最终结果。
 class Solution {
     public String makeLargestSpecial(String s) {
-        StringBuilder sb = new StringBuilder();
-        List<String> list = new ArrayList<>();
+        StringBuilder ans = new StringBuilder();
+        List<String> subList = new ArrayList<>();
 
         int start = 0, countOne = 0;
         for (int i = 0; i < s.length(); i++) {
             countOne += (s.charAt(i) == '1' ? 1 : -1);
             if (countOne == 0) {
                 String cur = s.substring(start + 1, i);
-                list.add("1" + makeLargestSpecial(cur) + "0");
+                subList.add("1" + makeLargestSpecial(cur) + "0");
                 start = i + 1;
             }
         }
 
-        Collections.sort(list);
-        for (int i = list.size() - 1; i >= 0; i--) {
-            sb.append(list.get(i));
+        Collections.sort(subList);
+        for (int i = subList.size() - 1; i >= 0; i--) {
+            ans.append(subList.get(i));
         }
 
-        return sb.toString();
+        return ans.toString();
     }
 }
 ```
@@ -866,7 +938,7 @@ class Solution {
     public int minMutation(String start, String end, String[] bank) {
         Set<String> set = new HashSet<>(Arrays.asList(bank));
         if (!set.contains(end)) {return -1;}
-        char[] dir = {'A', 'C', 'G', 'T'};
+        char[] dict = new char[]{'A', 'C', 'G', 'T'};
 
         Queue<String> queue = new LinkedList<>();
         queue.offer(start);
@@ -882,7 +954,7 @@ class Solution {
                 for (int i = 0; i < n; i++) {
                     char oldChar = tmp[i];
                     for (int j = 0; j < 4; j++) {
-                        tmp[i] = dir[j];
+                        tmp[i] = dict[j];
                         String newGenetic = new String(tmp);
                         if (end.equals(newGenetic)) {
                             return step;
@@ -910,25 +982,24 @@ class Solution {
 
 ```java
 class Solution {
-    public boolean makesquare(int[] nums) {
-        int sum = 0;
-        for (int n : nums) {sum += n;}
+    public boolean makesquare(int[] matchsticks) {
+        int sum = Arrays.stream(matchsticks).sum();
         if (sum == 0 || sum % 4 != 0) {return false;}
-        return myMethod(nums, sum >> 2, new int[4], 0);
+        return myMethod(matchsticks, sum >> 2, new int[4], 0);
     }
 
-    private static boolean myMethod(int[] nums, int target, int[] edges, int index) {
-        if (index == nums.length) {
+    private static boolean myMethod(int[] nums, int target, int[] edges, int idx) {
+        if (idx == nums.length) {
             if (edges[0] == edges[1] && edges[1] == edges[2] && edges[2] == edges[3]) {return true;}
             return false;
         }
 
         for (int i = 0; i < 4; i++) {
-            if (edges[i] + nums[index] > target) {continue;}
+            if (edges[i] + nums[idx] > target) {continue;}
 
-            edges[i] += nums[index];
-            if (myMethod(nums, target, edges, index + 1)) {return true;}
-            edges[i] -= nums[index];
+            edges[i] += nums[idx];
+            if (myMethod(nums, target, edges, idx + 1)) {return true;}
+            edges[i] -= nums[idx];
         }
 
         return false;
@@ -942,32 +1013,31 @@ class Solution {
 
 ```java
 class Solution {
-    List<List<Integer>> ans = new ArrayList<>();
-    List<Integer> tmp = new ArrayList<>();
-
     public List<List<Integer>> findSubsequences(int[] nums) {
-        dfs(nums, 0, Integer.MIN_VALUE);
+        List<List<Integer>> ans = new ArrayList<>();
+        List<Integer> path = new ArrayList<>();
+        dfs(nums, ans, path, 0, Integer.MIN_VALUE);
         return ans;
     }
 
-    private void dfs(int[] nums, int cur, int end) {
-        if (cur == nums.length) {
-            if (tmp.size() >= 2) {
-                ans.add(new ArrayList<>(tmp));
+    private static void dfs(int[] nums, List<List<Integer>> ans, List<Integer> path, int idx, int pre) {
+        if (idx == nums.length) {
+            if (path.size() >= 2) {
+                ans.add(new ArrayList<>(path));
             }
             return;
         }
 
-        // 使序列合法的办法非常简单，即给「选择」做一个限定条件，只有当前的元素大于等于上一个选择的元素的时候才能选择这个元素，这样枚举出来的所有元素都是合法的
-        if (nums[cur] >= end) {
-            tmp.add(nums[cur]);
-            dfs(nums, cur + 1, nums[cur]);
-            tmp.remove(tmp.size() - 1);
+        // 使序列合法的办法非常简单，即给「选择当前数」做一个限定条件，只有当前的元素大于等于上一个选择的元素的时候才能选择这个元素，这样枚举出来的所有元素都是合法的
+        if (nums[idx] >= pre) {
+            path.add(nums[idx]);
+            dfs(nums, ans, path, idx + 1, nums[idx]);
+            path.remove(path.size() - 1);
         }
 
-        // 那如何保证没有重复呢？我们需要给「不选择」做一个限定条件，只有当当前的元素不等于上一个选择的元素的时候，才考虑不选择当前元素，直接递归后面的元素。
-        if (nums[cur] != end) {
-            dfs(nums, cur + 1, end);
+        // 那如何保证没有重复呢？我们需要给「不选择当前数」做一个限定条件，只有当当前的元素不等于上一个选择的元素的时候，才考虑不选择当前元素，直接递归后面的元素。
+        if (nums[idx] != pre) {
+            dfs(nums, ans, path, idx + 1, pre);
         }
     }
 }
@@ -975,6 +1045,8 @@ class Solution {
 
 ## 优美的排列
 
+> 526
+>
 > 假设有从 1 到 N 的 N 个整数，如果从这 N 个数字中成功构造出一个数组，使得数组的第 i 位 (1 <= i <= N) 满足如下两个条件中的一个，我们就称这个数组为一个优美的排列。条件：
 >
 > 第 i 位的数字能被 i 整除
@@ -983,21 +1055,20 @@ class Solution {
 
 ```java
 class Solution {
-    int count = 0;
-
     public int countArrangement(int n) {
+        int[] count = new int[1];
         boolean[] visited = new boolean[n + 1];
-        backtrack(n, visited, 1);
-        return count;
+        backtrack(n, count, visited, 1);
+        return count[0];
     }
 
-    private void backtrack(int n, boolean[] visited, int pos) {
-        if (pos > n) {count++;}
+    private void backtrack(int n, int[] count, boolean[] visited, int pos) {
+        if (pos > n) {count[0]++;}
 
         for (int i = 1; i <= n; i++) {
             if (!visited[i] && (pos % i == 0 || i % pos == 0)) {
                 visited[i] = true;
-                backtrack(n, visited, pos + 1);
+                backtrack(n, count, visited, pos + 1);
                 visited[i] = false;
             }
         }
@@ -1005,6 +1076,8 @@ class Solution {
 }
 ```
 
+> 667
+>
 > *给定两个整数 n 和 k，你需要实现一个数组，这个数组包含从 1 到 n 的 n 个不同整数，同时满足以下条件：*
 >
 > *① 如果这个数组是 [a1, a2, a3, ... , an] ，那么数组 [|a1 - a2|, |a2 - a3|, |a3 - a4|, ... , |an-1 - an|] 中应该有且仅有 k 个不同整数；.*
@@ -1023,6 +1096,7 @@ class Solution {
         return ans;
     }
 
+    // 找规律构造
     private static void myReverse(int[] ans, int i, int j) {
         while (i < j) {
             int tmp = ans[i];
@@ -1050,25 +1124,22 @@ class Solution {
 ```java
 // DFS
 class Solution {
-    private static int num;
-    private static boolean[] visited;
-
     public boolean canVisitAllRooms(List<List<Integer>> rooms) {
         int n = rooms.size();
-        visited = new boolean[n];
-        num = 0;
+        int[] count = new int[1];
+        boolean[] visited = new boolean[n];
 
-        dfs(rooms, 0);
+        dfs(rooms, count, visited, 0);
 
-        return num == n;
+        return count[0] == n;
     }
-
-    private static void dfs(List<List<Integer>> rooms, int idx) {
+    
+    private static void dfs(List<List<Integer>> rooms, int[] count, boolean[] visited, int idx) {
         visited[idx] = true;
-        num++;
+        count[0]++;
         for (int neigh : rooms.get(idx)) {
             if (!visited[neigh]) {
-                dfs(rooms, neigh);
+                dfs(rooms, count, visited, neigh);
             }
         }
     }
@@ -1077,24 +1148,25 @@ class Solution {
 // BFS
 class Solution {
     public boolean canVisitAllRooms(List<List<Integer>> rooms) {
-        int n = rooms.size(), num = 0;
+        int n = rooms.size();
+        int count = 0;
         boolean[] visited = new boolean[n];
         Queue<Integer> queue = new LinkedList<>();
 
-        visited[0] = true;
         queue.offer(0);
+        visited[0] = true;
         while (!queue.isEmpty()) {
             int cur = queue.poll();
-            num++;
+            count++;
             for (int neigh : rooms.get(cur)) {
                 if (!visited[neigh]) {
-                    visited[neigh] = true;
                     queue.offer(neigh);
+                    visited[neigh] = true;
                 }
             }
         }
 
-        return num == n;
+        return count == n;
     }
 }
 ```
@@ -1143,6 +1215,201 @@ class Solution {
 
         map.put(needs, ans);
         return ans;
+    }
+}
+```
+
+## 图像渲染（0733）
+
+> *有一幅以二维整数数组表示的图画，每一个整数表示该图画的像素值大小，数值在 0 到 65535 之间。*
+>
+> *给你一个坐标 (sr, sc) 表示图像渲染开始的像素值（行 ，列）和一个新的颜色值 newColor，让你重新上色这幅图像。*
+>
+> *为了完成上色工作，从初始坐标开始，记录初始坐标的上下左右四个方向上像素值与初始坐标相同的相连像素点，接着再记录这四个方向上符合条件的像素点与他们对应四个方向上像素值与初始坐标相同的相连像素点，……，重复该过程。将所有有记录的像素点的颜色值改为新的颜色值。*
+>
+> *最后返回经过上色渲染后的图像。*
+
+```java
+// BFS
+class Solution {
+    private static int[] dx = new int[]{1, 0, 0, -1};
+    private static int[] dy = new int[]{0, 1, -1, 0};
+
+    public int[][] floodFill(int[][] image, int sr, int sc, int newColor) {
+        int curColor = image[sr][sc];
+        if (curColor == newColor) {return image;}
+
+        int n = image.length, m = image[0].length;
+        Queue<int[]> queue = new LinkedList<>();
+        queue.offer(new int[]{sr, sc});
+        image[sr][sc] = newColor;
+
+        while (!queue.isEmpty()) {
+            int[] cur = queue.poll();
+            int x = cur[0], y = cur[1];
+            for (int i = 0; i < 4; i++) {
+                int nextX = x + dx[i], nextY = y + dy[i];
+                if (nextX >= 0 && nextX < n && nextY >= 0 && nextY < m && image[nextX][nextY] == curColor) {
+                    queue.offer(new int[]{nextX, nextY});
+                    image[nextX][nextY] = newColor;
+                }
+            }
+        }
+
+        return image;
+    }
+}
+
+// DFS
+class Solution {
+    private static int[] dx = new int[]{1, 0, 0, -1};
+    private static int[] dy = new int[]{0, 1, -1, 0};
+
+    public int[][] floodFill(int[][] image, int sr, int sc, int newColor) {
+        int curColor = image[sr][sc];
+        if (curColor != newColor) {
+            dfs(image, sr, sc, newColor, curColor);
+        }
+        return image;
+    }
+
+    private static void dfs(int[][] image, int x, int y, int newColor, int curColor) {
+        int n = image.length, m = image[0].length;
+
+        if (image[x][y] == curColor) {
+            image[x][y] = newColor;
+            for (int i = 0; i < 4; i++) {
+                int nextX = x + dx[i], nextY = y + dy[i];
+                if (nextX >= 0 && nextX < n && nextY >= 0 && nextY < m) {
+                    dfs(image, nextX, nextY, newColor, curColor);
+                }
+            }
+        }
+    }
+}
+```
+
+## 达到终点（0780）
+
+> *从点 (x, y) 可以转换到 (x, x+y) 或者 (x+y, y)。*
+>
+> *给定一个起点 (sx, sy) 和一个终点 (tx, ty)，如果通过一系列的转换可以从起点到达终点，则返回 True ，否则返回 False。*
+
+```java
+// 回溯
+class Solution {
+    public boolean reachingPoints(int sx, int sy, int tx, int ty) {
+        while (tx >= sx && ty >= sy) {
+            if (tx == ty) {break;}
+            if (tx > ty) {
+                if (ty > sy) {tx %= ty;}
+                else {return (tx - sx) % ty == 0;}
+            }
+            else {
+                if (tx > sx) {ty %= tx;}
+                else {return (ty - sy) % tx == 0;}
+            }
+        }
+        return (tx == sx && ty == sy);
+    }
+}
+```
+
+## 金字塔转换矩阵（0756）
+
+> *现在，我们用一些方块来堆砌一个金字塔。 每个方块用仅包含一个字母的字符串表示。*
+>
+> *使用三元组表示金字塔的堆砌规则如下：*
+>
+> *对于三元组 ABC ，C 为顶层方块，方块 A 、B 分别作为方块 C 下一层的的左、右子块。当且仅当 ABC 是被允许的三元组，我们才可以将其堆砌上。*
+>
+> *初始时，给定金字塔的基层 bottom，用一个字符串表示。一个允许的三元组列表 allowed，每个三元组用一个长度为 3 的字符串表示。*
+>
+> *如果可以由基层一直堆到塔尖就返回 true ，否则返回 false 。*
+
+```java
+class Solution {
+    int[][] T;
+    Set<Long> seen;
+
+    public boolean pyramidTransition(String bottom, List<String> allowed) {
+        T = new int[7][7];
+        for (String a: allowed)
+            T[a.charAt(0) - 'A'][a.charAt(1) - 'A'] |= 1 << (a.charAt(2) - 'A');
+
+        seen = new HashSet();
+        int N = bottom.length();
+        int[][] A = new int[N][N];
+        int t = 0;
+        for (char c: bottom.toCharArray())
+            A[N-1][t++] = c - 'A';
+        return solve(A, 0, N-1, 0);
+    }
+
+    //A[i] - the ith row of the pyramid
+    //R - integer representing the current row of the pyramid
+    //N - length of current row we are calculating
+    //i - index of how far in the current row we are calculating
+    //Returns true iff pyramid can be built
+    public boolean solve(int[][] A, long R, int N, int i) {
+        if (N == 1 && i == 1) { // If successfully placed entire pyramid
+            return true;
+        } else if (i == N) {
+            if (seen.contains(R)) return false; // If we've already tried this row, give up
+            seen.add(R); // Add row to cache
+            return solve(A, 0, N-1, 0); // Calculate next row
+        } else {
+            // w's jth bit is true iff block #j could be
+            // a parent of A[N][i] and A[N][i+1]
+            int w = T[A[N][i]][A[N][i+1]];
+            // for each set bit in w...
+            for (int b = 0; b < 7; ++b) if (((w >> b) & 1) != 0) {
+                A[N-1][i] = b; //set parent to be equal to block #b
+                //If rest of pyramid can be built, return true
+                //R represents current row, now with ith bit set to b+1
+                // in base 8.
+                if (solve(A, R * 8 + (b+1), N, i+1)) return true;
+            }
+            return false;
+        }
+    }
+}
+```
+
+## 破解保险箱（0753）
+
+> *有一个需要密码才能打开的保险箱。密码是 n 位数, 密码的每一位是 k 位序列 0, 1, ..., k-1 中的一个 。*
+>
+> *你可以随意输入密码，保险箱会自动记住最后 n 位输入，如果匹配，则能够打开保险箱。*
+>
+> *举个例子，假设密码是 "345"，你可以输入 "012345" 来打开它，只是你输入了 6 个字符.*
+>
+> *请返回一个能打开保险箱的最短字符串。*
+
+```java
+class Solution {
+    Set<Integer> visited = new HashSet<>();
+    StringBuffer ans = new StringBuffer();
+    int highest;
+    int k;
+
+    public String crackSafe(int n, int k) {
+        highest = (int)Math.pow(10, n - 1);
+        this.k = k;
+        dfs(0);
+        for (int i = 1; i < n; i++) {ans.append('0');}
+        return ans.toString();
+    }
+
+    private void dfs(int node) {
+        for (int x = 0; x < k; x++) {
+            int neigh = node * 10 + x;
+            if (!visited.contains(neigh)) {
+                visited.add(neigh);
+                dfs(neigh % highest);
+                ans.append(x);
+            }
+        }
     }
 }
 ```
@@ -1225,201 +1492,6 @@ class Solution {
         }
 
         return -1;
-    }
-}
-```
-
-## 图像渲染（0733）
-
-> *有一幅以二维整数数组表示的图画，每一个整数表示该图画的像素值大小，数值在 0 到 65535 之间。*
->
-> *给你一个坐标 (sr, sc) 表示图像渲染开始的像素值（行 ，列）和一个新的颜色值 newColor，让你重新上色这幅图像。*
->
-> *为了完成上色工作，从初始坐标开始，记录初始坐标的上下左右四个方向上像素值与初始坐标相同的相连像素点，接着再记录这四个方向上符合条件的像素点与他们对应四个方向上像素值与初始坐标相同的相连像素点，……，重复该过程。将所有有记录的像素点的颜色值改为新的颜色值。*
->
-> *最后返回经过上色渲染后的图像。*
-
-```java
-// BFS
-class Solution {
-    int[] dx = {1, 0, 0, -1};
-    int[] dy = {0, 1, -1, 0};
-
-    public int[][] floodFill(int[][] image, int sr, int sc, int newColor) {
-        int curColor = image[sr][sc];
-        if (curColor == newColor) {return image;}
-
-        int m = image.length, n = image[0].length;
-        Queue<int[]> queue = new LinkedList<>();
-        queue.offer(new int[]{sr, sc});
-        image[sr][sc] = newColor;
-
-        while (!queue.isEmpty()) {
-            int[] cur = queue.poll();
-            int x = cur[0], y = cur[1];
-            for (int i = 0; i < 4; i++) {
-                int nextX = x + dx[i], nextY = y + dy[i];
-                if (nextX >= 0 && nextX < m && nextY >= 0 && nextY < n && image[nextX][nextY] == curColor) {
-                    queue.offer(new int[]{nextX, nextY});
-                    image[nextX][nextY] = newColor;
-                }
-            }
-        }
-
-        return image;
-    }
-}
-
-// DFS
-class Solution {
-    int[] dx = {1, 0, 0, -1};
-    int[] dy = {0, 1, -1, 0};
-
-    public int[][] floodFill(int[][] image, int sr, int sc, int newColor) {
-        int curColor = image[sr][sc];
-        if (curColor != newColor) {
-            dfs(image, sr, sc, curColor, newColor);
-        }
-        return image;
-    }
-
-    private void dfs(int[][] image, int x, int y, int color, int newColor) {
-        int m = image.length, n = image[0].length;
-
-        if (image[x][y] == color) {
-            image[x][y] = newColor;
-            for (int i = 0; i < 4; i++) {
-                int nextX = x + dx[i], nextY = y + dy[i];
-                if (nextX >= 0 && nextX < m && nextY >= 0 && nextY < n) {
-                    dfs(image, nextX, nextY, color, newColor);
-                }
-            }
-        }
-    }
-}
-```
-
-## 破解保险箱（0753）
-
-> *有一个需要密码才能打开的保险箱。密码是 n 位数, 密码的每一位是 k 位序列 0, 1, ..., k-1 中的一个 。*
->
-> *你可以随意输入密码，保险箱会自动记住最后 n 位输入，如果匹配，则能够打开保险箱。*
->
-> *举个例子，假设密码是 "345"，你可以输入 "012345" 来打开它，只是你输入了 6 个字符.*
->
-> *请返回一个能打开保险箱的最短字符串。*
-
-```java
-class Solution {
-    Set<Integer> visited = new HashSet<>();
-    StringBuffer ans = new StringBuffer();
-    int highest;
-    int k;
-
-    public String crackSafe(int n, int k) {
-        highest = (int)Math.pow(10, n - 1);
-        this.k = k;
-        dfs(0);
-        for (int i = 1; i < n; i++) {ans.append('0');}
-        return ans.toString();
-    }
-
-    private void dfs(int node) {
-        for (int x = 0; x < k; x++) {
-            int neigh = node * 10 + x;
-            if (!visited.contains(neigh)) {
-                visited.add(neigh);
-                dfs(neigh % highest);
-                ans.append(x);
-            }
-        }
-    }
-}
-```
-
-## 金字塔转换矩阵（0756）
-
-> *现在，我们用一些方块来堆砌一个金字塔。 每个方块用仅包含一个字母的字符串表示。*
->
-> *使用三元组表示金字塔的堆砌规则如下：*
->
-> *对于三元组 ABC ，C 为顶层方块，方块 A 、B 分别作为方块 C 下一层的的左、右子块。当且仅当 ABC 是被允许的三元组，我们才可以将其堆砌上。*
->
-> *初始时，给定金字塔的基层 bottom，用一个字符串表示。一个允许的三元组列表 allowed，每个三元组用一个长度为 3 的字符串表示。*
->
-> *如果可以由基层一直堆到塔尖就返回 true ，否则返回 false 。*
-
-```java
-class Solution {
-    int[][] T;
-    Set<Long> seen;
-
-    public boolean pyramidTransition(String bottom, List<String> allowed) {
-        T = new int[7][7];
-        for (String a: allowed)
-            T[a.charAt(0) - 'A'][a.charAt(1) - 'A'] |= 1 << (a.charAt(2) - 'A');
-
-        seen = new HashSet();
-        int N = bottom.length();
-        int[][] A = new int[N][N];
-        int t = 0;
-        for (char c: bottom.toCharArray())
-            A[N-1][t++] = c - 'A';
-        return solve(A, 0, N-1, 0);
-    }
-
-    //A[i] - the ith row of the pyramid
-    //R - integer representing the current row of the pyramid
-    //N - length of current row we are calculating
-    //i - index of how far in the current row we are calculating
-    //Returns true iff pyramid can be built
-    public boolean solve(int[][] A, long R, int N, int i) {
-        if (N == 1 && i == 1) { // If successfully placed entire pyramid
-            return true;
-        } else if (i == N) {
-            if (seen.contains(R)) return false; // If we've already tried this row, give up
-            seen.add(R); // Add row to cache
-            return solve(A, 0, N-1, 0); // Calculate next row
-        } else {
-            // w's jth bit is true iff block #j could be
-            // a parent of A[N][i] and A[N][i+1]
-            int w = T[A[N][i]][A[N][i+1]];
-            // for each set bit in w...
-            for (int b = 0; b < 7; ++b) if (((w >> b) & 1) != 0) {
-                A[N-1][i] = b; //set parent to be equal to block #b
-                //If rest of pyramid can be built, return true
-                //R represents current row, now with ith bit set to b+1
-                // in base 8.
-                if (solve(A, R * 8 + (b+1), N, i+1)) return true;
-            }
-            return false;
-        }
-    }
-}
-```
-
-## 达到终点（0780）
-
-> *从点 (x, y) 可以转换到 (x, x+y) 或者 (x+y, y)。*
->
-> *给定一个起点 (sx, sy) 和一个终点 (tx, ty)，如果通过一系列的转换可以从起点到达终点，则返回 True ，否则返回 False。*
-
-```java
-// 回溯
-class Solution {
-    public boolean reachingPoints(int sx, int sy, int tx, int ty) {
-        while (tx >= sx && ty >= sy) {
-            if (tx == ty) {break;}
-            if (tx > ty) {
-                if (ty > sy) {tx %= ty;}
-                else {return (tx - sx) % ty == 0;}
-            }
-            else {
-                if (tx > sx) {ty %= tx;}
-                else {return (ty - sy) % tx == 0;}
-            }
-        }
-        return (tx == sx && ty == sy);
     }
 }
 ```
