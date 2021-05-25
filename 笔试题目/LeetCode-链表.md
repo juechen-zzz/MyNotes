@@ -1,5 +1,7 @@
 [TOC]
 
+
+
 ```java
 public class ListNode {
     int val;
@@ -12,18 +14,20 @@ public class ListNode {
 
 ## 删除链表中的元素
 
+> 83
+>
 > *给定一个排序链表，删除所有重复的元素，使得每个元素只出现一次。*
 
 ```java
 class Solution {
     public ListNode deleteDuplicates(ListNode head) {
-        ListNode tmp = head;
-        while (tmp != null && tmp.next != null) {
-            if (tmp.val == tmp.next.val) {
-                tmp.next = tmp.next.next;
+        ListNode cur = head;
+        while (cur != null && cur.next != null) {
+            if (cur.val == cur.next.val) {
+                cur.next = cur.next.next;
             }
             else {
-                tmp = tmp.next;
+                cur = cur.next;
             }
         }
         return head;
@@ -31,14 +35,15 @@ class Solution {
 }
 ```
 
+> 82
+>
 > *给定一个排序链表，删除所有含有重复数字的节点，只保留原始链表中 没有重复出现 的数字。*
 
 ```java
 class Solution {
     public ListNode deleteDuplicates(ListNode head) {
         if (head == null || head.next == null) {return head;}
-        ListNode cur = new ListNode(-1);
-        cur.next = head;
+        ListNode cur = new ListNode(-1, head);
 
         ListNode a = cur;
         ListNode b = head.next;
@@ -50,9 +55,10 @@ class Solution {
             else {
                 while (b != null && a.next.val == b.val) {b = b.next;}
                 a.next = b;
-                b = (b == null) ? null : b.next;
+                b = (b == null ? null : b.next);
             }
         }
+        
         return cur.next;
     }
 }
@@ -65,6 +71,7 @@ class Solution {
     public ListNode removeElements(ListNode head, int val) {
         ListNode tmp = new ListNode(-1, head);
         ListNode cur = tmp;
+
         while (head != null) {
             if (head.val == val) {
                 cur.next = head.next;
@@ -74,6 +81,7 @@ class Solution {
             }
             head = head.next;
         }
+        
         return tmp.next;
     }
 }
@@ -93,11 +101,8 @@ class Solution {
 class Solution {
     public ListNode removeNthFromEnd(ListNode head, int n) {
         ListNode tmp = new ListNode(-1, head);
-        ListNode first = tmp;
-        ListNode second = tmp;
-        for (int i = 0; i < n; i++) {
-            first = first.next;
-        }
+        ListNode first = tmp, second = tmp;
+        for (int i = 0; i < n; i++) {first = first.next;}
 
         while (first.next != null) {
             first = first.next;
@@ -110,20 +115,23 @@ class Solution {
 }
 ```
 
-## 旋转链表（0061）
+## 旋转链表
 
+> 61
+>
 > *给定一个链表，旋转链表，将链表每个节点向右移动 k 个位置，其中 k 是非负数。*
 
 ```java
 class Solution {
     public ListNode rotateRight(ListNode head, int k) {
         if (head == null || head.next == null || k == 0) {return head;}
+
         ListNode first = head;
         int num = 1;
         while (first.next != null) {
             num++;
             first = first.next;
-        }
+        } 
 
         ListNode second = new ListNode(-1, head);
         if (k % num == 0) {return head;}
@@ -132,9 +140,11 @@ class Solution {
             second = second.next;
             n--;
         }
+
         ListNode ans = second.next;
         second.next = null;
         first.next = head;
+
         return ans;
     }
 }
@@ -142,6 +152,8 @@ class Solution {
 
 ## 分隔链表
 
+> 86
+>
 > *给你一个链表和一个特定值 x ，请你对链表进行分隔，使得所有小于 x 的节点都出现在大于或等于 x 的节点之前。*
 >
 > *你应当保留两个分区中每个节点的初始相对位置。*
@@ -150,27 +162,31 @@ class Solution {
 class Solution {
     public ListNode partition(ListNode head, int x) {
         if (head == null) {return null;}
-        ListNode cur1 = new ListNode(-1);
-        ListNode cur2 = new ListNode(-1);
+
+        ListNode cur1 = new ListNode(-1), cur2 = new ListNode(-1);
         ListNode p1 = cur1, p2 = cur2;
+
         while (head != null) {
-            if (head.val < x){
-                cur1.next = head;
-                cur1 = cur1.next;
-            } else {
-                cur2.next = head;
-                cur2 = cur2.next;
+            if (head.val < x) {
+                p1.next = head;
+                p1 = p1.next;
+            }
+            else {
+                p2.next = head;
+                p2 = p2.next;
             }
             head = head.next;
         }
-        // 注意考虑最后的结尾部分要指向null
-        cur1.next = p2.next;
-        cur2.next = null;
-        return p1.next;
+
+        p1.next = cur2.next;
+        p2.next = null;
+        return cur1.next;
     }
 }
 ```
 
+> 725
+>
 > *给定一个头结点为 root 的链表, 编写一个函数以将链表分隔为 k 个连续的部分。*
 >
 > *每部分的长度应该尽可能的相等: 任意两部分的长度差距不能超过 1，也就是说可能有些部分为 null。*
@@ -192,18 +208,18 @@ class Solution {
         }
 
         int width = num / k, remain = num % k;
-
         ListNode[] ans = new ListNode[k];
         cur = root;
         for (int i = 0; i < k; i++) {
-            ListNode head = new ListNode(-1), write = head;
+            ListNode tmp = new ListNode(-1), write = tmp;
             for (int j = 0; j < width + (i < remain ? 1 : 0); j++) {
                 write.next = new ListNode(cur.val);
                 write = write.next;
-                if (cur != null) {cur = cur.next;}
+                cur = cur.next;
             }
-            ans[i] = head.next;
+            ans[i] = tmp.next;
         }
+
         return ans;
     }
 }
@@ -211,51 +227,51 @@ class Solution {
 
 ## 反转链表
 
+> 206
+>
 > *反转一个单链表*
 
 ```java
 class Solution {
     public ListNode reverseList(ListNode head) {
         if (head == null) {return null;}
-        ListNode pre = null;
-        ListNode next = null;
+        ListNode pre = null, cur = null;
 
         while (head != null) {
-            next = head.next;
+            cur = head.next;
             head.next = pre;
 
             pre = head;
-            head = next;
+            head = cur;
         }
+
         return pre;
     }
 }
 ```
 
-> *反转从位置 m 到 n 的链表。请使用一趟扫描完成反转。*
+> 92
+>
+> *反转从位置 left 到 right 的链表。请使用一趟扫描完成反转。*
 
 ```java
 class Solution {
-    public ListNode reverseBetween(ListNode head, int m, int n) {
+    public ListNode reverseBetween(ListNode head, int left, int right) {
+        // 头插法
         ListNode tmp = new ListNode(-1, head);
-
         ListNode pre = tmp;
-        ListNode cur = head;
+        for (int i = 0; i < left - 1; i++) {pre = pre.next;}
 
-        int step = 0;
-        while (step < m - 1) {
-            pre = pre.next;
-            cur = cur.next;
-            step++;
+        ListNode cur = pre.next;
+        ListNode nextNode = null;
+        for (int i = 0; i < right - left; i++) {
+            nextNode = cur.next;
+            cur.next = nextNode.next;
+            
+            nextNode.next = pre.next;
+            pre.next = nextNode;
         }
 
-        for (int i = 0; i < n - m; i++) {
-            ListNode a = cur.next;
-            cur.next = cur.next.next;
-
-            a.next = pre.next;
-            pre.next = a;
-        }
         return tmp.next;
     }
 }
@@ -263,6 +279,8 @@ class Solution {
 
 ## 合并K个升序链表
 
+> 21
+>
 > *给你一个链表数组，每个链表都已经按升序排列。*
 >
 > *请你将所有链表合并到一个升序链表中，返回合并后的链表。*
@@ -302,8 +320,10 @@ class Solution {
 }
 ```
 
-## 两两交换链表中的节点（0024）
+## 两两交换链表中的节点
 
+> 24
+>
 > *给定一个链表，两两交换其中相邻的节点，并返回交换后的链表。*
 >
 > *你不能只是单纯的改变节点内部的值，而是需要实际的进行节点交换。*
@@ -336,8 +356,10 @@ class Solution {
 }
 ```
 
-## K个一组翻转链表（0025）
+## K个一组翻转链表
 
+> 25
+>
 > *给你一个链表，每 k 个节点一组进行翻转，请你返回翻转后的链表。*
 >
 > *k 是一个正整数，它的值小于或等于链表的长度。*
@@ -355,27 +377,26 @@ class Solution {
     public ListNode reverseKGroup(ListNode head, int k) {
         ListNode ans = new ListNode(-1, head);
 
-        ListNode pre = ans;
-        ListNode end = ans;
-
+        ListNode pre = ans, end = ans;
         while (end != null) {
             for (int i = 0; i < k && end != null; i++) {end = end.next;}
             if (end == null) {break;}
-            ListNode start = pre.next;
-            ListNode nxt = end.next;
+            
+            ListNode startNode = pre.next;
+            ListNode nextNode = end.next;
 
             end.next = null;
-            pre.next = myReverse(start);
-            start.next = nxt;
+            pre.next = myReverse(startNode);
+            startNode.next = nextNode;
 
-            pre = start;
-            end = start;
+            pre = startNode;
+            end = startNode;
         }
 
         return ans.next;
     }
 
-    public ListNode myReverse(ListNode head) {
+    private static ListNode myReverse(ListNode head) {
         ListNode pre = null;
         ListNode next = head;
         while (head != null) {
@@ -390,8 +411,10 @@ class Solution {
 }
 ```
 
-## 复制带随机指针的链表（0138）
+## 复制带随机指针的链表
 
+> 0138
+>
 > *给你一个长度为 n 的链表，每个节点包含一个额外增加的随机指针 random ，该指针可以指向链表中的任何节点或空节点。*
 >
 > *构造这个链表的 深拷贝。 深拷贝应该正好由 n 个 全新 节点组成，其中每个新节点的值都设为其对应的原节点的值。新节点的 next 指针和 random 指针也都应指向复制链表中的新节点，并使原链表和复制链表中的这些指针能够表示相同的链表状态。复制链表中的指针都不应指向原链表中的节点 。*
@@ -401,27 +424,29 @@ class Solution {
 > *返回复制链表的头节点。*
 
 ```java
-public class Solution {
+class Solution {
     Map<Node, Node> visited = new HashMap<>();
 
     public Node copyRandomList(Node head) {
         if (head == null) {return null;}
 
-        if (this.visited.containsKey(head)) {return visited.get(head);}
+        if (visited.containsKey(head)) {return visited.get(head);}
 
         Node node = new Node(head.val, null, null);
-        this.visited.put(head, node);
-        
-        node.next = this.copyRandomList(head.next);
-        node.random = this.copyRandomList(head.random);
+        visited.put(head, node);
+
+        node.next = copyRandomList(head.next);
+        node.random = copyRandomList(head.random);
 
         return node;
     }
 }
 ```
 
-## 环形链表（0141 && 0142）
+## 环形链表
 
+> 141
+>
 > *链表成环检测*
 
 ```java
@@ -439,6 +464,8 @@ public class Solution {
 }
 ```
 
+> 142
+>
 > *链表成环检测，返回环开始的位置，没有则返回null*
 
 ```java
@@ -462,8 +489,10 @@ public class Solution {
 }
 ```
 
-## 重排链表（0143）
+## 重排链表
 
+> 143
+>
 > *给定一个单链表 L：L0→L1→…→Ln-1→Ln ，*
 >
 > *将其重新排列后变为： L0→Ln→L1→Ln-1→L2→Ln-2→…*
@@ -474,6 +503,7 @@ public class Solution {
 class Solution {
     public void reorderList(ListNode head) {
         if (head == null) {return;}
+
         List<ListNode> list = new ArrayList<>();
         while (head != null) {
             list.add(head);
@@ -493,8 +523,9 @@ class Solution {
 }
 ```
 
-## 链表插入排序（0147）
+## 链表插入排序
 
+> 147
 > *插入排序算法：*
 >
 > *插入排序是迭代的，每次只移动一个元素，直到所有元素可以形成一个有序的输出列表。*
@@ -531,8 +562,10 @@ class Solution {
 }
 ```
 
-## 相交链表（0160）
+## 相交链表
 
+> 160
+>
 > *编写一个程序，找到两个单链表相交的起始节点。*
 
 ```java
@@ -550,8 +583,10 @@ public class Solution {
 }
 ```
 
-## 奇偶链表（0328）
+## 奇偶链表
 
+> 328
+>
 > *给定一个单链表，把所有的奇数节点和偶数节点分别排在一起。请注意，这里的奇数节点和偶数节点指的是节点编号的奇偶性，而不是节点的值的奇偶性。*
 >
 > *请尝试使用原地算法完成。你的算法的空间复杂度应为 O(1)，时间复杂度应为 O(nodes)，nodes 为节点总数。*
@@ -577,8 +612,10 @@ class Solution {
 }
 ```
 
-## 两数相加（0002 && 0445）
+## 两数相加
 
+> 2
+>
 > *给出两个 非空 的链表用来表示两个非负的整数。其中，它们各自的位数是按照 逆序 的方式存储的，并且它们的每个节点只能存储 一位 数字。*
 >
 > *将这两个数相加起来，则会返回一个新的链表来表示它们的和。*
@@ -619,6 +656,8 @@ class Solution {
 }
 ```
 
+> 445
+>
 > *输入：(7 -> 2 -> 4 -> 3) + (5 -> 6 -> 4)*
 >
 > *输出：7 -> 8 -> 0 -> 7*
