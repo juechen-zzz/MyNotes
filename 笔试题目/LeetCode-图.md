@@ -6,7 +6,6 @@
 private static boolean check(int[][] graph) {
     int n = graph.length;
     int[] inDegree = new int[n];
-    Queue<Integer> queue = new LinkedList<>();
 
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
@@ -16,6 +15,7 @@ private static boolean check(int[][] graph) {
         }
     }
 
+    Queue<Integer> queue = new LinkedList<>();
     for (int i = 0; i < n; i++) {
         if (inDegree[i] == 0) {
             queue.offer(i);
@@ -38,53 +38,56 @@ private static boolean check(int[][] graph) {
 }
 ```
 
-## 被围绕的区域（0130）
+## 被围绕的区域
 
+> 130
+>
 > *给定一个二维的矩阵，包含 'X' 和 'O'（字母 O）。*
 >
 > *找到所有被 'X' 围绕的区域，并将这些区域里所有的 'O' 用 'X' 填充。*
 
 ```java
 class Solution {
-    int[][] d = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+    private static int[][] d = new int[][]{{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
 
     public void solve(char[][] board) {
         if (board.length == 0 || board[0].length == 0) {return;}
 
-        int m = board.length;
-        int n = board[0].length;
-
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                if ((i == 0 || i == m - 1 || j == 0 || j == n - 1) && board[i][j] == 'O') {
-                    dfs(i, j, board);
+        int n = board.length, m = board[0].length;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if ((i == 0 || i == n - 1 || j == 0 || j == m - 1) && board[i][j] == 'O') {
+                    dfs(board, i, j);
                 }
             }
         }
 
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
+        // 被围绕的区间不会存在于边界上，换句话说，任何边界上的 'O' 都不会被填充为 'X'。
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
                 if (board[i][j] != '.') {board[i][j] = 'X';}
                 else {board[i][j] = 'O';}
             }
         }
     }
 
-    public void dfs(int x, int y, char[][] board) {
+    private static void dfs(char[][] board, int x, int y) {
         board[x][y] = '.';
         for (int i = 0; i < 4; i++) {
             int nextX = x + d[i][0];
             int nextY = y + d[i][1];
             if ((nextX >= 0 && nextX < board.length && nextY >= 0 && nextY < board[0].length) && board[nextX][nextY] == 'O') {
-                dfs(nextX, nextY, board);
+                dfs(board, nextX, nextY);
             }
         }
     }
 }
 ```
 
-## 克隆图（0133）
+## 克隆图
 
+> 133
+>
 > *给你无向 连通 图中一个节点的引用，请你返回该图的 深拷贝（克隆）。*
 
 ```java
@@ -96,17 +99,17 @@ class Solution {
         if (node == null) {return node;}
 
         // 如果该节点已经被访问过了，则直接从哈希表中取出对应的克隆节点返回
-        if (visited.containsKey(node)) {return visited.get(node);}
-
+        if (visited.containsKey(node)) {return visited.get(node);}	
         // 克隆节点，注意到为了深拷贝我们不会克隆它的邻居的列表
         Node cloneNode = new Node(node.val, new ArrayList<>());
         // 哈希表存储
-        visited.put(node, cloneNode);
+        visited.put(node, cloneNode);    
 
         // 遍历该节点的邻居并更新克隆节点的邻居列表
-        for (Node neighbor: node.neighbors) {
-            cloneNode.neighbors.add(cloneGraph(neighbor));
+        for (Node neigh : node.neighbors) {
+            cloneNode.neighbors.add(cloneGraph(neigh));
         }
+
         return cloneNode;
     }
 }
@@ -116,23 +119,23 @@ class Solution {
     public Node cloneGraph(Node node) {
         if (node == null) {return node;}
 
-        Map<Node, Node> visited = new HashMap<>();
         Queue<Node> queue = new LinkedList<>();
         queue.offer(node);
+        Map<Node, Node> visited = new HashMap<>();
         visited.put(node, new Node(node.val, new ArrayList<Node>()));
 
         while (!queue.isEmpty()) {
-            Node n = queue.poll();
             // 遍历该节点的邻居
-            for (Node neighbor: n.neighbors) {
-                if (!visited.containsKey(neighbor)) {
+            Node cur = queue.poll();
+            for (Node neigh : cur.neighbors) {
+                if (!visited.containsKey(neigh)) {
                     // 如果没有被访问过，就克隆并存储在哈希表中
-                    visited.put(neighbor, new Node(neighbor.val, new ArrayList<Node>()));
+                    visited.put(neigh, new Node(neigh.val, new ArrayList<Node>()));
                     // 将邻居节点加入队列中
-                    queue.offer(neighbor);
+                    queue.offer(neigh);
                 }
                 // 更新当前节点的邻居列表
-                visited.get(n).neighbors.add(visited.get(neighbor));
+                visited.get(cur).neighbors.add(visited.get(neigh));
             }
         }
 
@@ -143,45 +146,41 @@ class Solution {
 
 ## 课程表
 
-> *你这个学期必须选修 numCourses 门课程，记为 0 到 numCourses - 1 。*
+> 207
 >
-> *在选修某些课程之前需要一些先修课程。 先修课程按数组 prerequisites 给出，*
->
-> *其中 prerequisites[i] = [ai, bi] ，表示如果要学习课程 ai 则 必须 先学习课程 bi 。*
->
-> 
+> *你这个学期必须选修 numCourses 门课程，记为 0 到 numCourses - 1 。**在选修某些课程之前需要先修课程，先修课程按数组 prerequisites 给出*
 >
 > *例如，先修课程对 [0, 1] 表示：想要学习课程 0 ，你需要先完成课程 1 。*
 >
-> *请你判断是否可能完成所有课程的学习？如果可以，返回 true ；否则，返回 false 。*
+> *请你判断是否可能完成所有课程的学习？*
 
 ```java
 class Solution {
     public boolean canFinish(int numCourses, int[][] prerequisites) {
-        int[] inDegrees = new int[numCourses];
-        List<List<Integer>> adjacency = new ArrayList<>();
-        for (int i = 0; i < numCourses; i++) {adjacency.add(new ArrayList<>());}
+        int[] inDegree = new int[numCourses];
+        List<List<Integer>> graph = new ArrayList<>();
+        for (int i = 0; i < numCourses; i++) {graph.add(new ArrayList<>());}
 
         // 1 初始化入度矩阵和邻接矩阵
         for (int[] tmp : prerequisites) {
-            inDegrees[tmp[0]]++;
-            adjacency.get(tmp[1]).add(tmp[0]);
+            inDegree[tmp[0]]++;
+            graph.get(tmp[1]).add(tmp[0]);
         }
 
         // 2 将入度为0的节点放入队列
         Queue<Integer> queue = new LinkedList<>();
         for (int i = 0; i < numCourses; i++) {
-            if (inDegrees[i] == 0) {
+            if (inDegree[i] == 0) {
                 queue.offer(i);
             }
         }
 
         // 3 没从队列中取出一个元素，总数就减一，同时更新邻接矩阵
         while (!queue.isEmpty()) {
-            int pre = queue.poll();
+            int cur = queue.poll();
             numCourses--;
-            for (int cur : adjacency.get(pre)) {
-                if (--inDegrees[cur] == 0) {queue.offer(cur);}
+            for (int neigh : graph.get(cur)) {
+                if (--inDegree[neigh] == 0) {queue.offer(neigh);}
             }
         }
 
@@ -190,35 +189,39 @@ class Solution {
 }
 ```
 
+> 210
+>
 > *给定课程总量以及它们的先决条件，返回你为了学完所有课程所安排的学习顺序。*
 
 ```java
 class Solution {
     public int[] findOrder(int numCourses, int[][] prerequisites) {
-        int[] inDegrees = new int[numCourses];
-        List<List<Integer>> adjacency = new ArrayList<>();
-        for (int i = 0; i < numCourses; i++) {adjacency.add(new ArrayList<>());}
+        int[] inDegree = new int[numCourses];
+        List<List<Integer>> graph = new ArrayList<>();
+        for (int i = 0; i < numCourses; i++) {graph.add(new ArrayList<>());}
 
         for (int[] tmp : prerequisites) {
-            inDegrees[tmp[0]]++;
-            adjacency.get(tmp[1]).add(tmp[0]);
+            inDegree[tmp[0]]++;
+            graph.get(tmp[1]).add(tmp[0]);
         }
 
         Queue<Integer> queue = new LinkedList<>();
         for (int i = 0; i < numCourses; i++) {
-            if (inDegrees[i] == 0) {
+            if (inDegree[i] == 0) {
                 queue.offer(i);
             }
         }
 
         int[] ans = new int[numCourses];
-        int index = 0;
+        int idx = 0;
         while (!queue.isEmpty()) {
-            int pre = queue.poll();
+            int cur = queue.poll();
             numCourses--;
-            ans[index++] = pre;
-            for (int cur : adjacency.get(pre)) {
-                if (--inDegrees[cur] == 0) {queue.offer(cur);}
+            ans[idx++] = cur;
+            for (int neigh : graph.get(cur)) {
+                if (--inDegree[neigh] == 0) {
+                    queue.offer(neigh);
+                }
             }
         }
 
@@ -227,6 +230,8 @@ class Solution {
 }
 ```
 
+> 630
+>
 > *这里有 n 门不同的在线课程，他们按从 1 到 n 编号。每一门课程有一定的持续上课时间（课程时间）t 以及关闭时间第 d 天。一门课要持续学习 t 天直到第 d 天时要完成，你将会从第 1 天开始。*
 >
 > *给出 n 个在线课程用 (t, d) 对表示。你的任务是找出最多可以修几门课。*
@@ -250,6 +255,62 @@ class Solution {
         }
 
         return pq.size();
+    }
+}
+```
+
+> 1462
+>
+> 有的课会有直接的先修课程，比如如果想上课程 0 ，你必须先上课程 1 ，那么会以 [1,0] 数对的形式给出先修课程数对。
+>
+> 给你课程总数 n 和一个直接先修课程数对列表 prerequisite 和一个查询对列表 queries 。
+>
+> 对于每个查询对 queries[i] ，请判断 queries[i][0] 是否是 queries[i][1] 的先修课程。
+>
+> 请返回一个布尔值列表，列表中每个元素依次分别对应 queries 每个查询对的判断结果。
+>
+
+```java
+class Solution {
+    public List<Boolean> checkIfPrerequisite(int numCourses, int[][] prerequisites, int[][] queries) {
+        List<Integer>[] graph = new List[numCourses];
+        for (int i = 0; i < numCourses; i++) {graph[i] = new ArrayList<>();}
+
+        // 建立邻接表、计算入度
+        int[] inDegree = new int[numCourses];
+        for (int[] tmp : prerequisites) {
+            inDegree[tmp[1]]++;
+            graph[tmp[0]].add(tmp[1]);
+        }
+
+        Set<Integer>[] visited = new HashSet[numCourses];
+        for (int i = 0; i < numCourses; i++) {
+            if (inDegree[i] == 0) {     // 只计算入度为0的节点
+                dfs(i, graph, visited);
+            }
+        }
+
+        List<Boolean> ans = new ArrayList<>();
+        for (int[] cur : queries) {
+            ans.add(visited[cur[0]].contains(cur[1]));
+        }
+
+        return ans;
+    }
+
+    private static void dfs(int u, List<Integer>[] graph, Set<Integer>[] visited) {
+        if (visited[u] != null) {return;}
+
+        visited[u] = new HashSet<>();
+        visited[u].add(u);
+
+        // 将子节点的后修课程加入父节点的后修课程
+        for (int neigh : graph[u]) {
+            dfs(neigh, graph, visited);
+            for (int cur : visited[neigh]) {
+                visited[u].add(cur);
+            }
+        }
     }
 }
 ```
