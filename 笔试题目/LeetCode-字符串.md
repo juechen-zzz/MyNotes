@@ -1,7 +1,9 @@
 [TOC]
 
-## 无重复字符的最长子串（0003）
+## 无重复字符的最长子串
 
+> 3
+>
 > *给定一个字符串，请你找出其中不含有重复字符的 最长子串 的长度。*
 >
 > *输入: s = "abcabcbb"*
@@ -13,20 +15,21 @@
 ```java
 class Solution {
     public int lengthOfLongestSubstring(String s) {
-        HashMap<Character, Integer> window = new HashMap<>();
+        Map<Character, Integer> map = new HashMap<>();
 
         int left = 0, right = 0;
         int ans = 0;
-
-        while (right < s.length()){
+        while (right < s.length()) {
             char c = s.charAt(right);
+            map.put(c, map.getOrDefault(c, 0) + 1);
             right++;
-            window.put(c, window.getOrDefault(c, 0) + 1);
-            while (window.get(c) > 1){
+
+            while (map.get(c) > 1) {
                 char d = s.charAt(left);
+                map.put(d, map.get(d) - 1);
                 left++;
-                window.put(d, window.getOrDefault(d, 0) - 1);
             }
+
             ans = Math.max(ans, right - left);
         }
         return ans;

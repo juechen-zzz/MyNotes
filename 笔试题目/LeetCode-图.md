@@ -38,6 +38,51 @@ private static boolean check(int[][] graph) {
 }
 ```
 
+## 找到最终的安全状态
+
+> 802
+>
+> *在有向图中，从某个节点和每个转向处开始出发，沿着图的有向边走。如果到达的节点是终点（即它没有连出的有向边），则停止。*
+>
+> *如果从起始节点出发，最后必然能走到终点，就认为起始节点是 最终安全 的。更具体地说，对于最终安全的起始节点而言，存在一个自然数 k ，无论选择沿哪条有向边行走 ，走了不到 k 步后必能停止在一个终点上。*
+>
+> *返回一个由图中所有最终安全的起始节点组成的数组作为答案。答案数组中的元素应当按 升序 排列。*
+
+```java
+class Solution {
+    public List<Integer> eventualSafeNodes(int[][] graph) {
+        int n = graph.length;
+        int[] color = new int[n];
+        List<Integer> ans = new ArrayList<>();
+
+        for (int i = 0; i < n; i++) {
+            if (dfs(graph, color, i)) {
+                ans.add(i);
+            }
+        }
+
+        return ans;
+    }
+
+    // 用DFS判断图中的每个节点是否能走到环中。对于每个节点，我们有三种染色的方法：
+    	// 0 白色表示该节点还没有被访问过；
+    	// 1 灰色表示该节点在栈中（这一轮搜索中被访问过）或者在环中；
+    	// 2 黑色表示该节点的所有相连的节点都被访问过，且该节点不在环中。
+	// 当我们第一次访问一个节点时，我们把它从白色变成灰色，并继续搜索与它相连的节点。如果在搜索过程中我们遇到一个灰色的节点，那么说明找到了一个环，此时退出搜索，所有的灰色节点保持不变（即从任意一个灰色节点开始，都能走到环中），如果搜索过程中，我们没有遇到灰色的节点，那么在回溯到当前节点时，我们把它从灰色变成黑色，即表示它是一个安全的节点。
+    private static boolean dfs(int[][] graph, int[] color, int idx) {
+        if (color[idx] > 0) {return color[idx] == 2;}
+
+        color[idx] = 1;
+        for (int neigh : graph[idx]) {
+            if (color[neigh] == 2) {continue;}
+            if (color[neigh] == 1 || !dfs(graph, color, neigh)) {return false;}
+        }
+        color[idx] = 2;
+        return true;
+    }
+}
+```
+
 ## 被围绕的区域
 
 > 130
@@ -268,7 +313,6 @@ class Solution {
 > 对于每个查询对 queries[i] ，请判断 queries[i][0] 是否是 queries[i][1] 的先修课程。
 >
 > 请返回一个布尔值列表，列表中每个元素依次分别对应 queries 每个查询对的判断结果。
->
 
 ```java
 class Solution {
@@ -298,17 +342,17 @@ class Solution {
         return ans;
     }
 
-    private static void dfs(int u, List<Integer>[] graph, Set<Integer>[] visited) {
-        if (visited[u] != null) {return;}
+    private static void dfs(int node, List<Integer>[] graph, Set<Integer>[] visited) {
+        if (visited[node] != null) {return;}
 
-        visited[u] = new HashSet<>();
-        visited[u].add(u);
+        visited[node] = new HashSet<>();
+        visited[node].add(node);
 
         // 将子节点的后修课程加入父节点的后修课程
-        for (int neigh : graph[u]) {
+        for (int neigh : graph[node]) {
             dfs(neigh, graph, visited);
             for (int cur : visited[neigh]) {
-                visited[u].add(cur);
+                visited[node].add(cur);
             }
         }
     }
@@ -389,41 +433,42 @@ public class Huawei0512_2 {
 }
 ```
 
-## 单词搜索2（0212）
+## 单词搜索2
 
+> 212
 > 给定一个 m x n 二维字符网格 board 和一个单词（字符串）列表 words，找出所有同时在二维网格和字典中出现的单词。
 >
 > 单词必须按照字母顺序，通过 相邻的单元格 内的字母构成，其中“相邻”单元格是那些水平相邻或垂直相邻的单元格。同一个单元格内的字母在一个单词中不允许被重复使用。
 
 ```java
+// DFS
 class Solution {
-    List<String> ans = new ArrayList<>();
-
     public List<String> findWords(char[][] board, String[] words) {
-        int m = board.length, n = board[0].length;
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                dfs(board, words, "", i, j);
+        List<String> ans = new ArrayList<>();
+        int n = board.length, m = board[0].length;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                dfs(board, words, ans, "", i, j);
             }
         }
         return ans;
     }
 
-    public void dfs(char[][] board, String[] words, String s, int x, int y) {
-        int m = board.length, n = board[0].length;
-        if (x < 0 || x >= m || y < 0 || y >= n) {return;}
+    private static void dfs(char[][] board, String[] words, List<String> ans, String s, int x, int y) {
+        int n = board.length, m = board[0].length;
+        if (x < 0 || x >= n || y < 0 || y >= m) {return;}
 
         if (containsWord(words, s)) {ans.add(s);}
 
-        dfs(board, words, s + board[x][y], x + 1, y);
-        dfs(board, words, s + board[x][y], x - 1, y);
-        dfs(board, words, s + board[x][y], x, y + 1);
-        dfs(board, words, s + board[x][y], x, y - 1);
+        dfs(board, words, ans, s + board[x][y], x + 1, y);
+        dfs(board, words, ans, s + board[x][y], x - 1, y);
+        dfs(board, words, ans, s + board[x][y], x, y + 1);
+        dfs(board, words, ans, s + board[x][y], x, y - 1);
     }
 
-    public boolean containsWord(String[] words, String s) {
-        for (String tmp : words) {
-            if (tmp.equals(s)) {
+    private static boolean containsWord(String[] words, String s) {
+        for (String cur : words) {
+            if (cur.equals(s)) {
                 return true;
             }
         }
@@ -432,8 +477,10 @@ class Solution {
 }
 ```
 
-## 最小高度树（0310）
+## 最小高度树
 
+> 310
+>
 > 树是一个无向图，其中任何两个顶点只通过一条路径连接。 换句话说，一个任何没有简单环路的连通图都是一棵树。
 >
 > 给你一棵包含 n 个节点的树，标记为 0 到 n - 1 。给定数字 n 和一个有 n - 1 条无向边的 edges 列表（每一个边都是一对标签），其中 edges[i] = [ai, bi] 表示树中节点 ai 和 bi 之间存在一条无向边。
@@ -446,15 +493,19 @@ class Solution {
 class Solution {
     public List<Integer> findMinHeightTrees(int n, int[][] edges) {
         List<Integer> ans = new ArrayList<>();
+        if (n == 1) {
+            ans.add(0);
+            return ans;
+        }
 
         int[] degree = new int[n];
-        List<List<Integer>> adjency = new ArrayList<>();
-        for (int i = 0; i < n; i++) {adjency.add(new ArrayList<>());}
-        for (int[] edge : edges) {
-            degree[edge[0]]++;
-            degree[edge[1]]++;
-            adjency.get(edge[0]).add(edge[1]);
-            adjency.get(edge[1]).add(edge[0]);
+        List<List<Integer>> graph = new ArrayList<>();
+        for (int i = 0; i < n; i++) {graph.add(new ArrayList<>());}
+        for (int[] cur : edges) {
+            degree[cur[0]]++;
+            degree[cur[1]]++;
+            graph.get(cur[0]).add(cur[1]);
+            graph.get(cur[1]).add(cur[0]);
         }
 
         Queue<Integer> queue = new LinkedList<>();
@@ -464,68 +515,66 @@ class Solution {
             }
         }
 
-        int residue = n;
-        if (residue == 1) {ans.add(0);}
-
-        while (residue != 1 && residue != 2) {
+        while (!queue.isEmpty()) {
+            ans = new ArrayList<>();
             int size = queue.size();
-            residue -= size;
             for (int i = 0; i < size; i++) {
                 int cur = queue.poll();
-                for (int node : adjency.get(cur)) {
-                    if (degree[node] > 0) {
-                        degree[node]--;
-                    }
-                    if (degree[node] == 1) {
-                        queue.offer(node);
-                    }
+                /*
+                把当前节点加入结果集，因为我们每次循环都会新建一个list，所以最后保存的就是最后一个状态下的叶子节点，可以想象一下图，每层遍历完，都会把该层（也就是叶子节点层）这一层从队列中移除掉，不就相当于把原来的图给剪掉一圈叶子节点，形成一个缩小的新的图
+                */
+                ans.add(cur);
+                for (int neigh : graph.get(cur)) {
+                    degree[neigh]--;
+                    if (degree[neigh] == 1) {queue.offer(neigh);}
                 }
             }
         }
 
-        while (!queue.isEmpty()) {
-            ans.add(queue.poll());
-        }
         return ans;
     }
 }
 ```
 
-## 重新安排行程（0332）
+## 重新安排行程
 
+> 332
+>
 > *给定一个机票的字符串二维数组 [from, to]，子数组中的两个成员分别表示飞机出发和降落的机场地点，对该行程进行重新规划排序。所有这些机票都属于一个从 JFK（肯尼迪国际机场）出发的先生，所以该行程必须从 JFK 开始。*
 
 ```java
 class Solution {
-    Map<String, PriorityQueue<String>> map = new HashMap<>();
-    List<String> ans = new LinkedList<>();
-
     public List<String> findItinerary(List<List<String>> tickets) {
-        for (List<String> ticket : tickets) {
-            String src = ticket.get(0), dst = ticket.get(1);
+        Map<String, PriorityQueue<String>> map = new HashMap<>();
+        List<String> ans = new ArrayList<>();
+
+        for (List<String> cur : tickets) {
+            String src = cur.get(0), dst = cur.get(1);
             if (!map.containsKey(src)) {
                 map.put(src, new PriorityQueue<String>());
             }
             map.get(src).offer(dst);
         }
 
-        dfs("JFK");
+        dfs(map, ans, "JFK");
         Collections.reverse(ans);
         return ans;
     }
 
-    public void dfs(String cur) {
+    private static void dfs(Map<String, PriorityQueue<String>> map, List<String> ans, String cur) {
         while (map.containsKey(cur) && map.get(cur).size() > 0) {
-            String tmp = map.get(cur).poll();
-            dfs(tmp);
+            String neigh = map.get(cur).poll();
+            dfs(map, ans, neigh);
         }
         ans.add(cur);
     }
 }
 ```
 
-## K站中转内最便宜的航班（0787）
+## K站中转内最便宜的航班
 
+> 787
+>
 > *有 n 个城市通过 m 个航班连接。每个航班都从城市 u 开始，以价格 w 抵达 v。*
 >
 > *现在给定所有的城市和航班，以及出发城市 src 和目的地 dst，你的任务是找到从 src 到 dst 最多经过 k 站中转的最便宜的价格。 如果没有这样的路线，则输出 -1。*
@@ -636,13 +685,46 @@ public class Solution {
 }
 ```
 
-## 判断二分图（0785）
+## 判断二分图
 
+> 785
+>
 > *二分图 定义：如果能将一个图的节点集合分割成两个独立的子集 A 和 B ，并使图中的每一条边的两个节点一个来自 A 集合，一个来自 B 集合，就将这个图称为 二分图 。*
 >
 > *如果图是二分图，返回 true ；否则，返回 false 。*
 
 ```java
+// BFS
+class Solution {
+    public boolean isBipartite(int[][] graph) {
+        int n = graph.length;
+        int[] color = new int[n];
+        
+        for (int i = 0; i < n; i++) {
+            if (color[i] == 0) {
+                Queue<Integer> queue = new LinkedList<>();
+                queue.offer(i);
+                color[i] = 1;
+                while (!queue.isEmpty()) {
+                    int cur = queue.poll();
+                    int cNext = (color[cur] == 1 ? 2 : 1);
+                    for (int neigh : graph[cur]) {
+                        if (color[neigh] == 0) {
+                            queue.offer(neigh);
+                            color[neigh] = cNext;
+                        }
+                        else if (color[neigh] != cNext) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+}
+
 // DFS
 class Solution {
     private int[] color;
@@ -675,34 +757,47 @@ class Solution {
         }
     }
 }
+```
 
-// BFS
+## 可能的二分法
+
+> 886
+>
+> *给定一组 N 人（编号为 1, 2, ..., N）， 我们想把每个人分进任意大小的两组。*
+>
+> *每个人都可能不喜欢其他人，那么他们不应该属于同一组。*
+>
+> *形式上，如果 dislikes[i] = [a, b]，表示不允许将编号为 a 和 b 的人归入同一组。*
+>
+> *当可以用这种方法将所有人分进两组时，返回 true；否则返回 false。*
+
+```java
 class Solution {
-    private int[] color;
+    public boolean possibleBipartition(int N, int[][] dislikes) {
+        List<Integer>[] graph = new ArrayList[N + 1];
+        for (int i = 1; i <= N; i++) {graph[i] = new ArrayList<>();}
 
-    public boolean isBipartite(int[][] graph) {
-        int n = graph.length;
-        color = new int[n];
-        Arrays.fill(color, 0);
-        for (int i = 0; i < n; i++) {
-            if (color[i] == 0) {
-                Queue<Integer> queue = new LinkedList<>();
-                queue.offer(i);
-                color[i] = 1;
-                while (!queue.isEmpty()) {
-                    int node = queue.poll();
-                    int cNext = (color[node] == 1 ? 2 : 1);
-                    for (int neigh : graph[node]) {
-                        if (color[neigh] == 0) {
-                            queue.offer(neigh);
-                            color[neigh] = cNext;
-                        }
-                        else if (color[neigh] != cNext) {
-                            return false;
-                        }
-                    }
-                }
+        for (int[] cur : dislikes) {
+            graph[cur[0]].add(cur[1]);
+            graph[cur[1]].add(cur[0]);
+        }
+
+        Map<Integer,Integer> color = new HashMap<>();
+        for (int node = 1; node <= N; node++) {
+            if (!color.containsKey(node) && !dfs(graph, color, node, 0)) {
+                return false;
             }
+        }
+        return true;
+    }
+
+    private static boolean dfs(List<Integer>[] graph, Map<Integer,Integer> color, int node, int c) {
+        if (color.containsKey(node)) {return color.get(node) == c;}
+        
+        color.put(node, c);
+
+        for (int neigh : graph[node]) {
+            if (!dfs(graph, color, neigh, c ^ 1)) {return false;}
         }
 
         return true;
@@ -710,35 +805,42 @@ class Solution {
 }
 ```
 
-## 所有可能的路径（0797）
+## 所有可能的路径
 
+> 797
+>
 > *给一个有 n 个结点的有向无环图，找到所有从 0 到 n-1 的路径并输出（不要求按顺序）*
 
 ```java
 class Solution {
-    List<List<Integer>> ans = new ArrayList<>();
-
     public List<List<Integer>> allPathsSourceTarget(int[][] graph) {
+        List<List<Integer>> ans = new ArrayList<>();
         if (graph.length == 0) {return ans;}
-        dfs(graph, 0, new ArrayList<Integer>());
+
+        dfs(graph, ans, 0, new ArrayList<Integer>());
+
         return ans;
     }
 
-    private void dfs(int[][] graph, int cur, List<Integer> path) {
+    private static void dfs(int[][] graph, List<List<Integer>> ans, int cur, List<Integer> path) {
         path.add(cur);
+        
         if (cur == graph.length - 1) {
             ans.add(new ArrayList<>(path));
         }
         for (int neigh : graph[cur]) {
-            dfs(graph, neigh, path);
+            dfs(graph, ans, neigh, path);
         }
+        
         path.remove(path.size() - 1);
     }
 }
 ```
 
-## 省份数量（0547）
+## 省份数量
 
+> 547
+>
 > *有 n 个城市，其中一些彼此相连，另一些没有相连。如果城市 a 与城市 b 直接相连，且城市 b 与城市 c 直接相连，那么城市 a 与城市 c 间接相连。*
 >
 > *省份 是一组直接或间接相连的城市，组内不含其他没有相连的城市。*
@@ -751,20 +853,19 @@ class Solution {
 // BFS
 class Solution {
     public int findCircleNum(int[][] isConnected) {
-        int num = isConnected.length;
-        boolean[] visited = new boolean[num];
+        int n = isConnected.length;
+        boolean[] visited = new boolean[n];
         int ans = 0;
         Queue<Integer> queue = new LinkedList<>();
-        
-        for (int i = 0; i < num; i++){
-            // 首先判定这个点没访问过
-            if (!visited[i]){
+
+        for (int i = 0; i < n; i++) {
+            if (!visited[i]) {
                 queue.offer(i);
-                while (!queue.isEmpty()){
-                    int j = queue.poll();
-                    visited[j] = true;
-                    for (int k = 0; k < num; k++){
-                        if (isConnected[j][k] == 1 && !visited[k]){
+                while (!queue.isEmpty()) {
+                    int cur = queue.poll();
+                    visited[cur] = true;
+                    for (int k = 0; k < n; k++) {
+                        if (isConnected[cur][k] == 1 && !visited[k]) {
                             queue.offer(k);
                         }
                     }
@@ -772,6 +873,7 @@ class Solution {
                 ans++;
             }
         }
+
         return ans;
     }
 }
@@ -779,71 +881,36 @@ class Solution {
 // DFS 
 class Solution {
     public int findCircleNum(int[][] isConnected) {
-        int provinces = isConnected.length;
-        boolean[] visited = new boolean[provinces];
-        int circles = 0;
-        for (int i = 0; i < provinces; i++) {
-            if (!visited[i]) {
-                dfs(isConnected, visited, provinces, i);
-                circles++;
-            }
-        }
-        return circles;
-    }
-
-    public void dfs(int[][] isConnected, boolean[] visited, int provinces, int i) {
-        for (int j = 0; j < provinces; j++) {
-            if (isConnected[i][j] == 1 && !visited[j]) {
-                visited[j] = true;
-                dfs(isConnected, visited, provinces, j);
-            }
-        }
-    }
-}
-```
-
-## 找到最终的安全状态（0802）
-
-> *在有向图中，从某个节点和每个转向处开始出发，沿着图的有向边走。如果到达的节点是终点（即它没有连出的有向边），则停止。*
->
-> *如果从起始节点出发，最后必然能走到终点，就认为起始节点是 最终安全 的。更具体地说，对于最终安全的起始节点而言，存在一个自然数 k ，无论选择沿哪条有向边行走 ，走了不到 k 步后必能停止在一个终点上。*
->
-> *返回一个由图中所有最终安全的起始节点组成的数组作为答案。答案数组中的元素应当按 升序 排列。*
-
-```java
-class Solution {
-    public List<Integer> eventualSafeNodes(int[][] graph) {
-        int n = graph.length;
-        int[] color = new int[n];
-        List<Integer> ans = new ArrayList<>();
+        int n = isConnected.length;
+        boolean[] visited  = new boolean[n];
+        int ans = 0;
 
         for (int i = 0; i < n; i++) {
-            if (dfs(i, color, graph)) {
-                ans.add(i);
+            if (!visited[i]) {
+                dfs(isConnected, visited, n, i);
+                ans++;
             }
         }
-
+        
         return ans;
     }
 
-    private boolean dfs(int node, int[] color, int[][] graph) {
-        if (color[node] > 0) {return color[node] == 2;}
-
-        color[node] = 1;
-        for (int neigh : graph[node]) {
-            if (color[neigh] == 2) {continue;}
-            if (color[neigh] == 1 || !dfs(neigh, color, graph)) {return false;} 
+    private static void dfs(int[][] isConnected, boolean[] visited, int n, int i) {
+        for (int j = 0; j < n; j++) {
+            if (isConnected[i][j] == 1 && !visited[j]) {
+                visited[j] = true;
+                dfs(isConnected, visited, n, j);
+            }
         }
-
-        color[node] = 2;
-        return true;
     }
 }
 ```
 
-## 冗余连接（0684 && 0685）
+## 冗余连接
 
-> *在本问题中, 树指的是一个连通且无环的无向图。*
+> 684
+>
+> *在本问题中, 树指的是一个连通且无环的**无向图**。*
 >
 > *输入一个图，该图由一个有着N个节点 (节点值不重复1, 2, ..., N) 的树及一条附加的边构成。附加的边的两个顶点包含在1到N中间，这条附加的边不属于树中已存在的边。*
 >
@@ -858,15 +925,16 @@ class Solution {
         UnionFind uf = new UnionFind(n + 1);
 
         for (int i = 0; i < n; i++) {
-            int[] edge = edges[i];
-            int node1 = edge[0], node2 = edge[1];
+            int[] cur = edges[i];
+            int node1 = cur[0], node2 = cur[1];
             if (uf.find(node1) != uf.find(node2)) {
                 uf.union(node1, node2);
             }
             else {
-                return edge;
+                return cur;
             }
         }
+
         return new int[0];
     }
 }
@@ -876,25 +944,25 @@ class UnionFind {
 
     public UnionFind(int n) {
         ancestor = new int[n];
-        for (int i = 0; i < n; i++) {
-            ancestor[i] = i;
-        }
+        for (int i = 0; i < n; i++) {ancestor[i] = i;}
     }
 
-    public void union(int index1, int index2) {
-        ancestor[find(index1)] = find(index2);
+    public void union(int idx1, int idx2) {
+        ancestor[find(idx1)] = find(idx2);
     }
 
-    public int find(int index) {
-        if (ancestor[index] != index) {
-            ancestor[index] = find(ancestor[index]);
+    public int find(int idx) {
+        if (ancestor[idx] != idx) {
+            ancestor[idx] = find(ancestor[idx]);
         }
-        return ancestor[index];
+        return ancestor[idx];
     }
 }
 ```
 
-> *在本问题中，有根树指满足以下条件的 有向 图。该树只有一个根节点，所有其他节点都是该根节点的后继。该树除了根节点之外的每一个节点都有且只有一个父节点，而根节点没有父节点。*
+> 685
+>
+> *在本问题中，有根树指满足以下条件的 **有向图**。该树只有一个根节点，所有其他节点都是该根节点的后继。该树除了根节点之外的每一个节点都有且只有一个父节点，而根节点没有父节点。*
 >
 > *输入一个有向图，该图由一个有着 n 个节点（节点值不重复，从 1 到 n）的树及一条附加的有向边构成。附加的边包含在 1 到 n 中的两个不同顶点间，这条附加的边不属于树中已存在的边。*
 >
@@ -908,12 +976,12 @@ class Solution {
         int n = edges.length;
         UnionFind uf = new UnionFind(n + 1);
         int[] parent = new int[n + 1];
-        for (int i = 1; i <= n; i++) {parent[i] = i;}
+        for (int i = 0; i <= n; i++) {parent[i] = i;}
 
         int conflict = -1, cycle = -1;
         for (int i = 0; i < n; i++) {
-            int[] edge = edges[i];
-            int node1 = edge[0], node2 = edge[1];
+            int[] cur = edges[i];
+            int node1 = cur[0], node2 = cur[1];
             if (parent[node2] != node2) {conflict = i;}
             else {
                 parent[node2] = node1;
@@ -962,8 +1030,10 @@ class UnionFind {
 }
 ```
 
-## 岛屿数量（0200）
+## 岛屿数量
 
+> 200
+>
 > 给你一个由 '1'（陆地）和 '0'（水）组成的的二维网格，请你计算网格中岛屿的数量。
 >
 > 岛屿总是被水包围，并且每座岛屿只能由水平方向和/或竖直方向上相邻的陆地连接形成。
@@ -975,12 +1045,11 @@ class Solution {
     public int numIslands(char[][] grid) {
         if (grid == null || grid.length == 0) {return 0;}
 
-        int m = grid.length;
-        int n = grid[0].length;
+        int n = grid.length, m = grid[0].length;
         int ans = 0;
 
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
                 if (grid[i][j] == '1') {
                     ans++;
                     dfs(grid, i, j);
@@ -991,11 +1060,10 @@ class Solution {
         return ans;
     }
 
-    public void dfs(char[][] grid, int row, int col) {
-        int m = grid.length;
-        int n = grid[0].length;
+    private static void dfs(char[][] grid, int row, int col) {
+        int n = grid.length, m = grid[0].length;
 
-        if (row < 0 || row >= m || col < 0 || col >= n || grid[row][col] == '0') {return;}
+        if (row < 0 || row >= n || col < 0 || col >= m || grid[row][col] == '0') {return;}
 
         grid[row][col] = '0';
         dfs(grid, row - 1, col);
@@ -1006,8 +1074,10 @@ class Solution {
 }
 ```
 
-## 岛屿的最大面积（0695）
+## 岛屿的最大面积
 
+> 695
+>
 > *给定一个包含了一些 0 和 1 的非空二维数组 grid 。*
 >
 > *一个 岛屿 是由一些相邻的 1 (代表土地) 构成的组合，这里的「相邻」要求两个 1 必须在水平或者竖直方向上相邻。你可以假设 grid 的四个边缘都被 0（代表水）包围着。*
@@ -1017,17 +1087,16 @@ class Solution {
 ```java
 class Solution {
     public int maxAreaOfIsland(int[][] grid) {
-        if (grid == null || grid.length == 0) {return 0;}
+        if (grid.length == 0 || grid[0].length == 0) {return 0;}
 
-        int m = grid.length;
-        int n = grid[0].length;
+        int n = grid.length, m = grid[0].length;
         int ans = 0;
-
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
+        
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
                 if (grid[i][j] == 1) {
-                    int tmp = dfs(grid, i, j);
-                    ans = Math.max(ans, tmp);
+                    int cur = dfs(grid, i, j);
+                    ans = Math.max(ans, cur);
                 }
             }
         }
@@ -1035,21 +1104,21 @@ class Solution {
         return ans;
     }
 
-    public int dfs(int[][] grid, int row, int col) {
-        int m = grid.length;
-        int n = grid[0].length;
+    private static int dfs(int[][] grid, int row, int col) {
+        int n = grid.length, m = grid[0].length;
 
-        if (row < 0 || row >= m || col < 0 || col >= n || grid[row][col] == 0) {return 0;}
+        if (row < 0 || row >= n || col < 0 || col >= m || grid[row][col] == 0) {return 0;}
 
         grid[row][col] = 0;
-        return 1 + dfs(grid, row - 1, col) + dfs(grid, row + 1, col) 
-                 + dfs(grid, row, col + 1) + dfs(grid, row, col - 1);
+        return 1 + dfs(grid, row - 1, col) + dfs(grid, row + 1, col) + dfs(grid, row, col - 1) + dfs(grid, row, col + 1);
     }
 }
 ```
 
-## 岛屿的周长（0463）
+## 岛屿的周长
 
+> 463
+>
 > *给定一个 row x col 的二维网格地图 grid ，其中：grid[i][j] = 1 表示陆地， grid[i][j] = 0 表示水域。*
 >
 > *网格中的格子 水平和垂直 方向相连（对角线方向不相连）。整个网格被水完全包围，但其中恰好有一个岛屿（或者说，一个或多个表示陆地的格子相连组成的岛屿）。*
@@ -1058,32 +1127,35 @@ class Solution {
 
 ```java
 class Solution {
-    private int[] dir = {1, 0, -1, 0, 1};
+    private static int[][] d = new int[][]{{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
 
     public int islandPerimeter(int[][] grid) {
-        int m = grid.length, n = grid[0].length;
+        int n = grid.length, m = grid[0].length;
         int ans = 0;
-        
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
                 if (grid[i][j] == 1) {
                     int count = 0;
                     for (int k = 0; k < 4; k++) {
-                        int nextX = i + dir[k];
-                        int nextY = j + dir[k + 1];
-                        if (nextX < 0 || nextX >= m || nextY < 0 || nextY >= n || grid[nextX][nextY] == 0) {count++;}
+                        int nextX = i + d[k][0];
+                        int nextY = j + d[k][1];
+                        if (nextX < 0 || nextX >= n || nextY < 0 || nextY >= m || grid[nextX][nextY] == 0) {count++;}
                     }
                     ans += count;
                 }
             }
         }
+
         return ans;
     }
 }
 ```
 
-## 太平洋大西洋水流问题（0417）
+## 太平洋大西洋水流问题
 
+> 417
+>
 > *给定一个 m x n 的非负整数矩阵来表示一片大陆上各个单元格的高度。“太平洋”处于大陆的左边界和上边界，而“大西洋”处于大陆的右边界和下边界。*
 >
 > *规定水流只能按照上、下、左、右四个方向流动，且只能从高到低或者在同等高度上流动。*
@@ -1092,126 +1164,74 @@ class Solution {
 
 ```java
 class Solution {
-    private int m, n;
-    private int[][] dir = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
-    private boolean inArea(int x, int y) {return 0 <= x && x < m && 0 <= y && y < n;}
+    private static int[][] dir = new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 
     public List<List<Integer>> pacificAtlantic(int[][] heights) {
         List<List<Integer>> ans = new ArrayList<>();
         if (heights.length == 0) {return ans;}
 
-        m = heights.length;
-        n = heights[0].length;
-        int[][] po = new int[m][n], ao = new int[m][n];
+        int n = heights.length, m = heights[0].length;
+        int[][] po = new int[n][m], ao = new int[n][m];
 
-        for (int i = 0; i < m; i++) {
-            dfs(heights, i, 0, po);
-            dfs(heights, i, n - 1, ao);
-        }
+        // 从各边界开始逆流进行搜索
         for (int i = 0; i < n; i++) {
-            dfs(heights, 0, i, po);
-            dfs(heights, m - 1, i, ao);
+            dfs(heights, i, 0, po);
+            dfs(heights, i, m - 1, ao);
         }
 
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                if (po[i][j] == 1 && ao[i][j] == 1){
+        for (int j = 0; j < m; j++) {
+            dfs(heights, 0, j, po);
+            dfs(heights, n - 1, j, ao);
+        }
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (po[i][j] == 1 && ao[i][j] == 1) {
                     ans.add(Arrays.asList(i, j));
                 }
             }
         }
+
         return ans;
     }
 
-    private void dfs(int[][] matrix, int x, int y, int[][] tmp){
-        tmp[x][y] = 1;
+    private static boolean inArea(int[][] matrix, int x, int y) {
+        return x >= 0 && x < matrix.length && y >= 0 && y < matrix[0].length;
+    }
+
+    private static void dfs(int[][] matrix, int x, int y, int[][] cur) {
+        cur[x][y] = 1;
         for (int[] d : dir) {
-            int newx = x + d[0];
-            int newy = y + d[1];
-            if (!inArea(newx, newy) || matrix[x][y] > matrix[newx][newy] || tmp[newx][newy] == 1){
-                continue;
-            }
-            dfs(matrix, newx, newy, tmp);
+            int nextX = x + d[0], nextY = y + d[1];
+            //这里的判断条件是：在岛上；递增；在没流过的路上。
+            if (!inArea(matrix, nextX, nextY) || matrix[x][y] > matrix[nextX][nextY] || cur[nextX][nextY] == 1) {continue;}
+            dfs(matrix, nextX, nextY, cur);
         }
     }
 }
 ```
 
-## 扫雷游戏（0529）
+## 0/1矩阵
 
-> 给定一个代表游戏板的二维字符矩阵。 'M' 代表一个未挖出的地雷，'E' 代表一个未挖出的空方块，'B' 代表没有相邻（上，下，左，右，和所有4个对角线）地雷的已挖出的空白方块，数字（'1' 到 '8'）表示有多少地雷与这块已挖出的方块相邻，'X' 则表示一个已挖出的地雷。
+> 542
 >
-> 现在给出在所有未挖出的方块中（'M'或者'E'）的下一个点击位置（行和列索引），根据以下规则，返回相应位置被点击后对应的面板：
->
-> 如果一个地雷（'M'）被挖出，游戏就结束了- 把它改为 'X'。
-> 如果一个没有相邻地雷的空方块（'E'）被挖出，修改它为（'B'），并且所有和其相邻的未挖出方块都应该被递归地揭露。
-> 如果一个至少与一个地雷相邻的空方块（'E'）被挖出，修改它为数字（'1'到'8'），表示相邻地雷的数量。
-> 如果在此次点击中，若无更多方块可被揭露，则返回面板。
-
-```java
-class Solution {
-    int[] dirX = {0, 1, 0, -1, 1, 1, -1, -1};
-    int[] dirY = {1, 0, -1, 0, 1, -1, 1, -1};
-
-    public char[][] updateBoard(char[][] board, int[] click) {
-        int x = click[0], y = click[1];
-        if (board[x][y] == 'M') {
-            board[x][y] = 'X';
-        }
-        else {
-            dfs(board, x, y);
-        }
-        return board;
-    }
-
-    private void dfs(char[][] board, int x, int y) {
-        int cnt = 0;
-        for (int i = 0; i < 8; i++) {
-            int nextX = x + dirX[i];
-            int nextY = y + dirY[i];
-            if (nextX < 0 || nextX >= board.length || nextY < 0 || nextY >= board[0].length) {
-                continue;
-            }
-
-            if (board[nextX][nextY] == 'M') {cnt++;}
-        }
-
-        if (cnt > 0) {board[x][y] = (char)(cnt + '0');}
-        else {
-            board[x][y] = 'B';
-            for (int i = 0; i < 8; i++) {
-                int nextX = x + dirX[i];
-                int nextY = y + dirY[i];
-                if (nextX < 0 || nextX >= board.length || nextY < 0 || nextY >= board[0].length || board[nextX][nextY] != 'E') {
-                    continue;
-                }
-
-                dfs(board, nextX, nextY);
-            }
-        }
-    }
-}
-```
-
-## 0/1矩阵（0542）
-
 > *给定一个由 0 和 1 组成的矩阵，找出每个元素到最近的 0 的距离。*
 >
 > *两个相邻元素间的距离为 1 。*
 
 ```java
 class Solution {
-    private static int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+    private static int[][] dir = new int[][]{{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
-    public int[][] updateMatrix(int[][] matrix) {
-        int n = matrix.length, m = matrix[0].length;
+    public int[][] updateMatrix(int[][] mat) {
+        int n = mat.length, m = mat[0].length;
         int[][] ans = new int[n][m];
         boolean[][] visited = new boolean[n][m];
         Queue<int[]> queue = new LinkedList<>();
-        
+
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < m; j++) {
-                if (matrix[i][j] == 0) {
+                if (mat[i][j] == 0) {
                     queue.offer(new int[]{i, j});
                     visited[i][j] = true;
                 }
@@ -1219,15 +1239,14 @@ class Solution {
         }
 
         while (!queue.isEmpty()) {
-            int[] cell = queue.poll();
-            int x = cell[0], y = cell[1];
-            for (int d = 0; d < 4; d++) {
-                int nextX = x + dirs[d][0];
-                int nextY = y + dirs[d][1];
+            int[] cur = queue.poll();
+            int x = cur[0], y = cur[1];
+            for (int k = 0; k < 4; k++) {
+                int nextX = x + dir[k][0], nextY = y + dir[k][1];
                 if (nextX >= 0 && nextX < n && nextY >= 0 && nextY < m && !visited[nextX][nextY]) {
                     ans[nextX][nextY] = ans[x][y] + 1;
                     queue.offer(new int[]{nextX, nextY});
-                    visited[nextX][nextY] = true; 
+                    visited[nextX][nextY] = true;
                 }
             }
         }
@@ -1237,68 +1256,10 @@ class Solution {
 }
 ```
 
-## 出界的路径数（0576）
+## 网络延迟时间
 
-> *给定一个 m × n 的网格和一个球。球的起始坐标为 (i,j) ，你可以将球移到相邻的单元格内，或者往上、下、左、右四个方向上移动使球穿过网格边界。*
+> 743
 >
-> *但是，你最多可以移动 N 次。找出可以将球移出边界的路径数量。答案可能非常大，返回 结果 mod 109 + 7 的值。*
-
-```java
-// DFS 超时
-class Solution {
-    int res = 0;
-    public int findPaths(int m, int n, int N, int i, int j) {
-        dfs(m, n, N, i, j);
-        return res;
-    }
-    public void dfs(int m, int n, int N, int i, int j){
-        if(N == 0 && i >= 0 && i < m && j >= 0 && j < n) return;
-        if(i >= N && m - i > N && j >= N && n - j > N) return;
-        if(N >= 0 && (i == -1 || j == -1 || i == m || j == n)){
-            res = (res + 1) % 1000000007;
-            return;
-        }
-        dfs(m, n, N - 1, i + 1, j);
-        dfs(m, n, N - 1, i - 1, j);
-        dfs(m, n, N - 1, i, j + 1);
-        dfs(m, n, N - 1, i, j - 1);
-    }
-}
-
-// DP
-class Solution {
-    public int findPaths(int m, int n, int N, int i, int j) {
-        if (N == 0) {return 0;}
-        long[][][] dp = new long[m + 2][n + 2][N + 1];
-
-        for (int r = 0; r <= m + 1; r++) {
-            dp[r][0][0] = 1;
-            dp[r][n + 1][0] = 1;
-        }
-        for (int c = 0; c <= n + 1; c++) {
-            dp[0][c][0] = 1;
-            dp[m + 1][c][0] = 1;
-        }
-
-        for (int k = 1; k <= N; k++) {
-            for (int r = 1; r <= m; r++) {
-                for (int c = 1; c <= n; c++) {
-                    dp[r][c][k] = (dp[r - 1][c][k - 1] + dp[r + 1][c][k - 1] + dp[r][c - 1][k - 1] + dp[r][c + 1][k - 1]) % 1000000007;
-                }
-            }
-        }
-
-        int ans = 0;
-        for (int k = 1; k <= N; k++) {
-            ans = (int)((ans + dp[i + 1][j + 1][k]) % 1000000007);
-        }
-        return ans;
-    }
-}
-```
-
-## 网络延迟时间（0743）
-
 > *有 n 个网络节点，标记为 1 到 n。*
 >
 > *给你一个列表 times，表示信号经过 有向 边的传递时间。 times[i] = (ui, vi, wi)，其中 ui 是源节点，vi 是目标节点， wi 是一个信号从源节点传递到目标节点的时间。*
@@ -1307,21 +1268,20 @@ class Solution {
 
 ```java
 class Solution {
-    Map<Integer, Integer> dist = new HashMap<>();
-
     public int networkDelayTime(int[][] times, int n, int k) {
+        Map<Integer, Integer> dist = new HashMap<>();
         Map<Integer, List<int[]>> graph = new HashMap<>();
-        for (int[] edge : times) {
-            if (!graph.containsKey(edge[0])) {
-                graph.put(edge[0], new ArrayList<int[]>());
+        for (int[] cur : times) {
+            if (!graph.containsKey(cur[0])) {
+                graph.put(cur[0], new ArrayList<int[]>());
             }
-            graph.get(edge[0]).add(new int[]{edge[1], edge[2]});
+            graph.get(cur[0]).add(new int[]{cur[1], cur[2]});
         }
 
         for (int node : graph.keySet()) {Collections.sort(graph.get(node), (a, b) -> a[0] - b[0]);}
-        t
+        for (int i = 1; i <= n; i++) {dist.put(i, Integer.MAX_VALUE);}
 
-        dfs(graph, k, 0);
+        dfs(graph, dist, k, 0);
 
         int ans = 0;
         for (int num : dist.values()) {
@@ -1331,20 +1291,23 @@ class Solution {
         return ans;
     }
 
-    private void dfs(Map<Integer, List<int[]>> graph, int node, int time) {
+    private static void dfs(Map<Integer, List<int[]>> graph, Map<Integer, Integer> dist, int node, int time) {
         if (time >= dist.get(node)) {return;}
+
         dist.put(node, time);
         if (graph.containsKey(node)) {
-            for (int[] info : graph.get(node)) {
-                dfs(graph, info[0], time + info[1]);
+            for (int[] cur : graph.get(node)) {
+                dfs(graph, dist, cur[0], time + cur[1]);
             }
         }
     }
 }
 ```
 
-## 打开转盘锁（0752）
+## 打开转盘锁
 
+> 752
+>
 > *你有一个带有四个圆形拨轮的转盘锁。每个拨轮都有10个数字： '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' 。每个拨轮可以自由旋转：例如把 '9' 变为  '0'，'0' 变为 '9' 。每次旋转都只能旋转一个拨轮的一位数字。*
 >
 > *锁的初始数字为 '0000' ，一个代表四个拨轮的数字的字符串。*
@@ -1410,55 +1373,10 @@ class Solution {
 }
 ```
 
-## 可能的二分法（0886）
+## 不邻接植花
 
-> *给定一组 N 人（编号为 1, 2, ..., N）， 我们想把每个人分进任意大小的两组。*
+> 1042
 >
-> *每个人都可能不喜欢其他人，那么他们不应该属于同一组。*
->
-> *形式上，如果 dislikes[i] = [a, b]，表示不允许将编号为 a 和 b 的人归入同一组。*
->
-> *当可以用这种方法将所有人分进两组时，返回 true；否则返回 false。*
-
-```java
-class Solution {
-    private static List<Integer>[] graph;
-    private static Map<Integer,Integer> color;
-
-    public boolean possibleBipartition(int N, int[][] dislikes) {
-        graph = new ArrayList[N + 1];
-        for (int i = 1; i <= N; i++) {graph[i] = new ArrayList<>();}
-
-        for (int[] edge : dislikes) {
-            graph[edge[0]].add(edge[1]);
-            graph[edge[1]].add(edge[0]);
-        }
-
-        color = new HashMap<>();
-        for (int node = 1; node <= N; node++) {
-            if (!color.containsKey(node) && !dfs(node, 0)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static boolean dfs(int node, int c) {
-        if (color.containsKey(node)) {return color.get(node) == c;}
-        
-        color.put(node, c);
-
-        for (int neigh : graph[node]) {
-            if (!dfs(neigh, c ^ 1)) {return false;}
-        }
-
-        return true;
-    }
-}
-```
-
-## 不邻接植花（1042）
-
 > *有 n 个花园，按从 1 到 n 标记。另有数组 paths ，其中 paths[i] = [xi, yi] 描述了花园 xi 到花园 yi 的双向路径。在每个花园中，你打算种下四种花之一。*
 >
 > *另外，所有花园 最多 有 3 条路径可以进入或离开.*
@@ -1503,11 +1421,13 @@ class Solution {
 }
 ```
 
-## 颜色交替的最短路径（1129）
+## 颜色交替的最短路径
 
+> 1129
+>
 > *在一个有向图中，节点分别标记为 0, 1, ..., n-1。这个图中的每条边不是红色就是蓝色，且存在自环或平行边。*
 >
-> *red_edges 中的每一个 [i, j] 对表示从节点 i 到节点 j 的红色有向边。类似地，blue_edges 中的每一个 [i, j] 对表示从节点 i 到节点 j 的蓝色有向边。*
+> *red_edges 中的每一个 [i, j] 对表示从节点 i 到节点 j 的**红色有向边**。类似地，blue_edges 中的每一个 [i, j] 对表示从节点 i 到节点 j 的**蓝色有向边**。*
 >
 > *返回长度为 n 的数组 answer，其中 answer[X] 是从节点 0 到节点 X 的红色边和蓝色边交替出现的最短路径的长度。如果不存在这样的路径，那么 answer[x] = -1。*
 
@@ -1566,8 +1486,10 @@ class Solution {
 }
 ```
 
-## 最小高度树（0310）
+## 最小高度树
 
+> 310
+>
 > *树是一个无向图，其中任何两个顶点只通过一条路径连接。 换句话说，一个任何没有简单环路的连通图都是一棵树。*
 >
 > *给你一棵包含 n 个节点的树，标记为 0 到 n - 1 。给定数字 n 和一个有 n - 1 条无向边的 edges 列表（每一个边都是一对标签），其中 edges[i] = [ai, bi] 表示树中节点 ai 和 bi 之间存在一条无向边。*
@@ -1631,8 +1553,10 @@ class Solution {
 }
 ```
 
-## 员工的重要性（0690）
+## 员工的重要性
 
+> 690
+>
 > *给定一个保存员工信息的数据结构，它包含了员工 唯一的 id ，重要度 和 直系下属的 id 。*
 >
 > *比如，员工 1 是员工 2 的领导，员工 2 是员工 3 的领导。他们相应的重要度为 15 , 10 , 5 。那么员工 1 的数据结构是 [1, 15, [2]] ，员工 2的 数据结构是 [2, 10, [3]] ，员工 3 的数据结构是 [3, 5, []] 。注意虽然员工 3 也是员工 1 的一个下属，但是由于 并不是直系 下属，因此没有体现在员工 1 的数据结构中。*
@@ -1685,8 +1609,10 @@ class Solution {
 }
 ```
 
-## 马在棋盘上的概率（0688）
+## 马在棋盘上的概率
 
+> 688
+>
 > *已知一个 NxN 的国际象棋棋盘，棋盘的行号和列号都是从 0 开始。即最左上角的格子记为 (0, 0)，最右下角的记为 (N-1, N-1)。* 
 >
 > *现有一个 “马”（也译作 “骑士”）位于 (r, c) ，并打算进行 K 次移动。* 
@@ -1730,6 +1656,62 @@ class Solution {
         }
 
         return ans;
+    }
+}
+```
+
+## 扫雷游戏
+
+> 529
+>
+> 给定一个代表游戏板的二维字符矩阵。 'M' 代表一个未挖出的地雷，'E' 代表一个未挖出的空方块，'B' 代表没有相邻（上，下，左，右，和所有4个对角线）地雷的已挖出的空白方块，数字（'1' 到 '8'）表示有多少地雷与这块已挖出的方块相邻，'X' 则表示一个已挖出的地雷。
+>
+> 现在给出在所有未挖出的方块中（'M'或者'E'）的下一个点击位置（行和列索引），根据以下规则，返回相应位置被点击后对应的面板：
+>
+> 如果一个地雷（'M'）被挖出，游戏就结束了- 把它改为 'X'。
+> 如果一个没有相邻地雷的空方块（'E'）被挖出，修改它为（'B'），并且所有和其相邻的未挖出方块都应该被递归地揭露。
+> 如果一个至少与一个地雷相邻的空方块（'E'）被挖出，修改它为数字（'1'到'8'），表示相邻地雷的数量。
+> 如果在此次点击中，若无更多方块可被揭露，则返回面板。
+
+```java
+class Solution {
+    private static int[] dirX = {0, 1, 0, -1, 1, 1, -1, -1};
+    private static int[] dirY = {1, 0, -1, 0, 1, -1, 1, -1};
+
+    public char[][] updateBoard(char[][] board, int[] click) {
+        int x = click[0], y = click[1];
+        if (board[x][y] == 'M') {
+            board[x][y] = 'X';
+        }
+        else {
+            dfs(board, x, y);
+        }
+        return board;
+    }
+
+    private static void dfs(char[][] board, int x, int y) {
+        int cnt = 0;
+        for (int i = 0; i < 8; i++) {
+            int nextX = x + dirX[i], nextY = y + dirY[i];
+            if (nextX < 0 || nextX >= board.length || nextY < 0 || nextY >= board[0].length) {
+                continue;
+            }
+
+            if (board[nextX][nextY] == 'M') {cnt++;}
+        }
+
+        if (cnt > 0) {board[x][y] = (char)(cnt + '0');}
+        else {
+            board[x][y] = 'B';
+            for (int t = 0; t < 8; t++) {
+                int nextX = x + dirX[t], nextY = y + dirY[t];
+                if (nextX < 0 || nextX >= board.length || nextY < 0 || nextY >= board[0].length || board[nextX][nextY] != 'E') {
+                    continue;
+                }
+
+                dfs(board, nextX, nextY);
+            }
+        }
     }
 }
 ```

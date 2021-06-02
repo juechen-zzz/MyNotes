@@ -1,7 +1,9 @@
 [TOC]
 
-## 有效的括号（0020）
+## 有效的括号
 
+> 20
+>
 > *给定一个只包括 '('，')'，'{'，'}'，'['，']' 的字符串，判断字符串是否有效。*
 >
 > *输入: "()[]{}"*
@@ -12,32 +14,32 @@
 class Solution {
     public boolean isValid(String s) {
         if (s.length() % 2 != 0) {return false;}
-        Map<Character, Character> pairs = new HashMap<Character, Character>() {{
-            put(')', '(');
-            put(']', '[');
-            put('}', '{');
-        }};
+        Map<Character, Character> map = new HashMap<>();
+        map.put(')', '(');
+        map.put(']', '[');
+        map.put('}', '{');
 
         Stack<Character> stack = new Stack<>();
-
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
-            if (pairs.containsKey(c)) {
-                if (stack.isEmpty() || stack.peek() != pairs.get(c)) {
-                    return false;
-                }
+            if (map.containsKey(c)) {
+                if (stack.isEmpty() || stack.peek() != map.get(c)) {return false;}
                 stack.pop();
-            } else {
+            }
+            else {
                 stack.push(c);
             }
         }
+
         return stack.isEmpty();
     }
 }
 ```
 
-## 有效的括号字符串（0678）
+## 有效的括号字符串
 
+> 678
+>
 > *给定一个只包含三种字符的字符串：（ ，） 和 \*，写一个函数来检验这个字符串是否为有效字符串。有效字符串具有如下规则：*
 >
 > *任何左括号 ( 必须有相应的右括号 )。*
@@ -51,13 +53,14 @@ class Solution {
 > *一个空字符串也被视为有效字符串。*
 
 ```java
-// solution 1
+// solution 1 将所有星星视作左括号，然后从左到右逐步统计左括号相对右括号多余的数量
 class Solution {
     public boolean checkValidString(String s) {
-        int left = 0, right = 0, n = s.length();
+        int left = 0, right = 0;
+        int n = s.length();
         for (int i = 0; i < n; i++) {
             left += (s.charAt(i) == ')') ? -1 : 1;
-            right += (s.charAt(n - i - 1) == '(') ? -1 : 1;
+            right += (s.charAt(n - 1 - i) == '(') ? -1 : 1;
             if (left < 0 || right < 0) {
                 return false;
             }
@@ -66,7 +69,7 @@ class Solution {
     }
 }
 
-// solution 2 stack
+// solution 2 常规双栈思路
 class Solution {
     public boolean checkValidString(String s) {
         int n = s.length();
@@ -97,8 +100,10 @@ class Solution {
 }
 ```
 
-## 柱状图中最大的矩形（0084）
+## 柱状图中最大的矩形
 
+> 84
+>
 > *给定 n 个非负整数，用来表示柱状图中各个柱子的高度。每个柱子彼此相邻，且宽度为 1 。*
 >
 > *求在该柱状图中，能够勾勒出来的矩形的最大面积。*
@@ -125,8 +130,10 @@ class Solution {
 }
 ```
 
-## 逆波兰表达式求值（0150）
+## 逆波兰表达式求值
 
+> 150
+>
 > *根据 逆波兰表示法，求表达式的值。*
 >
 > *有效的运算符包括 +, -, \*, / 。每个运算对象可以是整数，也可以是另一个逆波兰表达式。*
@@ -197,11 +204,9 @@ class Solution {
         while (deque.size() > 0) {
             char c = deque.pollFirst();
             if (Character.isDigit(c)) {
-                num = 10 * num + (c - '0');
+                num = num * 10 + (c - '0');
             }
-            if (c == '(') {
-                num = myMethod(deque);
-            }
+            if (c == '(') {num = myMethod(deque);}
 
             if ((!Character.isDigit(c) && c !=' ') || deque.size() == 0) {
                 if (sign == '+') {stack.push(num);}
@@ -217,19 +222,20 @@ class Solution {
         }
 
         int ans = 0;
-        for (int n : stack) {
-            ans += n;
-        }
+        for (int n : stack) {ans += n;}
         return ans;
     }
 }
 ```
 
-## 移掉K位数字（0402）
+## 移掉K位数字
 
+> 402
+>
 > *给定一个以字符串表示的非负整数 num，移除这个数中的 k 位数字，使得剩下的数字最小。*
 
 ```java
+// 若要使得剩下的数字最小，需要保证靠前的数字尽可能小
 class Solution {
     public String removeKdigits(String num, int k) {
         Deque<Character> deque = new LinkedList<>();
@@ -260,7 +266,14 @@ class Solution {
 }
 ```
 
-## 132模式（0456）
+## 132模式
+
+> 456
+>
+> 给你一个整数数组 nums ，数组中共有 n 个整数。132 模式的子序列 由三个整数 nums[i]、nums[j] 和 nums[k] 组成，并同时满足：i < j < k 和 nums[i] < nums[k] < nums[j] 。
+>
+> 如果 nums 中存在 132 模式的子序列 ，返回 true ；否则，返回 false 。
+>
 
 ```java
 class Solution {
@@ -268,10 +281,11 @@ class Solution {
         int n = nums.length;
         int[] curMin = new int[n];
         curMin[0] = nums[0];
+        for (int i = 1; i < n; i++) {
+            curMin[i] = Math.min(curMin[i - 1], nums[i]);
+        }
 
-        for (int i = 1; i < n; i++) {curMin[i] = Math.min(curMin[i - 1], nums[i]);}
         Stack<Integer> stack = new Stack<>();
-
         for (int i = n - 1; i >= 0; i--) {
             while (!stack.isEmpty() && stack.peek() <= curMin[i]) {stack.pop();}
             if (!stack.isEmpty() && nums[i] > stack.peek()) {return true;}
@@ -381,8 +395,10 @@ class Solution {
 }
 ```
 
-## 最短无序连续子数组（0581）
+## 最短无序连续子数组
 
+> 581
+>
 > *给你一个整数数组 nums ，你需要找出一个 连续子数组 ，如果对这个子数组进行升序排序，那么整个数组都会变为升序排序。*
 >
 > *请你找出符合题意的 最短 子数组，并输出它的长度。*
@@ -430,91 +446,10 @@ class Solution {
 }
 ```
 
-## 函数的独占时间（0636）
+## 行星碰撞
 
-> *给出一个非抢占单线程CPU的 n 个函数运行日志，找到函数的独占时间。*
+> 735
 >
-> *每个函数都有一个唯一的 Id，从 0 到 n-1，函数可能会递归调用或者被其他函数调用。*
->
-> *日志是具有以下格式的字符串：function_id：start_or_end：timestamp。例如："0:start:0" 表示函数 0 从 0 时刻开始运行。"0:end:0" 表示函数 0 在 0 时刻结束。*
->
-> *函数的独占时间定义是在该方法中花费的时间，调用其他函数花费的时间不算该函数的独占时间。你需要根据函数的 Id 有序地返回每个函数的独占时间。*
-
-```java
-class Solution {
-    public int[] exclusiveTime(int n, List<String> logs) {
-        Stack<Integer> stack = new Stack<>();
-        int[] ans = new int[n];
-        String[] s = logs.get(0).split(":");
-
-        stack.push(Integer.parseInt(s[0]));
-        int pre = Integer.parseInt(s[2]);
-        for (int i = 1; i < logs.size(); i++) {
-            s = logs.get(i).split(":");
-            if (s[1].equals("start")) {
-                if (!stack.isEmpty()) {
-                    ans[stack.peek()] += Integer.parseInt(s[2]) - pre;
-                }
-                stack.push(Integer.parseInt(s[0]));
-                pre = Integer.parseInt(s[2]);
-            }
-            else {
-                ans[stack.peek()] += Integer.parseInt(s[2]) - pre + 1;
-                stack.pop();
-                pre = Integer.parseInt(s[2]) + 1;
-            }
-        }
-
-        return ans;
-    }
-}
-```
-
-## 棒球比赛（0682）
-
-> *你现在是一场采用特殊赛制棒球比赛的记录员。这场比赛由若干回合组成，过去几回合的得分可能会影响以后几回合的得分。*
->
-> *比赛开始时，记录是空白的。你会得到一个记录操作的字符串列表 ops，其中 ops[i] 是你需要记录的第 i 项操作，ops 遵循下述规则：*
->
-> *整数 x - 表示本回合新获得分数 x*
->
-> *"+" - 表示本回合新获得的得分是前两次得分的总和。题目数据保证记录此操作时前面总是存在两个有效的分数。*
->
-> *"D" - 表示本回合新获得的得分是前一次得分的两倍。题目数据保证记录此操作时前面总是存在一个有效的分数。*
->
-> *"C" - 表示前一次得分无效，将其从记录中移除。题目数据保证记录此操作时前面总是存在一个有效的分数。*
->
-> *请你返回记录中所有得分的总和。*
-
-```java
-class Solution {
-    public int calPoints(String[] ops) {
-        Stack<Integer> stack = new Stack<>();
-
-        for(String op : ops) {
-            if (op.equals("+")) {
-                int top = stack.pop();
-                int newtop = top + stack.peek();
-                stack.push(top);
-                stack.push(newtop);
-            } else if (op.equals("C")) {
-                stack.pop();
-            } else if (op.equals("D")) {
-                stack.push(2 * stack.peek());
-            } else {
-                stack.push(Integer.valueOf(op));
-            }
-        }
-
-        int ans = 0;
-        for(int score : stack) {ans += score;}
-        return ans;
-    }
-}
-```
-
-## 行星碰撞（0735）
-
 > *给定一个整数数组 asteroids，表示在同一行的行星。*
 >
 > *对于数组中的每一个元素，其绝对值表示行星的大小，正负表示行星的移动方向（正表示向右移动，负表示向左移动）。每一颗行星以相同的速度移动。*
@@ -566,3 +501,89 @@ class Solution {
 }
 ```
 
+## 棒球比赛
+
+> 682
+>
+> *你现在是一场采用特殊赛制棒球比赛的记录员。这场比赛由若干回合组成，过去几回合的得分可能会影响以后几回合的得分。*
+>
+> *比赛开始时，记录是空白的。你会得到一个记录操作的字符串列表 ops，其中 ops[i] 是你需要记录的第 i 项操作，ops 遵循下述规则：*
+>
+> *整数 x - 表示本回合新获得分数 x*
+>
+> *"+" - 表示本回合新获得的得分是前两次得分的总和。题目数据保证记录此操作时前面总是存在两个有效的分数。*
+>
+> *"D" - 表示本回合新获得的得分是前一次得分的两倍。题目数据保证记录此操作时前面总是存在一个有效的分数。*
+>
+> *"C" - 表示前一次得分无效，将其从记录中移除。题目数据保证记录此操作时前面总是存在一个有效的分数。*
+>
+> *请你返回记录中所有得分的总和。*
+
+```java
+class Solution {
+    public int calPoints(String[] ops) {
+        Stack<Integer> stack = new Stack<>();
+
+        for(String op : ops) {
+            if (op.equals("+")) {
+                int top = stack.pop();
+                int newtop = top + stack.peek();
+                stack.push(top);
+                stack.push(newtop);
+            } else if (op.equals("C")) {
+                stack.pop();
+            } else if (op.equals("D")) {
+                stack.push(2 * stack.peek());
+            } else {
+                stack.push(Integer.valueOf(op));
+            }
+        }
+
+        int ans = 0;
+        for(int score : stack) {ans += score;}
+        return ans;
+    }
+}
+```
+
+## 函数的独占时间
+
+> 636
+>
+> *给出一个非抢占单线程CPU的 n 个函数运行日志，找到函数的独占时间。*
+>
+> *每个函数都有一个唯一的 Id，从 0 到 n-1，函数可能会递归调用或者被其他函数调用。*
+>
+> *日志是具有以下格式的字符串：function_id：start_or_end：timestamp。例如："0:start:0" 表示函数 0 从 0 时刻开始运行。"0:end:0" 表示函数 0 在 0 时刻结束。*
+>
+> *函数的独占时间定义是在该方法中花费的时间，调用其他函数花费的时间不算该函数的独占时间。你需要根据函数的 Id 有序地返回每个函数的独占时间。*
+
+```java
+class Solution {
+    public int[] exclusiveTime(int n, List<String> logs) {
+        Stack<Integer> stack = new Stack<>();
+        int[] ans = new int[n];
+        String[] s = logs.get(0).split(":");
+
+        stack.push(Integer.parseInt(s[0]));
+        int pre = Integer.parseInt(s[2]);
+        for (int i = 1; i < logs.size(); i++) {
+            s = logs.get(i).split(":");
+            if (s[1].equals("start")) {
+                if (!stack.isEmpty()) {
+                    ans[stack.peek()] += Integer.parseInt(s[2]) - pre;
+                }
+                stack.push(Integer.parseInt(s[0]));
+                pre = Integer.parseInt(s[2]);
+            }
+            else {
+                ans[stack.peek()] += Integer.parseInt(s[2]) - pre + 1;
+                stack.pop();
+                pre = Integer.parseInt(s[2]) + 1;
+            }
+        }
+
+        return ans;
+    }
+}
+```
