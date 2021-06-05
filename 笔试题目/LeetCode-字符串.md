@@ -37,8 +37,10 @@ class Solution {
 }
 ```
 
-## 最长回文串（0409）
+## 最长回文串
 
+> 409
+>
 > *给定一个包含大写字母和小写字母的字符串，找到通过这些字母构造成的最长的回文串。*
 >
 > *在构造过程中，请注意区分大小写。比如 "Aa" 不能当做一个回文字符串。*
@@ -49,27 +51,36 @@ class Solution {
         if (s.length() == 0) {return 0;}
         Map<Character, Integer> count = new HashMap<>();
         for (int i = 0; i < s.length(); i++) {
-            count.put(s.charAt(i), count.getOrDefault(s.charAt(i), 0) + 1);
+            char c = s.charAt(i);
+            count.put(c, count.getOrDefault(c, 0) + 1);
         }
 
         int ans = 0;
         boolean single = true;
         for (char c : count.keySet()) {
-            if (single && ((count.get(c) & 1) == 1)) {
+            if (single && count.get(c) % 2 == 1) {
                 ans += count.get(c);
                 single = false;
             }
             else {
-                ans += (((count.get(c) & 1) == 0) ? count.get(c) : count.get(c) - 1);
+                if (count.get(c) % 2 == 0) {
+                    ans += count.get(c);
+                }
+                else {
+                    ans += count.get(c) - 1;
+                }
             }
         }
+
         return ans;
     }
 }
 ```
 
-## 验证回文串（0125）
+## 验证回文串
 
+> 125
+>
 > *给定一个字符串，验证它是否是回文串，只考虑字母和数字字符，可以忽略字母的大小写。*
 
 ```java
@@ -90,26 +101,29 @@ class Solution {
 }
 ```
 
+> 680
+>
 > *给定一个非空字符串 s，最多删除一个字符。判断是否能成为回文字符串。*
 
 ```java
 class Solution {
     public boolean validPalindrome(String s) {
-        int low = 0, high = s.length() - 1;
-        while (low < high) {
-            char c1 = s.charAt(low), c2 = s.charAt(high);
+        int left = 0, right = s.length() - 1;
+        while (left < right) {
+            char c1 = s.charAt(left), c2 = s.charAt(right);
             if (c1 == c2) {
-                low++;
-                high--;
-            } else {
-                return validPalindrome(s, low, high - 1) || validPalindrome(s, low + 1, high);
+                left++;
+                right--;
+            }
+            else {
+                return myMethod(s, left, right - 1) || myMethod(s, left + 1, right);
             }
         }
         return true;
     }
 
-    public boolean validPalindrome(String s, int low, int high) {
-        for (int i = low, j = high; i < j; i++, j--) {
+    private static boolean myMethod(String s, int left, int right) {
+        for (int i = left, j = right; i < j; i++, j--) {
             char c1 = s.charAt(i), c2 = s.charAt(j);
             if (c1 != c2) {return false;}
         }
@@ -118,50 +132,52 @@ class Solution {
 }
 ```
 
-## 分割回文串（0131 && 0132）
+## 分割回文串
 
+> 131
+>
 > *给定一个字符串 s，将 s 分割成一些子串，使每个子串都是回文串。*
 >
 > *返回 s 所有可能的分割方案。*
 
 ```java
 class Solution {
-    List<List<String>> ans = new ArrayList<>();
-
     public List<List<String>> partition(String s) {
-        int len = s.length();
-        if (len == 0) {return ans;}
-        Deque<String> path  = new LinkedList<>();
+        List<List<String>> ans = new ArrayList<>();
+        int n = s.length();
+        if (n == 0) {return ans;}
+        Deque<String> path = new LinkedList<>();
 
-        backtrack(s, 0, len, path);
+        myMethod(s, n, ans, path, 0);
         return ans;
     }
 
-    public void backtrack(String s, int start, int len, Deque<String> path) {
-        if (start == len) {
+    private static void myMethod(String s, int len, List<List<String>> ans, Deque<String> path, int begin) {
+        if (begin == len) {
             ans.add(new ArrayList<>(path));
             return;
         }
 
-        for (int i = start; i < len; i++) {
-            if (!checkpalindrome(s, start, i)) {continue;}
-            path.offerLast(s.substring(start, i + 1));
-            backtrack(s, i + 1, len, path);
-            path.removeLast();
+        for (int i = begin; i < len; i++) {
+            if (!check(s, begin, i)) {continue;}
+            path.offerLast(s.substring(begin, i + 1));
+            myMethod(s, len, ans, path, i + 1);
+            path.pollLast();
         }
     }
 
-    public boolean checkpalindrome(String s, int left, int right) {
-        while (left < right) {
-            if (s.charAt(left) != s.charAt(right)) {return false;}
-            left++;
-            right--;
+    private static boolean check(String s, int left, int right) {
+        for (int i = left, j = right; i < j; i++, j--) {
+            char c1 = s.charAt(i), c2 = s.charAt(j);
+            if (c1 != c2) {return false;}
         }
         return true;
     }
 }
 ```
 
+> 132
+>
 > *给定一个字符串 s，将 s 分割成一些子串，使每个子串都是回文串。*
 >
 > *返回符合要求的最少分割次数。*
@@ -169,28 +185,29 @@ class Solution {
 ```java
 class Solution {
     public int minCut(String s) {
-        int len = s.length();
-        if (len < 2) {return 0;}
+        int n = s.length();
+        if (n < 2) {return 0;}
 
-        int[] dp = new int[len];
-        for (int i = 0; i < len; i++) {dp[i] = i;}
+        int[] dp = new int[n];
+        for (int i = 0; i < n; i++) {dp[i] = i;}
 
-        for (int i = 1; i < len; i++) {
-            if (checkPalindrome(s, 0, i)) {
+        for (int i = 1; i < n; i++) {
+            if (check(s, 0, i)) {
                 dp[i] = 0;
                 continue;
             }
 
             for (int j = 0; j < i; j++) {
-                if (checkPalindrome(s, j + 1, i)) {
+                if (check(s, j + 1, i)) {
                     dp[i] = Math.min(dp[i], dp[j] + 1);
                 }
             }
         }
-        return dp[len - 1];
+
+        return dp[n - 1];
     }
 
-    public boolean checkPalindrome(String s, int left, int right) {
+    private static boolean check(String s, int left, int right) {
         while (left < right) {
             if (s.charAt(left) != s.charAt(right)) {return false;}
             left++;
@@ -201,8 +218,10 @@ class Solution {
 }
 ```
 
-## 回文子串（0647）
+## 回文子串
 
+> 647
+>
 > *给定一个字符串，你的任务是计算这个字符串中有多少个回文子串。*
 >
 > *具有不同开始位置或结束位置的子串，即使是由相同的字符组成，也会被视作不同的子串。*
@@ -224,13 +243,15 @@ class Solution {
             }
         }
 
-        return ans;
+        return ans;()
     }
 }
 ```
 
-## 串联所有单词的子串（0030）
+## 串联所有单词的子串
 
+> 30
+>
 > *给定一个字符串 s 和一些长度相同的单词 words。找出 s 中恰好可以由 words 中所有单词串联形成的子串的起始位置。*
 >
 > *注意子串要与 words 中的单词完全匹配，中间不能有其他字符，但不需要考虑 words 中单词串联的顺序。*
@@ -256,30 +277,29 @@ class Solution {
         List<Integer> ans = new ArrayList<>();
         if (s.length() == 0 || words.length == 0) {return ans;}
 
-        int wordLength = words[0].length(), wordNum = words.length;
-        int targetLength = wordLength * wordNum;
-        HashMap<String, Integer> map = new HashMap<>();
-        for (String word : words) {
-            map.put(word, map.getOrDefault(word, 0) + 1);
-        }
+        int oneLen = words[0].length(), n = words.length;
+        int targetLen = oneLen * n;
+        Map<String, Integer> map = new HashMap<>();
+        for (String w : words) {map.put(w, map.getOrDefault(w, 0) + 1);}
 
-        for (int i = 0; i < s.length() - targetLength + 1; i++) {
-            String tmp = s.substring(i, i + targetLength);
-            HashMap<String, Integer> tempMap = new HashMap<>();
-            for (int j = 0; j < targetLength; j += wordLength) {
-                String tempWord = tmp.substring(j, j+ wordLength);
-                tempMap.put(tempWord, tempMap.getOrDefault(tempWord, 0) + 1);
+        for (int i = 0; i < s.length() - targetLen + 1; i++) {
+            String cur = s.substring(i, i + targetLen);
+            Map<String, Integer> temp = new HashMap<>();
+            for (int j = 0; j < targetLen; j += oneLen) {
+                String tempWord = cur.substring(j, j + oneLen);
+                temp.put(tempWord, temp.getOrDefault(tempWord, 0) + 1);
             }
-            if (tempMap.equals(map)) {ans.add(i);}
+            if (temp.equals(map)) {ans.add(i);}
         }
-
         return ans;
     }
 }
 ```
 
-## 删除无效的括号（0301）
+## 删除无效的括号
 
+> 301
+>
 > *删除最小数量的无效括号，使得输入的字符串有效，返回所有可能的结果。*
 >
 > *说明: 输入可能包含了除 ( 和 ) 以外的字符。*
@@ -290,38 +310,42 @@ class Solution {
         Set<String> set = new HashSet<>();
         List<String> ans = new ArrayList<>();
         set.add(s);
+        
         while (true) {
-            for (String str : set) {
-                if (isRegular(str))
-                    ans.add(str);
+            for (String cur : set) {
+                if (myMethod(cur)) {ans.add(cur);}
             }
-            if (ans.size() > 0) return ans;
+            if (ans.size() > 0) {return ans;}
+            
             Set<String> nextSet = new HashSet<>();
-            for (String str : set) {
-                for (int i = 0; i < str.length(); i ++) {
-                    if (str.charAt(i) == '(' || str.charAt(i) == ')')
-                        nextSet.add(str.substring(0, i) + str.substring(i + 1, str.length()));
+            for (String cur : set) {
+                for (int i = 0; i < cur.length(); i++) {
+                    if (cur.charAt(i) == '(' || cur.charAt(i) == ')') {
+                        nextSet.add(cur.substring(0, i) + cur.substring(i + 1, cur.length()));
+                    }
                 }
             }
             set = nextSet;
         }
     }
-    
-    public boolean isRegular(String s) {
-        char[] ss = s.toCharArray();
+
+    private static boolean myMethod(String s) {
+        char[] charArray = s.toCharArray();
         int count = 0;
-        for (char c : ss) {
-            if (c == '(') count ++;
-            else if (c == ')') count --;
-            if (count < 0) return false;
+        for (char c : charArray) {
+            if (c == '(') {count++;}
+            else if (c == ')') {count--;}
+            if (count < 0) {return false;}
         }
         return count == 0;
     }
 }
 ```
 
-## 字母异位词分组（0049）
+## 字母异位词分组
 
+> 49
+>
 > *给定一个字符串数组，将字母异位词组合在一起。字母异位词指字母相同，但排列不同的字符串。*
 
 ```java
@@ -329,20 +353,23 @@ class Solution {
     public List<List<String>> groupAnagrams(String[] strs) {
         Map<String, List<String>> map = new HashMap<>();
         for (String s : strs) {
-            char[] c = s.toCharArray();
-            Arrays.sort(c);
-            String key = new String(c);
-            List<String> list = map.getOrDefault(key, new ArrayList<String>());
-            list.add(s);
-            map.put(key, list);
+            char[] cur = s.toCharArray();
+            Arrays.sort(cur);
+            String key = new String(cur);
+
+            List<String> curList = map.getOrDefault(key, new ArrayList<String>());
+            curList.add(s);
+            map.put(key, curList);
         }
         return new ArrayList<List<String>>(map.values());
     }
 }
 ```
 
-## 二进制求和（0067）
+## 二进制求和
 
+> 67
+>
 > *给两个二进制字符串，返回它们的和（用二进制表示）。*
 >
 > *输入为 非空 字符串且只包含数字 1 和 0。*
@@ -351,58 +378,24 @@ class Solution {
 class Solution {
     public String addBinary(String a, String b) {
         StringBuilder ans = new StringBuilder();
-        int ca = 0;
-        for(int i = a.length() - 1, j = b.length() - 1; i >= 0 || j >= 0; i--, j--) {
-            int sum = ca;
+        int curSum = 0;
+        for (int i = a.length() - 1, j = b.length() - 1; i >= 0 || j >= 0; i--, j--) {
+            int sum = curSum;
             sum += (i >= 0 ? a.charAt(i) - '0' : 0);
             sum += (j >= 0 ? b.charAt(j) - '0' : 0);
             ans.append(sum % 2);
-            ca = sum / 2;
+            curSum = sum / 2;
         }
-        ans.append(ca == 1 ? ca : "");
+        ans.append((curSum == 1 ? curSum : ""));
         return ans.reverse().toString();
     }
 }
 ```
 
-## 简化路径（0071）
+## 最小覆盖子串
 
-> *以 Unix 风格给出一个文件的绝对路径，你需要简化它。或者换句话说，将其转换为规范路径。*
-
-```java
-class Solution {
-    public String simplifyPath(String path) {
-        if (path == null || path.length() == 0) {return "/";}
-        int n = path.length();
-        
-        List<String> names = new ArrayList<>();
-        for (int i = 0; i < n; i++) {
-            if (path.charAt(i) != '/'){
-                int j = i;
-                while (j < n && path.charAt(j) != '/') {j++;}
-                names.add(path.substring(i, j));
-                i = j;
-            }
-        }
-
-        List<String> ans = new ArrayList<>();
-        for (int i = 0; i < names.size(); i++) {
-            if (names.get(i).equals("..")) {
-                if (ans.size() > 0) {
-                    ans.remove(ans.size() - 1);
-                }
-            }
-            else if (!names.get(i).equals(".")) {
-                ans.add(names.get(i));
-            }
-        }
-        return "/" + String.join("/", ans);
-    }
-}
-```
-
-## 最小覆盖子串（0076）
-
+> 76
+>
 > *给你一个字符串 s 、一个字符串 t 。返回 s 中涵盖 t 所有字符的最小子串。如果 s 中不存在涵盖 t 所有字符的子串，则返回空字符串 "" 。*
 >
 > *注意：如果 s 中存在这样的子串，我们保证它是唯一的答案。*
@@ -410,8 +403,8 @@ class Solution {
 ```java
 class Solution {
     public String minWindow(String s, String t) {
-        HashMap<Character, Integer> need = new HashMap<>();
-        HashMap<Character, Integer> window = new HashMap<>();
+        Map<Character, Integer> need = new HashMap<>();
+        Map<Character, Integer> window = new HashMap<>();
         for (int i = 0; i < t.length(); i++) {
             char c = t.charAt(i);
             need.put(c, need.getOrDefault(c, 0) + 1);
@@ -419,26 +412,25 @@ class Solution {
 
         int left = 0, right = 0;
         int valid = 0;
-        // 记录最小覆盖子串的起始索引及长度
         int start = 0, len = s.length() + 1;
-        while (right < s.length()){
+        while (right < s.length()) {
             char c = s.charAt(right);
             right++;
-            if (need.containsKey(c)){
+            if (need.containsKey(c)) {
                 window.put(c, window.getOrDefault(c, 0) + 1);
-                if (window.get(c) - need.get(c) == 0){valid++;}
+                if (window.get(c) - need.get(c) == 0) {valid++;}
             }
 
-            while (valid == need.size()){
-                if (right - left < len){
+            while (valid == need.size()) {
+                if (right - left < len) {
                     start = left;
                     len = right - left;
                 }
                 char d = s.charAt(left);
                 left++;
-                if (need.containsKey(d)){
-                    if (window.get(d) - need.get(d) == 0){valid--;}
-                    window.put(d, window.getOrDefault(d, 0) - 1);
+                if (need.containsKey(d)) {
+                    if (window.get(d) - need.get(d) == 0) {valid--;}
+                    window.put(d, window.get(d) - 1);
                 }
             }
         }
@@ -448,122 +440,10 @@ class Solution {
 }
 ```
 
-## 解码方法（0091）
+## 单词拆分
 
-> *'A' -> 1*
+> 139
 >
-> *'B' -> 2*
->
-> *...*
->
-> *'Z' -> 26*
->
-> *要 解码 已编码的消息，所有数字必须基于上述映射的方法，反向映射回字母（可能有多种方法）。例如，"111" 可以将 "1" 中的每个 "1" 映射为 "A" ，从而得到 "AAA" ，或者可以将 "11" 和 "1"（分别为 "K" 和 "A" ）映射为 "KA" 。注意，"06" 不能映射为 "F" ，因为 "6" 和 "06" 不同。*
->
-> *给你一个只含数字的 非空 字符串 num ，请计算并返回 解码 方法的 总数 。*
-
-```java
-class Solution {
-    public int numDecodings(String s) {
-        int n = s.length();
-        if (n == 0) {return 0;}
-        int[] dp = new int[n + 1];
-        dp[0] = 1;
-        dp[1] = s.charAt(0) == '0' ? 0 : 1;
-
-        for (int i = 1; i < n; i++) {
-            if ((s.charAt(i - 1) == '1') || (s.charAt(i - 1) == '2' && s.charAt(i) < '7')) {
-                if (s.charAt(i) == '0') {dp[i + 1] = dp[i - 1];}
-                else {dp[i + 1] = dp[i] + dp[i - 1];}
-            }
-            else if (s.charAt(i) == '0') {
-                return 0;
-            }
-            else {
-                dp[i + 1] = dp[i];
-            }
-        }
-
-        return dp[n];
-    }
-}
-```
-
-## 复原IP地址（0093）
-
-> 给定一个只包含数字的字符串，用以表示一个 IP 地址，返回所有可能从 s 获得的 有效 IP 地址 。你可以按任何顺序返回答案。
->
-> 有效 IP 地址 正好由四个整数（每个整数位于 0 到 255 之间组成，且不能含有前导 0），整数之间用 '.' 分隔。
->
-> 例如："0.1.2.201" 和 "192.168.1.1" 是 有效 IP 地址，但是 "0.011.255.245"、"192.168.1.312" 和 "192.168@1.1" 是 无效 IP 地址。
->
->  
->
-> 示例 1：
->
-> 输入：s = "25525511135"
-> 输出：["255.255.11.135","255.255.111.35"]
-> 示例 2：
->
-> 输入：s = "0000"
-> 输出：["0.0.0.0"]
-
-```java
-class Solution {
-    static final int SEG_COUNT = 4;
-    List<String> ans = new ArrayList<String>();
-    int[] segments = new int[SEG_COUNT];
-
-    public List<String> restoreIpAddresses(String s) {
-        segments = new int[SEG_COUNT];
-        dfs(s, 0, 0);
-        return ans;
-    }
-
-    public void dfs(String s, int segId, int segStart) {
-        // 如果找到了 4 段 IP 地址并且遍历完了字符串，那么就是一种答案
-        if (segId == SEG_COUNT) {
-            if (segStart == s.length()) {
-                StringBuffer ipAddr = new StringBuffer();
-                for (int i = 0; i < SEG_COUNT; ++i) {
-                    ipAddr.append(segments[i]);
-                    if (i != SEG_COUNT - 1) {
-                        ipAddr.append('.');
-                    }
-                }
-                ans.add(ipAddr.toString());
-            }
-            return;
-        }
-
-        // 如果还没有找到 4 段 IP 地址就已经遍历完了字符串，那么提前回溯
-        if (segStart == s.length()) {
-            return;
-        }
-
-        // 由于不能有前导零，如果当前数字为 0，那么这一段 IP 地址只能为 0
-        if (s.charAt(segStart) == '0') {
-            segments[segId] = 0;
-            dfs(s, segId + 1, segStart + 1);
-        }
-
-        // 一般情况，枚举每一种可能性并递归
-        int addr = 0;
-        for (int segEnd = segStart; segEnd < s.length(); ++segEnd) {
-            addr = addr * 10 + (s.charAt(segEnd) - '0');
-            if (addr > 0 && addr <= 0xFF) {
-                segments[segId] = addr;
-                dfs(s, segId + 1, segEnd + 1);
-            } else {
-                break;
-            }
-        }
-    }
-}
-```
-
-## 单词拆分（0139 && 0140）
-
 > *给定一个非空字符串 s 和一个包含非空单词的列表 wordDict，判定 s 是否可以被空格拆分为一个或多个在字典中出现的单词。*
 
 ```java
@@ -575,7 +455,7 @@ class Solution {
         boolean[] dp = new boolean[n + 1];
         dp[0] = true;
 
-        for (int i = 1; i <= n; i++) {
+        for (int i = 0; i <= n; i++) {
             for (int j = 0; j < i; j++) {
                 if (dp[j] && wordDict.contains(s.substring(j, i))) {
                     dp[i] = true;
@@ -588,12 +468,13 @@ class Solution {
 }
 ```
 
+> 140
+>
 > *给定一个非空字符串 s 和一个包含非空单词列表的字典 wordDict，在字符串中增加空格来构建一个句子，使得句子中所有的单词都在词典中。返回所有这些可能的句子。*
 
 ```java
 class Solution {
     public List<String> wordBreak(String s, List<String> wordDict) {
-        // 为了快速判断一个单词是否在单词集合中，需要将它们加入哈希表
         int n = s.length();
 
         // 第 1 步：动态规划得到是否可以划分
@@ -618,7 +499,7 @@ class Solution {
         return ans;
     }
 
-    public void dfs(String s, int len, List<String> wordDict, boolean[] dp, Deque<String> deque, List<String> ans) {
+    private static void dfs(String s, int len, List<String> wordDict, boolean[] dp, Deque<String> deque, List<String> ans) {
         if (len == 0) {
             ans.add(String.join(" ", deque));
             return;
@@ -636,8 +517,10 @@ class Solution {
 }
 ```
 
-## 翻转字符串中的单词（0151）
+## 翻转字符串中的单词
 
+> 151
+>
 > *给定一个字符串，逐个翻转字符串中的每个单词。*
 >
 > *示例 1：*
@@ -659,8 +542,10 @@ class Solution {
 }
 ```
 
-## 重构字符串（0767）
+## 重构字符串
 
+> 767
+>
 > *给定一个字符串S，检查是否能重新排布其中的字母，使得两相邻的字符不同。*
 >
 > *若可行，输出任意可行的结果。若不可行，返回空字符串。*
@@ -668,15 +553,14 @@ class Solution {
 ```java
 class Solution {
     public String reorganizeString(String s) {
-        char[] charArray = s.toCharArray();
-        int[] dist = new int[26];
         int n = s.length();
-        for (int i = 0; i < n; i++) {dist[charArray[i] - 'a']++;}
+        int[] count = new int[26];
+        for (int i = 0; i < n; i++) {count[s.charAt(i) - 'a']++;}
 
         int maxCount = 0, alphabet = 0;
         for (int i = 0; i < 26; i++) {
-            if (dist[i] > maxCount) {
-                maxCount = dist[i];
+            if (count[i] > maxCount) {
+                maxCount = count[i];
                 alphabet = i;
                 if (maxCount > (n + 1) / 2) {return "";}
             }
@@ -684,18 +568,18 @@ class Solution {
 
         char[] ans = new char[n];
         int idx = 0;
-        while (dist[alphabet] > 0) {
+        while (count[alphabet] > 0) {
             ans[idx] = (char)(alphabet + 'a');
             idx += 2;
-            dist[alphabet]--;
+            count[alphabet]--;
         }
 
         for (int i = 0; i < 26; i++) {
-            while (dist[i] > 0) {
+            while (count[i] > 0) {
                 if (idx >= n) {idx = 1;}
                 ans[idx] = (char)(i + 'a');
                 idx += 2;
-                dist[i]--;
+                count[i]--;
             }
         }
 
@@ -704,8 +588,10 @@ class Solution {
 }
 ```
 
-## 反转字符串（0541）
+## 反转字符串
 
+> 541
+>
 > *给定一个字符串 s 和一个整数 k，你需要对从字符串开头算起的每隔 2k 个字符的前 k 个字符进行反转。*
 >
 > *如果剩余字符少于 k 个，则将剩余字符全部反转。*
@@ -716,21 +602,23 @@ class Solution {
 class Solution {
     public String reverseStr(String s, int k) {
         char[] ans = s.toCharArray();
-        for (int start = 0; start < ans.length; start += 2 * k) {
-            int left = start, right = Math.min(start + k - 1, ans.length - 1);
+        for (int i = 0; i < ans.length; i += 2 * k) {
+            int left = i, right = Math.min(i + k - 1, ans.length - 1);
             while (left < right) {
                 char tmp = ans[left];
                 ans[left++] = ans[right];
                 ans[right--] = tmp;
             }
-        } 
+        }
         return new String(ans);
     }
 }
 ```
 
-## 比较版本号（0165）
+## 比较版本号
 
+> 165
+>
 > *给你两个版本号 version1 和 version2 ，请你比较它们。*
 
 ```java
@@ -740,11 +628,11 @@ class Solution {
         String[] nums2 = version2.split("\\.");
         int n1 = nums1.length, n2 = nums2.length;
 
-        int i1, i2;
+        int cur1, cur2;
         for (int i = 0; i < Math.max(n1, n2); i++) {
-            i1 = i < n1 ? Integer.parseInt(nums1[i]) : 0;
-            i2 = i < n2 ? Integer.parseInt(nums2[i]) : 0;
-            if (i1 != i2) {return i1 > i2 ? 1 : -1;}
+            cur1 = i < n1 ? Integer.parseInt(nums1[i]) : 0;
+            cur2 = i < n2 ? Integer.parseInt(nums2[i]) : 0;
+            if (cur1 != cur2) {return cur1 > cur2 ? 1 : -1;}
         }
 
         return 0;
@@ -752,8 +640,10 @@ class Solution {
 }
 ```
 
-## 最大数（0179）
+## 最大数
 
+> 179
+>
 > *给定一组非负整数 nums，重新排列它们每个数字的顺序（每个数字不可拆分）使之组成一个最大的整数。*
 
 ```java
@@ -1626,6 +1516,112 @@ class Solution {
         }
 
         return true;
+    }
+}
+```
+
+## 复原IP地址
+
+> 93
+>
+> 给定一个只包含数字的字符串，用以表示一个 IP 地址，返回所有可能从 s 获得的 有效 IP 地址 。你可以按任何顺序返回答案。
+>
+> 有效 IP 地址 正好由四个整数（每个整数位于 0 到 255 之间组成，且不能含有前导 0），整数之间用 '.' 分隔。
+>
+> 例如："0.1.2.201" 和 "192.168.1.1" 是 有效 IP 地址，但是 "0.011.255.245"、"192.168.1.312" 和 "192.168@1.1" 是 无效 IP 地址。
+>
+> 示例 1：
+>
+> 输入：s = "25525511135"
+> 输出：["255.255.11.135","255.255.111.35"]
+> 示例 2：
+>
+> 输入：s = "0000"
+> 输出：["0.0.0.0"]
+
+```java
+class Solution {
+    public List<String> restoreIpAddresses(String s) {
+        List<String> ans = new ArrayList<>();
+        int[] segment = new int[4];
+        dfs(s, ans, segment, 0, 0);
+        return ans;
+    }
+
+    private static void dfs(String s, List<String> ans, int[] segment, int segId, int segStart) {
+        // 如果找到了 4 段 IP 地址并且遍历完了字符串，那么就是一种答案
+        if (segId == 4) {
+            if (segStart == s.length()) {
+                StringBuilder ipAddr = new StringBuilder();
+                for (int i = 0; i < 4; ++i) {
+                    ipAddr.append(segment[i]);
+                    if (i != 3) {
+                        ipAddr.append('.');
+                    }
+                }
+                ans.add(ipAddr.toString());
+            }
+            return;
+        }
+
+        // 如果还没有找到 4 段 IP 地址就已经遍历完了字符串，那么提前回溯
+        if (segStart == s.length()) {return;}
+
+        // 由于不能有前导零，如果当前数字为 0，那么这一段 IP 地址只能为 0
+        if (s.charAt(segStart) == '0') {
+            segment[segId] = 0;
+            dfs(s, ans, segment, segId + 1, segStart + 1);
+        }
+
+        // 一般情况，枚举每一种可能性并递归
+        int addr = 0;
+        for (int segEnd = segStart; segEnd < s.length(); ++segEnd) {
+            addr = addr * 10 + (s.charAt(segEnd) - '0');
+            if (addr > 0 && addr <= 0xFF) {
+                segment[segId] = addr;
+                dfs(s, ans, segment, segId + 1, segEnd + 1);
+            } else {
+                break;
+            }
+        }
+    }
+}
+```
+
+## 简化Unix路径
+
+> 71
+>
+> *以 Unix 风格给出一个文件的绝对路径，你需要简化它。或者换句话说，将其转换为规范路径。*
+
+```java
+class Solution {
+    public String simplifyPath(String path) {
+        if (path == null || path.length() == 0) {return "/";}
+        int n = path.length();
+        
+        List<String> names = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            if (path.charAt(i) != '/'){
+                int j = i;
+                while (j < n && path.charAt(j) != '/') {j++;}
+                names.add(path.substring(i, j));
+                i = j;
+            }
+        }
+
+        List<String> ans = new ArrayList<>();
+        for (int i = 0; i < names.size(); i++) {
+            if (names.get(i).equals("..")) {
+                if (ans.size() > 0) {
+                    ans.remove(ans.size() - 1);
+                }
+            }
+            else if (!names.get(i).equals(".")) {
+                ans.add(names.get(i));
+            }
+        }
+        return "/" + String.join("/", ans);
     }
 }
 ```
