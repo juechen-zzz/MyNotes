@@ -1,18 +1,14 @@
 [TOC]
 
-```
+## 最长回文子串   
 
-```
-
-## 最长回文子串（0005）      
-
+> 5
+>
 > *给定一个字符串 s，找到 s 中最长的回文子串。你可以假设 s 的最大长度为 1000。*
 >
 > *输入: "babad"*
 >
 > *输出: "bab"*
->
-> *注意: "aba" 也是一个有效答案。*
 
 ```java
 // DP
@@ -20,20 +16,23 @@ class Solution {
     public String longestPalindrome(String s) {
         int n = s.length();
         boolean[][] dp = new boolean[n][n];
+        char[] cur = s.toCharArray();
         String ans = "";
-        for (int i = n - 1; i >= 0; i--){
-            for (int j = i; j < n; j++){
+
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = i; j < n; j++) {
                 if (i == j) {dp[i][j] = true;}
-                else if (j - i == 1) {dp[i][j] = (s.charAt(i) == s.charAt(j));}
+                else if (j - i == 1) {dp[i][j] = (cur[i] == cur[j]);}
                 else {
-                    dp[i][j] = ((s.charAt(i) == s.charAt(j)) && dp[i + 1][j - 1]);
+                    dp[i][j] = (dp[i + 1][j - 1] && (cur[i] == cur[j]));
                 }
 
-                if (dp[i][j] && (j - i + 1 >= ans.length())){
+                if (dp[i][j] && (j - i + 1 >= ans.length())) {
                     ans = s.substring(i, j + 1);
                 }
             }
         }
+
         return ans;
     }
 }
@@ -63,104 +62,65 @@ class Solution {
 }
 ```
 
-> 统计不同回文子序列
+> 647
+>
+> 给定一个字符串，你的任务是计算这个字符串中有多少个回文子串。
+>
+> 具有不同开始位置或结束位置的子串，即使是由相同的字符组成，也会被视作不同的子串。
 
 ```java
 class Solution {
-    int[][] memo, prv, nxt;
-    byte[] A;
-    int MOD = 1_000_000_007;
+    public int countSubstrings(String s) {
+        int n = s.length();
+        boolean[][] dp = new boolean[n][n];
+        int ans = 0;
 
-    public int countPalindromicSubsequences(String S) {
-        int N = S.length();
-        prv = new int[N][4];
-        nxt = new int[N][4];
-        memo = new int[N][N];
-        for (int[] row: prv) Arrays.fill(row, -1);
-        for (int[] row: nxt) Arrays.fill(row, -1);
-
-        A = new byte[N];
-        int ix = 0;
-        for (char c: S.toCharArray()) {
-            A[ix++] = (byte) (c - 'a');
-        }
-
-        int[] last = new int[4];
-        Arrays.fill(last, -1);
-        for (int i = 0; i < N; ++i) {
-            last[A[i]] = i;
-            for (int k = 0; k < 4; ++k)
-                prv[i][k] = last[k];
-        }
-
-        Arrays.fill(last, -1);
-        for (int i = N-1; i >= 0; --i) {
-            last[A[i]] = i;
-            for (int k = 0; k < 4; ++k)
-                nxt[i][k] = last[k];
-        }
-
-        return dp(0, N-1) - 1;
-    }
-
-    public int dp(int i, int j) {
-        if (memo[i][j] > 0) return memo[i][j];
-        int ans = 1;
-        if (i <= j) {
-            for (int k = 0; k < 4; ++k) {
-                int i0 = nxt[i][k];
-                int j0 = prv[j][k];
-                if (i <= i0 && i0 <= j) ans++;
-                if (-1 < i0 && i0 < j0) ans += dp(i0 + 1, j0 - 1);
-                if (ans >= MOD) ans -= MOD;
+        for (int j = 0; j < n; j++) {
+            for (int i = 0; i <= j; i++) {
+                if (s.charAt(i) != s.charAt(j)) {continue;}
+                dp[i][j] = (j - i <= 2 || dp[i + 1][j - 1]);
+                if (dp[i][j]) {ans++;}
             }
         }
-        memo[i][j] = ans;
+
         return ans;
     }
 }
 ```
 
-## 最长有效括号（0032）
+## 最长回文子序列
 
-> *给你一个只包含 '(' 和 ')' 的字符串，找出最长有效（格式正确且连续）括号子串的长度。*
+> 516
 >
-> *输入：s = "(()"*
->
-> *输出：2*
->
-> *解释：最长有效括号子串是 "()"*
+> 给定一个字符串 `s` ，找到其中最长的回文子序列，并返回该序列的长度。可以假设 `s` 的最大长度为 `1000` 。
 
 ```java
 class Solution {
-    public int longestValidParentheses(String s) {
-        int[] dp = new int[s.length() + 1];
-        dp[0] = 0;
-        for (int i = 1; i < s.length(); i++) {
-            if (s.charAt(i) == ')' && i - dp[i - 1] - 1 >= 0 && s.charAt(i - dp[i - 1] - 1) == '(') {
-                dp[i] = dp[i - 1] + 2;
-                if (i - dp[i - 1] - 2 >= 0) {
-                    dp[i] += dp[i - dp[i - 1] - 2];
+    public int longestPalindromeSubseq(String s) {
+        int n = s.length();
+        int[][] dp = new int[n][n];
+        for (int i = 0; i < n; i++) {dp[i][i] = 1;}
+
+        for (int i = n - 2; i >= 0; i--) {
+            for (int j = i + 1; j < n; j++) {
+                if (s.charAt(i) == s.charAt(j)) {
+                    dp[i][j] = dp[i + 1][j - 1] + 2;
+                }
+                else {
+                    dp[i][j] = Math.max(dp[i + 1][j], dp[i][j - 1]);
                 }
             }
         }
-        return getMax(dp);
-    }
 
-    public int getMax(int[] nums) {
-        int ans = Integer.MIN_VALUE;
-        for (int n : nums) {
-            if (n > ans) {
-                ans = n;
-            }
-        }
-        return ans;
+        return dp[0][n - 1];
     }
 }
 ```
 
-## 最长递增子序列（0300）
+## 最长递增子序列
 
+> 300
+>
 > *给你一个整数数组 nums ，找到其中最长严格递增子序列的长度。*
 >
 > *子序列是由数组派生而来的序列，删除（或不删除）数组中的元素而不改变其余元素的顺序。例如，[3,6,2,7] 是数组 [0,3,1,6,2,2,7] 的子序列。*
@@ -173,19 +133,15 @@ class Solution {
         int[] dp = new int[n];
         Arrays.fill(dp, 1);
 
-        for (int i = 0; i < n; i++){
-            for (int j = 0; j < i; j++){
-                if (nums[i] > nums[j]){
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < i; j++) {
+                if (nums[i] > nums[j]) {
                     dp[i] = Math.max(dp[i], dp[j] + 1);
                 }
             }
         }
 
-        int ans = 0;
-        for (int i = 0; i < n; i++){
-            ans = Math.max(ans, dp[i]);
-        }
-        return ans;
+        return Arrays.stream(dp).max().getAsInt();
     }
 }
 
@@ -218,8 +174,10 @@ class Solution {
 }
 ```
 
-## 最长递增子序列的个数（0673）
+## 最长递增子序列的个数
 
+> 673
+>
 > *给定一个未排序的整数数组，找到最长递增子序列的个数。*
 
 ```java
@@ -245,21 +203,23 @@ class Solution {
             }
         }
 
-        int longest = 0, ans = 0;
-        for (int l : length) {longest = Math.max(longest, l);}
+        int ans = 0;
+        int longest = Arrays.stream(length).max().getAsInt();
         for (int i = 0; i < n; i++) {
             if (length[i] == longest) {
                 ans += count[i];
             }
         }
-        
+
         return ans;
     }
 }
 ```
 
-## 使序列递增的最小交换次数（0801）
+## 使序列递增的最小交换次数
 
+> 801
+>
 > *我们有两个长度相等且不为空的整型数组 A 和 B 。*
 >
 > *我们可以交换 A[i] 和 B[i] 的元素。注意这两个元素在各自的序列中应该处于相同的位置。*
@@ -269,32 +229,29 @@ class Solution {
 > *给定数组 A 和 B ，请返回使得两个数组均保持严格递增状态的最小交换次数。假设给定的输入总是有效的。*
 
 ```java
+// 在判断 A[i] 和 B[i] 是否交换时，只需要考虑它们之前的一个元素 A[i - 1] 和 B[i - 1] 是否被交换就可以了。
+// n1 表示数组 A 和 B 满足前 i - 1 个元素分别严格递增，并且 A[i - 1] 和 B[i - 1] 未被交换的最小交换次数
+// s1 表示 A[i - 1] 和 B[i - 1] 被交换的最小交换次数
 class Solution {
-    public int minSwap(int[] nums1, int[] nums2) {
-        int ans = 0;
-        int n = nums1.length;
-        int[][] dp = new int[n][2];
-        dp[0][0] = 0;
-        dp[0][1] = 1;
-
-        for (int i = 1; i < n; i++) {
-            if (nums1[i - 1] < nums1[i] && nums2[i - 1] < nums2[i]) {
-                if (nums1[i - 1] < nums2[i] && nums2[i - 1] < nums1[i]) {
-                    dp[i][0] = Math.min(dp[i - 1][0], dp[i - 1][1]);
-                    dp[i][1] = Math.min(dp[i - 1][0], dp[i - 1][1]) + 1;
-                }
-                else {
-                    dp[i][0] = dp[i - 1][0];
-                    dp[i][1] = dp[i - 1][1] + 1;
-                }
+    public int minSwap(int[] A, int[] B) {
+        // n: natural, s: swapped
+        int n1 = 0, s1 = 1;
+        for (int i = 1; i < A.length; ++i) {
+            int n2 = Integer.MAX_VALUE, s2 = Integer.MAX_VALUE;
+            // 如果 a1 和 b1 未被交换，a2 和 b2 就可以不交换；
+            // 同样如果 a1 和 b1 被交换了，a2 和 b2 在交换后满足严格递增的条件
+            if (A[i - 1] < A[i] && B[i - 1] < B[i]) {
+                n2 = n1;
+                s2 = s1 + 1;
             }
-            else {
-                dp[i][0] = dp[i - 1][1];
-                dp[i][1] = dp[i - 1][0] + 1;
+            if (A[i - 1] < B[i] && B[i - 1] < A[i]) {
+                n2 = Math.min(n2, s1);
+                s2 = Math.min(s2, n1 + 1);
             }
+            n1 = n2;
+            s1 = s2;
         }
-
-        return Math.min(dp[n - 1][0], dp[n - 1][1]);
+        return Math.min(n1, s1);
     }
 }
 ```
@@ -354,6 +311,37 @@ class Solution {
         }
         
         return ans;
+    }
+}
+```
+
+## 最长有效括号
+
+> 32
+>
+> *给你一个只包含 '(' 和 ')' 的字符串，找出最长有效（格式正确且连续）括号子串的长度。*
+>
+> *输入：s = "(()"*
+>
+> *输出：2*
+
+```java
+class Solution {
+    public int longestValidParentheses(String s) {
+        int n = s.length();
+        if (n == 0) {return 0;}
+        int[] dp = new int[n];
+
+        for (int i = 1; i < n; i++) {
+            if (s.charAt(i) == ')' && i - dp[i - 1] - 1 >= 0 && s.charAt(i - dp[i - 1] - 1) == '(') {
+                dp[i] = dp[i - 1] + 2;
+                if (i - dp[i - 1] - 2 >= 0) {
+                    dp[i] += dp[i - dp[i - 1] - 2];
+                }
+            }
+        }
+
+        return Arrays.stream(dp).max().getAsInt();
     }
 }
 ```
@@ -433,33 +421,6 @@ class Solution {
         }
 
         return dp[0][0];
-    }
-}
-```
-
-## 最长回文子序列（0516）
-
-> 给定一个字符串 `s` ，找到其中最长的回文子序列，并返回该序列的长度。可以假设 `s` 的最大长度为 `1000` 。
-
-```java
-class Solution {
-    public int longestPalindromeSubseq(String s) {
-        int n = s.length();
-        int[][] dp = new int[n][n];
-        for (int i = 0; i < n; i++) {dp[i][i] = 1;}
-
-        for (int i = n - 2; i >= 0; i--) {
-            for (int j = i + 1; j < n; j++) {
-                if (s.charAt(i) == s.charAt(j)) {
-                    dp[i][j] = dp[i + 1][j - 1] + 2;
-                }
-                else {
-                    dp[i][j] = Math.max(dp[i + 1][j], dp[i][j - 1]);
-                }
-            }
-        }
-
-        return dp[0][n - 1];
     }
 }
 ```
@@ -1163,8 +1124,10 @@ class Solution {
 }
 ```
 
-## 一和零（0474）
+## 一和零
 
+> 474   可以理解为二维的背包问题
+>
 > 给你一个二进制字符串数组 strs 和两个整数 m 和 n 。
 >
 > 请你找出并返回 strs 的最大子集的大小，该子集中 最多 有 m 个 0 和 n 个 1 。
@@ -1175,24 +1138,24 @@ class Solution {
 class Solution {
     public int findMaxForm(String[] strs, int m, int n) {
         int[][] dp = new int[m + 1][n + 1];
-        for (String s: strs) {
-            int[] count = countString(s);
-            for (int zeroes = m; zeroes >= count[0]; zeroes--) {
-                for (int ones = n; ones >= count[1]; ones--) {
-                    dp[zeroes][ones] = Math.max(dp[zeroes][ones], 1 + dp[zeroes - count[0]][ones - count[1]]);
+        for (String cur : strs) {
+            int[] count = myMethod(cur);
+            for (int zero = m; zero >= count[0]; zero--) {
+                for (int one = n; one >= count[1]; one--) {
+                    dp[zero][one] = Math.max(dp[zero][one], 1 + dp[zero - count[0]][one - count[1]]);
                 }
             }
         }
         return dp[m][n];
     }
 
-    private static int[] countString(String s) {
-        int[] dir = new int[2];
+    private static int[] myMethod(String s) {
+        int[] count = new int[2];
         for (int i = 0; i < s.length(); i++) {
-            if (s.charAt(i) == '0') {dir[0]++;}
-            else {dir[1]++;}
+            if (s.charAt(i) == '0') {count[0]++;}
+            else {count[1]++;}
         }
-        return dir;
+        return count;
     }
 }
 ```

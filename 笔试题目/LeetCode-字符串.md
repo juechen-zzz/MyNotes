@@ -1,41 +1,6 @@
 [TOC]
 
-## 无重复字符的最长子串
-
-> 3
->
-> *给定一个字符串，请你找出其中不含有重复字符的 最长子串 的长度。*
->
-> *输入: s = "abcabcbb"*
->
-> *输出: 3* 
->
-> *解释: 因为无重复字符的最长子串是 "abc"，所以其长度为 3。*
-
-```java
-class Solution {
-    public int lengthOfLongestSubstring(String s) {
-        Map<Character, Integer> map = new HashMap<>();
-
-        int left = 0, right = 0;
-        int ans = 0;
-        while (right < s.length()) {
-            char c = s.charAt(right);
-            map.put(c, map.getOrDefault(c, 0) + 1);
-            right++;
-
-            while (map.get(c) > 1) {
-                char d = s.charAt(left);
-                map.put(d, map.get(d) - 1);
-                left++;
-            }
-
-            ans = Math.max(ans, right - left);
-        }
-        return ans;
-    }
-}
-```
+# 回文
 
 ## 最长回文串
 
@@ -248,6 +213,45 @@ class Solution {
 }
 ```
 
+# 滑动窗口
+
+## 无重复字符的最长子串
+
+> 3
+>
+> *给定一个字符串，请你找出其中不含有重复字符的 最长子串 的长度。*
+>
+> *输入: s = "abcabcbb"*
+>
+> *输出: 3* 
+>
+> *解释: 因为无重复字符的最长子串是 "abc"，所以其长度为 3。*
+
+```java
+class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        Map<Character, Integer> map = new HashMap<>();
+
+        int left = 0, right = 0;
+        int ans = 0;
+        while (right < s.length()) {
+            char c = s.charAt(right);
+            map.put(c, map.getOrDefault(c, 0) + 1);
+            right++;
+
+            while (map.get(c) > 1) {
+                char d = s.charAt(left);
+                map.put(d, map.get(d) - 1);
+                left++;
+            }
+
+            ans = Math.max(ans, right - left);
+        }
+        return ans;
+    }
+}
+```
+
 ## 串联所有单词的子串
 
 > 30
@@ -295,6 +299,232 @@ class Solution {
     }
 }
 ```
+
+## 最小覆盖子串
+
+> 76
+>
+> *给你一个字符串 s 、一个字符串 t 。返回 s 中涵盖 t 所有字符的最小子串。如果 s 中不存在涵盖 t 所有字符的子串，则返回空字符串 "" 。*
+>
+> *注意：如果 s 中存在这样的子串，我们保证它是唯一的答案。*
+
+```java
+class Solution {
+    public String minWindow(String s, String t) {
+        Map<Character, Integer> need = new HashMap<>();
+        Map<Character, Integer> window = new HashMap<>();
+        for (int i = 0; i < t.length(); i++) {
+            char c = t.charAt(i);
+            need.put(c, need.getOrDefault(c, 0) + 1);
+        }
+
+        int left = 0, right = 0;
+        int valid = 0;
+        int start = 0, len = s.length() + 1;
+        while (right < s.length()) {
+            char c = s.charAt(right);
+            right++;
+            if (need.containsKey(c)) {
+                window.put(c, window.getOrDefault(c, 0) + 1);
+                if (window.get(c) - need.get(c) == 0) {valid++;}
+            }
+
+            while (valid == need.size()) {
+                if (right - left < len) {
+                    start = left;
+                    len = right - left;
+                }
+                char d = s.charAt(left);
+                left++;
+                if (need.containsKey(d)) {
+                    if (window.get(d) - need.get(d) == 0) {valid--;}
+                    window.put(d, window.get(d) - 1);
+                }
+            }
+        }
+
+        return len == s.length() + 1 ? "" : s.substring(start, start + len);
+    }
+}
+```
+
+## 至少有K个重复字符的最长子串
+
+> 395
+>
+> *给你一个字符串 s 和一个整数 k ，请你找出 s 中的最长子串， 要求该子串中的每一字符出现次数都不少于 k 。返回这一子串的长度。*
+
+```java
+class Solution {
+    public int longestSubstring(String s, int k) {
+        int ans = 0;
+        int n = s.length();
+
+        // total:窗口内的字符种类数目 less:窗口中还有几种字符未达到k次
+        for (int i = 0; i <= 26; i++) {
+            int left = 0, right = 0;
+            int[] count = new int[26];
+            int total = 0, less = 0;
+
+            while (right < n) {
+                count[s.charAt(right) - 'a']++;
+                if (count[s.charAt(right) - 'a'] == 1) {
+                    total++;
+                    less++;
+                }
+                if (count[s.charAt(right) - 'a'] == k) {
+                    less--;
+                }
+
+                while (total > i) {
+                    count[s.charAt(left) - 'a']--;
+                    if (count[s.charAt(left) - 'a'] == k - 1) {less++;}
+                    if (count[s.charAt(left) - 'a'] == 0) {
+                        total--;
+                        less--;
+                    }
+                    left++;
+                }
+
+                if (less == 0) {ans = Math.max(ans, right - left + 1);}
+                right++;
+            }
+        }
+
+        return ans;
+    }
+}
+```
+
+## 替换后的最长重复字符
+
+> 424
+>
+> *给你一个仅由大写英文字母组成的字符串，你可以将任意位置上的字符替换成另外的字符，总共可最多替换 k 次。在执行上述操作后，找到包含重复字母的最长子串的长度。*
+>
+> *注意：字符串长度 和 k 不会超过 104。*
+
+```java
+class Solution {
+    public int characterReplacement(String s, int k) {
+        int n = s.length();
+        if (n < 2) {return n;}
+
+        char[] charArray = s.toCharArray();
+        int left = 0, right = 0;
+        int ans = 0, maxCount = 0;
+        int[] count = new int[26];
+
+        while (right < n) {
+            count[charArray[right] - 'A']++;
+            maxCount = Math.max(maxCount, count[charArray[right] - 'A']);
+            right++;
+
+            if (right - left > maxCount + k) {
+                count[charArray[left] - 'A']--;
+                left++;
+            }
+
+            ans = Math.max(ans, right - left);
+        }
+
+        return ans;
+    }
+}
+```
+
+## 找到字符串中所有字母异位词
+
+> 438
+>
+> *给定一个字符串 s 和一个非空字符串 p，找到 s 中所有是 p 的字母异位词的子串，返回这些子串的起始索引。*
+>
+> *字符串只包含小写英文字母，并且字符串 s 和 p 的长度都不超过 20100。*
+
+```java
+class Solution {
+    public List<Integer> findAnagrams(String s, String p) {
+        Map<Character, Integer> need = new HashMap<>();
+        Map<Character, Integer> window = new HashMap<>();
+        for (int i = 0; i < p.length(); i++) {
+            char c = p.charAt(i);
+            need.put(c, need.getOrDefault(c, 0) + 1);
+        }
+
+        int left = 0, right = 0;
+        int valid = 0;
+        List<Integer> ans = new ArrayList<>();
+
+        while (right < s.length()) {
+            char c = s.charAt(right);
+            right++;
+            if (need.containsKey(c)) {
+                window.put(c, window.getOrDefault(c, 0) + 1);
+                if (window.get(c) - need.get(c) == 0) {valid++;}
+            }
+
+            while (right - left >= p.length()) {
+                if (valid - need.size() == 0) {ans.add(left);}
+                char d = s.charAt(left);
+                left++;
+                if (need.containsKey(d)) {
+                    if (window.get(d) - need.get(d) == 0) {valid--;}
+                    window.put(d, window.get(d) - 1);
+                }
+            }
+        }
+
+        return ans;
+    }
+}
+```
+
+## 字符串的排列
+
+> 567
+>
+> *给定两个字符串 s1 和 s2，写一个函数来判断 s2 是否包含 s1 的排列。*
+>
+> *换句话说，第一个字符串的排列之一是第二个字符串的子串。*
+
+```java
+class Solution {
+    public boolean checkInclusion(String s1, String s2) {
+        Map<Character, Integer> need = new HashMap<>();
+        Map<Character, Integer> window = new HashMap<>();
+        for (int i = 0; i < s1.length(); i++) {
+            char c = s1.charAt(i);
+            need.put(c, need.getOrDefault(c, 0) + 1);
+        }
+
+        int left = 0, right = 0;
+        int valid = 0;
+    
+        while (right < s2.length()) {
+            char c = s2.charAt(right);
+            right++;
+            if (need.containsKey(c)) {
+                window.put(c, window.getOrDefault(c, 0) + 1);
+                if (window.get(c) - need.get(c) == 0) {valid++;}
+            }
+
+            while (right - left >= s1.length()) {
+                if (valid == need.size()) {return true;}
+                char d = s2.charAt(left);
+                left++;
+                if (need.containsKey(d)) {
+                    if (window.get(d) - need.get(d) == 0) {valid--;}
+                    window.put(d, window.get(d) - 1);
+                }
+            }
+        }
+
+        return false;
+    }
+}
+```
+
+# 其他
 
 ## 删除无效的括号
 
@@ -388,54 +618,6 @@ class Solution {
         }
         ans.append((curSum == 1 ? curSum : ""));
         return ans.reverse().toString();
-    }
-}
-```
-
-## 最小覆盖子串
-
-> 76
->
-> *给你一个字符串 s 、一个字符串 t 。返回 s 中涵盖 t 所有字符的最小子串。如果 s 中不存在涵盖 t 所有字符的子串，则返回空字符串 "" 。*
->
-> *注意：如果 s 中存在这样的子串，我们保证它是唯一的答案。*
-
-```java
-class Solution {
-    public String minWindow(String s, String t) {
-        Map<Character, Integer> need = new HashMap<>();
-        Map<Character, Integer> window = new HashMap<>();
-        for (int i = 0; i < t.length(); i++) {
-            char c = t.charAt(i);
-            need.put(c, need.getOrDefault(c, 0) + 1);
-        }
-
-        int left = 0, right = 0;
-        int valid = 0;
-        int start = 0, len = s.length() + 1;
-        while (right < s.length()) {
-            char c = s.charAt(right);
-            right++;
-            if (need.containsKey(c)) {
-                window.put(c, window.getOrDefault(c, 0) + 1);
-                if (window.get(c) - need.get(c) == 0) {valid++;}
-            }
-
-            while (valid == need.size()) {
-                if (right - left < len) {
-                    start = left;
-                    len = right - left;
-                }
-                char d = s.charAt(left);
-                left++;
-                if (need.containsKey(d)) {
-                    if (window.get(d) - need.get(d) == 0) {valid--;}
-                    window.put(d, window.get(d) - 1);
-                }
-            }
-        }
-
-        return len == s.length() + 1 ? "" : s.substring(start, start + len);
     }
 }
 ```
@@ -666,148 +848,10 @@ class Solution {
 }
 ```
 
-## 最大单词长度乘积（0318）
+## 移掉K位数字
 
-> *给定一个字符串数组 words，找到 length(word[i]) \* length(word[j]) 的最大值，并且这两个单词不含有公共字母。*
+> 402
 >
-> *可以认为每个单词只包含小写字母。如果不存在这样的两个单词，返回 0。*
-
-```java
-class Solution {
-    public int maxProduct(String[] words) {
-        int[] wordToNum = new int[words.length];
-        for (int i = 0; i < words.length; i++) {
-            String word = words[i];
-            int num = 0;
-            for (int j = 0; j < word.length(); j++) {
-                int index = word.charAt(j) - 'a';
-                num = num | (1 << index);
-            }
-            wordToNum[i] = num;
-        }
-
-        int ans = 0;
-        for (int i = 0; i < words.length - 1; i++) {
-            for (int j = i + 1; j < words.length; j++) {
-                if ((wordToNum[i] & wordToNum[j]) != 0) {continue;}
-                ans = Math.max(ans, words[i].length() * words[j].length());
-            }
-        }
-
-        return ans;
-    }
-}
-```
-
-## 同构字符串（0205）
-
-> *给定两个字符串 s 和 t，判断它们是否是同构的。*
->
-> *如果 s 中的字符可以被替换得到 t ，那么这两个字符串是同构的。*
->
-> *所有出现的字符都必须用另一个字符替换，同时保留字符的顺序。两个字符不能映射到同一个字符上，但字符可以映射自己本身。*
-
-```java
-class Solution {
-    public boolean isIsomorphic(String s, String t) {
-        Map<Character, Character> s2t = new HashMap<>();
-        Map<Character, Character> t2s = new HashMap<>();
-        int len = s.length();
-        for (int i = 0; i < len; ++i) {
-            char x = s.charAt(i), y = t.charAt(i);
-            if ((s2t.containsKey(x) && s2t.get(x) != y) || (t2s.containsKey(y) && t2s.get(y) != x)) {
-                return false;
-            }
-            s2t.put(x, y);
-            t2s.put(y, x);
-        }
-        return true;
-    }
-}
-```
-
-## 去除重复字母（0316）
-
-> *给你一个字符串 s ，请你去除字符串中重复的字母，使得每个字母只出现一次。*
->
-> *需保证 返回结果的字典序最小（要求不能打乱其他字符的相对位置）。*
-
-```java
-class Solution {
-    public String removeDuplicateLetters(String s) {
-        Deque<Character> deque = new LinkedList<>();
-        int[] count = new int[26];
-        boolean[] exists = new boolean[26];
-
-        for (char c : s.toCharArray()) {
-            count[c - 'a']++;
-        }
-
-        for (int i = 0; i < s.length(); i++) {
-            char tmp = s.charAt(i);
-            if (!exists[tmp - 'a']) {
-                while (!deque.isEmpty() && deque.peekLast() > tmp && count[deque.peekLast() - 'a'] > 0) {
-                    exists[deque.peekLast() - 'a'] = false;
-                    deque.removeLast();
-                }
-                exists[tmp - 'a'] = true;
-                deque.offerLast(tmp);
-            }
-            count[tmp - 'a']--;
-        }
-
-        StringBuilder ans = new StringBuilder();
-        for (char c : deque) {
-            ans.append(c);
-        }
-
-        return ans.toString();
-    }
-}
-```
-
-## 字符串解码（0394）
-
-> *给定一个经过编码的字符串，返回它解码后的字符串。*
->
-> *编码规则为: k[encoded_string]，表示其中方括号内部的 encoded_string 正好重复 k 次。注意 k 保证为正整数。*
-
-```java
-class Solution {
-    public String decodeString(String s) {
-        StringBuilder ans = new StringBuilder();
-        Stack<Integer> count = new Stack<>();
-        Stack<StringBuilder> set = new Stack<>();
-
-        int num = 0;
-        for (char c : s.toCharArray()) {
-            if (Character.isDigit(c)) {
-                num = num * 10 + c - '0';
-            }
-            else if (c == '[') {
-                count.add(num);
-                set.add(ans);
-                num = 0;
-                ans = new StringBuilder();
-            }
-            else if (Character.isAlphabetic(c)) {
-                ans.append(c);
-            }
-            else {
-                StringBuilder tmp = set.pop();
-                int curCount = count.pop();
-                for (int i = 0; i < curCount; i++) {tmp.append(ans);}
-                ans = tmp;
-            }
-        }
-        
-        return ans.toString();
-    }
-}
-```
-
-## 移掉K位数字（0402）
-
 > 给定一个以字符串表示的非负整数 *num*，移除这个数中的 *k* 位数字，使得剩下的数字最小。
 
 ```java
@@ -839,8 +883,151 @@ class Solution {
 }
 ```
 
-## 压缩字符串（0443）
+## 最大单词长度乘积
 
+> 318
+>
+> *给定一个字符串数组 words，找到 length(word[i]) \* length(word[j]) 的最大值，并且这两个单词不含有公共字母。*
+>
+> *可以认为每个单词只包含小写字母。如果不存在这样的两个单词，返回 0。*
+
+```java
+class Solution {
+    public int maxProduct(String[] words) {
+        int n = words.length;
+        int[] wordToNum = new int[n];
+        for (int i = 0; i < n; i++) {
+            String cur = words[i];
+            int num = 0;
+            for (int j = 0; j < cur.length(); j++) {
+                int idx = cur.charAt(j) - 'a';
+                num = num | (1 << idx);
+            }
+            wordToNum[i] = num;
+        }
+
+        int ans = 0;
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = i + 1; j < n; j++) {
+                if ((wordToNum[i] & wordToNum[j]) != 0) {continue;}
+                ans = Math.max(ans, words[i].length() * words[j].length());
+            }
+        }
+
+        return ans;
+    }
+}
+```
+
+## 同构字符串
+
+> 205
+>
+> *给定两个字符串 s 和 t，判断它们是否是同构的。*
+>
+> *如果 s 中的字符可以被替换得到 t ，那么这两个字符串是同构的。*
+>
+> *所有出现的字符都必须用另一个字符替换，同时保留字符的顺序。两个字符不能映射到同一个字符上，但字符可以映射自己本身。*
+
+```java
+class Solution {
+    public boolean isIsomorphic(String s, String t) {
+        Map<Character, Character> s2t = new HashMap<>();
+        Map<Character, Character> t2s = new HashMap<>();
+        int n = s.length();
+        for (int i = 0; i < n; i++) {
+            char x = s.charAt(i), y = t.charAt(i);
+            if ((s2t.containsKey(x) && s2t.get(x) != y) || (t2s.containsKey(y) && t2s.get(y) != x)) {return false;}
+            
+            s2t.put(x, y);
+            t2s.put(y, x);
+        }
+        return true;
+    }
+}
+```
+
+## 去除重复字母
+
+> 316
+>
+> *给你一个字符串 s ，请你去除字符串中重复的字母，使得每个字母只出现一次。*
+>
+> *需保证 返回结果的字典序最小（要求不能打乱其他字符的相对位置）。*
+
+```java
+class Solution {
+    public String removeDuplicateLetters(String s) {
+        Stack<Character> stack = new Stack<>();
+        int[] count = new int[26];
+        boolean[] exists = new boolean[26];
+        for (char c : s.toCharArray()) {count[c - 'a']++;}
+
+        for (int i = 0; i < s.length(); i++) {
+            char cur = s.charAt(i);
+            if (!exists[cur - 'a']) {
+                while (!stack.isEmpty() && stack.peek() > cur && count[stack.peek() - 'a'] > 0) {
+                    exists[stack.peek() - 'a'] = false;
+                    stack.pop();
+                }
+                exists[cur - 'a'] = true;
+                stack.push(cur);
+            }
+            count[cur - 'a']--;
+        }
+
+        StringBuilder ans = new StringBuilder();
+        for (char c : stack) {ans.append(c);}
+        return ans.toString();
+    }
+}
+```
+
+## 字符串解码
+
+> 394
+>
+> *给定一个经过编码的字符串，返回它解码后的字符串。*
+>
+> *编码规则为: k[encoded_string]，表示其中方括号内部的 encoded_string 正好重复 k 次。注意 k 保证为正整数。*
+>
+> 输入：s = "3[a]2[bc]"
+> 输出："aaabcbc"
+
+```java
+class Solution {
+    public String decodeString(String s) {
+        Stack<Integer> count = new Stack<>();
+        Stack<StringBuilder> preStr = new Stack<>();
+        StringBuilder ans = new StringBuilder();
+
+        int num = 0;
+        for (char c : s.toCharArray()) {
+            if (Character.isDigit(c)) {num = num * 10 + (c - '0');}
+            else if (Character.isAlphabetic(c)) {ans.append(c);}
+            else if (c == '[') {
+                count.add(num);
+                preStr.add(ans);
+                num = 0;
+                ans = new StringBuilder();
+            }
+            else {
+                StringBuilder cur = preStr.pop();
+                int curCount = count.pop();
+                for (int i = 0; i < curCount; i++) {cur.append(ans);}
+                ans = cur;
+            }
+        }
+
+        return ans.toString();
+    }
+}
+```
+
+## 压缩字符串
+
+> 443
+>
 > *输入：*
 >
 > *["a","a","b","b","c","c","c"]*
@@ -858,7 +1045,8 @@ class Solution {
             if (read + 1 == chars.length || chars[read + 1] != chars[read]) {
                 chars[write++] = chars[anchor];
                 if (read > anchor) {
-                    for (char c : ("" + (read - anchor + 1)).toCharArray()) {       // 写count
+                    // 写count,同时预防出现count=10这种情况，所以写成for
+                    for (char c : ("" + (read - anchor + 1)).toCharArray()) {       
                         chars[write++] = c;
                     }
                 }
@@ -870,91 +1058,10 @@ class Solution {
 }
 ```
 
-## 至少有K个重复字符的最长子串（0395）
+## 重复的子字符串
 
-> *给你一个字符串 s 和一个整数 k ，请你找出 s 中的最长子串， 要求该子串中的每一字符出现次数都不少于 k 。返回这一子串的长度。*
-
-```java
-class Solution {
-    public int longestSubstring(String s, int k) {
-        int ans = 0;
-        int n = s.length();
-
-        // 枚举最长子串中的字符种类
-        // total:窗口内的字符种类数目
-        // less:窗口中还有几种字符未达到k次
-        for (int i = 1; i <= 26; i++) {
-            int left = 0, right = 0;
-            int[] count = new int[26];
-            int total = 0, less = 0;
-
-            while (right < n) {
-                count[s.charAt(right) - 'a']++;
-                if (count[s.charAt(right) - 'a'] == 1) {
-                    total++;
-                    less++;
-                }
-                if (count[s.charAt(right) - 'a'] == k) {
-                    less--;
-                }
-
-                while (total > i) {
-                    count[s.charAt(left) - 'a']--;
-                    if (count[s.charAt(left) - 'a'] == k - 1) {
-                        less++;
-                    }
-                    if (count[s.charAt(left) - 'a'] == 0) {
-                        total--;
-                        less--;
-                    }
-                    left++;
-                }
-                if (less == 0) {ans = Math.max(ans, right - left + 1);}
-                right++;
-            }
-        }
-        return ans;
-    }
-}
-```
-
-## 替换后的最长重复字符（0424）
-
-> *给你一个仅由大写英文字母组成的字符串，你可以将任意位置上的字符替换成另外的字符，总共可最多替换 k 次。在执行上述操作后，找到包含重复字母的最长子串的长度。*
+> 459
 >
-> *注意：字符串长度 和 k 不会超过 104。*
-
-```java
-class Solution {
-    public int characterReplacement(String s, int k) {
-        int n = s.length();
-        if (n < 2) {return n;}
-
-        char[] charArray = s.toCharArray();
-        int left = 0, right = 0;
-        int ans = 0, maxCount = 0;
-        int[] count = new int[26];
-
-        while (right < n) {
-            count[charArray[right] - 'A']++;
-            maxCount = Math.max(maxCount, count[charArray[right] - 'A']);
-            right++;
-
-            if (right - left > maxCount + k) {
-                count[charArray[left] - 'A']--;
-                left++;
-            }
-            
-            ans = Math.max(ans, right - left);
-        }
-
-        return ans;
-    }
-}
-```
-
-## 重复的子字符串（0459）
-
 > *给定一个非空的字符串，判断它是否可以由它的一个子串重复多次构成。给定的字符串只含有小写英文字母，并且长度不超过10000。*
 
 ```java
@@ -1002,52 +1109,10 @@ class Solution {
 }
 ```
 
-## 找到字符串中所有字母异位词（0438）
+## 环绕字符串中唯一的子字符串
 
-> *给定一个字符串 s 和一个非空字符串 p，找到 s 中所有是 p 的字母异位词的子串，返回这些子串的起始索引。*
+> 467 
 >
-> *字符串只包含小写英文字母，并且字符串 s 和 p 的长度都不超过 20100。*
-
-```java
-class Solution {
-    public List<Integer> findAnagrams(String s, String p) {
-        HashMap<Character, Integer> need = new HashMap<>();
-        HashMap<Character, Integer> window = new HashMap<>();
-        for (int i = 0; i < p.length(); i++){
-            char c = p.charAt(i);
-            need.put(c, need.getOrDefault(c, 0) + 1);
-        }
-
-        int left = 0, right = 0;
-        int valid = 0;
-        List<Integer> ans = new ArrayList<Integer>();
-
-        while (right < s.length()){
-            char c = s.charAt(right);
-            right++;
-            if (need.containsKey(c)){
-                window.put(c, window.getOrDefault(c, 0) + 1);
-                if (window.get(c) - need.get(c) == 0) {valid++;}
-            }
-
-            while (right - left >= p.length()){
-                if (valid - need.size() == 0) {ans.add(left);}
-                char d = s.charAt(left);
-                left++;
-                if (need.containsKey(d)){
-                    if (window.get(d) - need.get(d) == 0) {valid--;}
-                    window.put(d, window.getOrDefault(d, 0) - 1);
-                }
-            }
-        }
-        
-        return ans;
-    }
-}
-```
-
-## 环绕字符串中唯一的子字符串（0467）
-
 > 把字符串 s 看作是“abcdefghijklmnopqrstuvwxyz”的无限环绕字符串，所以 s 看起来是这样的："...zabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcd....". 
 >
 > 现在我们有了另一个字符串 p 。你需要的是找出 s 中有多少个唯一的 p 的非空子串，尤其是当你的输入是字符串 p ，你需要输出字符串 s 中 p 的不同的非空子串的数目。 
@@ -1057,60 +1122,27 @@ class Solution {
 ```java
 class Solution {
     public int findSubstringInWraproundString(String p) {
-        int[] dp = new int[26];
-        char[] array = p.toCharArray();
+        int[] dp = new int[26];			// 记录 p 中以每个字符结尾的最长连续子串的长度
+        char[] charArray = p.toCharArray();
 
-        int count = 0;
-        for (int i = 0; i < array.length; i++) {
-            if (i > 0 && (array[i] - array[i - 1] - 1) % 26 == 0) {count++;}
+        int count = 0;					// 记录当前连续子串的长度
+        for (int i = 0; i < charArray.length; i++) {
+            if (i > 0 && (charArray[i] - charArray[i - 1] - 1) % 26 == 0) {count++;}
             else {count = 1;}
 
-            dp[array[i] - 'a'] = Math.max(dp[array[i] - 'a'], count);
+            dp[charArray[i] - 'a'] = Math.max(dp[charArray[i] - 'a'], count);
         }
 
-        int ans = 0;
-        for (int n : dp) {ans += n;}
+        int ans = Arrays.stream(dp).sum();
         return ans;
-    }
-}
-```
-
-## 连接词（0472）
-
-> 给定一个 不含重复 单词的字符串数组 words ，编写一个程序，返回 words 中的所有 连接词 。
->
-> 连接词 的定义为：一个字符串完全是由至少两个给定数组中的单词组成的。
-
-```java
-class Solution {
-    public List<String> findAllConcatenatedWordsInADict(String[] words) {
-        Set<String> set = new HashSet<>(Arrays.asList(words));
-        List<String> ans = new ArrayList<>();
-        for (String s : words) {
-            if (myMethod(s, set, 0)) {
-                ans.add(s);
-            }
-        }
-        return ans;
-    }
-
-    private boolean myMethod(String s, Set<String> set, int index) {
-        if (set.contains(s) && index != 0) {return true;}
-        for (int i = 1; i < s.length(); i++) {
-            String tmp = s.substring(0, i);
-            if (set.contains(tmp)) {
-                if (myMethod(s.substring(i), set, index + 1)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 }
 ```
 
 ## 最长特殊序列
 
+> 521
+>
 > 给你两个字符串，请你从这两个字符串中找出最长的特殊序列。
 >
 > 「最长特殊序列」定义如下：该序列为某字符串独有的最长子序列（即不能是其他字符串的子序列）。
@@ -1128,22 +1160,24 @@ class Solution {
 }
 ```
 
-> 给定字符串列表，你需要从它们中找出最长的特殊序列。最长特殊序列定义如下：该序列为某字符串独有的最长子序列（即不能是其他字符串的子序列）。
+> 522
 >
-> 子序列可以通过删去字符串中的某些字符实现，但不能改变剩余字符的相对顺序。空序列为所有字符串的子序列，任何字符串为其自身的子序列。
+> 给定字符串列表，你需要从它们中找出最长的特殊序列。最长特殊序列定义如下：该序列为某字符串独有的最长子序列（即不能是其他字符串的子序列）。
 >
 > 输入将是一个字符串列表，输出是最长特殊序列的长度。如果最长特殊序列不存在，返回 -1 。
 
 ```java
+// 首先按照长度降序排序所有字符串。
+// 然后，依次使用序列中的每个字符串与其他字符串比较，如果不存在字符串是当前字符串的子序列，则返回当前字符串的长度。
+// 否则返回 -1。
 class Solution {
     public int findLUSlength(String[] strs) {
-        Arrays.sort(strs, (s1, s2) -> s2.length() - s1.length());
+        Arrays.sort(strs, (a, b) -> b.length() - a.length());
 
         for (int i = 0; i < strs.length; i++) {
             boolean flag = true;
             for (int j = 0; j < strs.length; j++) {
                 if (i == j) {continue;}
-                System.out.println(strs[i] + " " + strs[j]);
                 if (isSubsequence(strs[i], strs[j])) {
                     flag = false;
                     break;
@@ -1167,11 +1201,15 @@ class Solution {
 }
 ```
 
-## 通过删除字母匹配字典里最长单词（0524）
+## 通过删除字母匹配字典里最长单词
 
+> 524
+>
 > 给定一个字符串和一个字符串字典，找到字典里面最长的字符串，该字符串可以通过删除给定字符串的某些字符来得到。如果答案不止一个，返回长度最长且字典顺序最小的字符串。如果答案不存在，则返回空字符串。
 
 ```java
+// 直接在未排序的字典 dd 中查找字符串 xx 满足 xx 是 ss 的子序列。
+// 如果 xx 被找到了，我们将它与其他匹配的字符串做比较，直到找到长度最长、字典序最小的单词为止。
 class Solution {
     public String findLongestWord(String s, List<String> dictionary) {
         String ans = "";
@@ -1197,8 +1235,10 @@ class Solution {
 }
 ```
 
-## 匹配子序列的单词数（0792）
+## 匹配子序列的单词数
 
+> 792
+>
 > *给定字符串 S 和单词字典 words, 求 words[i] 中是 S 的子序列的单词个数。*
 
 ```java
@@ -1223,51 +1263,10 @@ class Solution {
 }
 ```
 
-## 字符串的排列（0567）
+## 自定义字符串排序
 
-> *给定两个字符串 s1 和 s2，写一个函数来判断 s2 是否包含 s1 的排列。*
+> 791
 >
-> *换句话说，第一个字符串的排列之一是第二个字符串的子串。*
-
-```java
-class Solution {
-    public boolean checkInclusion(String s1, String s2) {
-        Map<Character, Integer> need = new HashMap<>();
-        Map<Character, Integer> window = new HashMap<>();
-        for (int i = 0; i < s1.length(); i++) {
-            char c = s1.charAt(i);
-            need.put(c, need.getOrDefault(c, 0) + 1);
-        }
-
-        int left = 0, right = 0;
-        int valid = 0;
-
-        while (right < s2.length()) {
-            char c = s2.charAt(right);
-            right++;
-            if (need.containsKey(c)) {
-                window.put(c, window.getOrDefault(c, 0) + 1);
-                if (window.get(c) - need.get(c) == 0) {valid++;}
-            }
-
-            while (right - left >= s1.length()) {
-                if (valid == need.size()) {return true;}
-                char d = s2.charAt(left);
-                left++;
-                if (need.containsKey(d)) {
-                    if (window.get(d) - need.get(d) == 0) {valid--;}
-                    window.put(d, window.getOrDefault(d, 0) - 1);
-                }
-            }
-        }
-
-        return false;
-    }
-}
-```
-
-## 自定义字符串排序（0791）
-
 > *字符串S和 T 只包含小写字符。在S中，所有字符只会出现一次。*
 >
 > *S 已经根据某种规则进行了排序。我们要根据S中的字符顺序对T进行排序。更具体地说，如果S中x在y之前出现，那么返回的字符串中x也应出现在y之前。*
@@ -1289,7 +1288,8 @@ class Solution {
             count[c - 'a'] = 0;
         }
 
-        // 将 str 中出现的但不在 order 中的元素添加到字符串时，无序关注顺序，因为这些元素并没有在 order 中出现，不需要满足排序关系
+        // 将 str 中出现的但不在 order 中的元素添加到字符串时
+        // 无序关注顺序，因为这些元素并没有在 order 中出现，不需要满足排序关系
         for (char c = 'a'; c <= 'z'; c++) {
             for (int i = 0; i < count[c - 'a']; i++) {
                 ans.append(c);
@@ -1301,8 +1301,10 @@ class Solution {
 }
 ```
 
-## 字母大小写全排列（0784）
+## 字母大小写全排列
 
+> 784
+>
 > *给定一个字符串S，通过将字符串S中的每个字母转变大小写，我们可以获得一个新的字符串。返回所有可能得到的字符串集合。*
 
 ```java
@@ -1317,7 +1319,7 @@ class Solution {
                 for (int i = 0; i < n; i++) {
                     cur.add(new StringBuilder(cur.get(i)));
                     cur.get(i).append(Character.toLowerCase(c));
-                    cur.get(n + i).append(Character.toUpperCase(c));
+                    cur.get(i + n).append(Character.toUpperCase(c));
                 }
             }
             else {
@@ -1334,8 +1336,10 @@ class Solution {
 }
 ```
 
-## 删除字符串中的所有相邻重复项（1047）
+## 删除字符串中的所有相邻重复项
 
+> 1047
+>
 > *给出由小写字母组成的字符串 S，重复项删除操作会选择两个相邻且相同的字母，并删除它们。*
 >
 > *在 S 上反复执行重复项删除操作，直到无法继续删除。*
@@ -1345,30 +1349,30 @@ class Solution {
 ```java
 // 递归
 class Solution {
-    public String removeDuplicates(String S) {
-        int n = S.length();
+    public String removeDuplicates(String s) {
+        int n = s.length();
         for (int i = 1; i < n; i++){
-            if (S.charAt(i - 1) == S.charAt(i)){
-                return removeDuplicates(S.substring(0, i - 1) + removeDuplicates(S.substring(i + 1)));
+            if (s.charAt(i - 1) == s.charAt(i)){
+                return removeDuplicates(s.substring(0, i - 1) + removeDuplicates(s.substring(i + 1)));
             }
         }
-        return S;
+        return s;
     }
 }
 
 // 栈
 class Solution {
-    public String removeDuplicates(String S) { 
+    public String removeDuplicates(String s) {
         StringBuilder sb = new StringBuilder();
-        int sbLength = 0;
-        for (char c : S.toCharArray()) {
-            if (sbLength != 0 && c == sb.charAt(sbLength - 1)) {
-                sb.deleteCharAt(sbLength - 1);
-                sbLength--;
+        int idx = 0;
+        for (char c : s.toCharArray()) {
+            if (idx != 0 && c == sb.charAt(idx - 1)) {
+                sb.deleteCharAt(idx - 1);
+                idx--;
             }
             else {
                 sb.append(c);
-                sbLength++;
+                idx++;
             }
         }
         return sb.toString();
@@ -1376,8 +1380,10 @@ class Solution {
 }
 ```
 
-## 词典中最长的单词（0720）
+## 词典中最长的单词
 
+> 720
+>
 > *给出一个字符串数组words组成的一本英语词典。从中找出最长的一个单词，该单词是由words词典中其他单词逐步添加一个字母组成。若其中有多个可行的答案，则返回答案中字典序最小的单词。*
 >
 > *若无答案，则返回空字符串。*
@@ -1385,19 +1391,18 @@ class Solution {
 ```java
 class Solution {
     public String longestWord(String[] words) {
-        Set<String> wordset = new HashSet<>();
-        for (String word : words) {wordset.add(word);}
+        Set<String> wordSet = new HashSet<>(Arrays.asList(words));
         Arrays.sort(words, (a, b) -> a.length() == b.length() ? a.compareTo(b) : b.length() - a.length());
 
-        for (String word: words) {
+        for (String s : words) {
             boolean flag = true;
-            for (int k = 1; k < word.length(); ++k) {
-                if (!wordset.contains(word.substring(0, k))) {
+            for (int i = 1; i < s.length(); i++) {
+                if (!wordSet.contains(s.substring(0, i))) {
                     flag = false;
                     break;
                 }
             }
-            if (flag) {return word;}
+            if (flag) {return s;}
         }
 
         return "";
@@ -1405,8 +1410,10 @@ class Solution {
 }
 ```
 
-## 原子的数量（0726）
+## 原子的数量
 
+> 726
+>
 > *给定一个化学式formula（作为字符串），返回每种原子的数量。*
 >
 > *原子总是以一个大写字母开始，接着跟随0个或任意个小写字母，表示原子的名字。*
@@ -1461,27 +1468,31 @@ class Solution {
 }
 ```
 
-## 划分字母区间（0763）
+## 划分字母区间
 
+> 763
+>
 > *字符串 S 由小写字母组成。我们要把这个字符串划分为尽可能多的片段，同一字母最多出现在一个片段中。*
 >
 > *返回一个表示每个字符串片段的长度的列表。*
 
 ```java
+// 由于同一个字母只能出现在同一个片段，显然同一个字母的第一次出现的下标位置和最后一次出现的下标位置必须出现在同一个片段。因此需要遍历字符串，得到每个字母最后一次出现的下标位置。
+// 在得到每个字母最后一次出现的下标位置之后，可以使用贪心的方法将字符串划分为尽可能多的片段
 class Solution {
     public List<Integer> partitionLabels(String s) {
-        int[] dist = new int[26];
+        int[] dict = new int[26];
         for (int i = 0; i < s.length(); i++) {
-            dist[s.charAt(i) - 'a'] = i;
+            dict[s.charAt(i) - 'a'] = i;
         }
 
         List<Integer> ans = new ArrayList<>();
-        int start = 0, end = 0;
+        int left = 0, right = 0;
         for (int i = 0; i < s.length(); i++) {
-            end = Math.max(end, dist[s.charAt(i) - 'a']);
-            if (i == end) {
-                ans.add(end - start + 1);
-                start = end + 1;
+            right = Math.max(right, dict[s.charAt(i) - 'a']);
+            if (i == right) {
+                ans.add(right - left + 1);
+                left = right + 1;
             }
         }
 
@@ -1490,8 +1501,10 @@ class Solution {
 }
 ```
 
-## 在LR字符串中交换相邻字符（0777）
+## 在LR字符串中交换相邻字符
 
+> 777
+>
 > *在一个由 'L' , 'R' 和 'X' 三个字符组成的字符串（例如"RXXLRXRXL"）中进行移动操作。一次移动操作指用一个"LX"替换一个"XL"，或者用一个"XR"替换一个"RX"。现给定起始字符串start和结束字符串end，请编写代码，当且仅当存在一系列移动操作使得start可以转换成end时， 返回True。*
 
 ```java
@@ -1516,6 +1529,52 @@ class Solution {
         }
 
         return true;
+    }
+}
+```
+
+## 连接词
+
+> 472
+>
+> 给定一个 不含重复 单词的字符串数组 words ，编写一个程序，返回 words 中的所有 连接词 。
+>
+> 连接词 的定义为：一个字符串完全是由至少两个给定数组中的单词组成的。
+
+```java
+/**
+1 把所有单词加入集合
+2 对于每个单词，调用辅助递归函数判断
+3 在辅助递归函数中使用index参数记录递归次数，避免单词本身对结果产生影响
+4 辅助递归函数的终止条件：一旦传入的字符串存在set中并且不是第一次递归，返回true
+5 对每一个s[0-i]，判断是否存在在set中，如果存在截取后部分字符串递归
+6 只要有任何一个截取方式能成功组合即返回true避免无意义计算
+7 若所有截断方式都无法成功组合返回false
+**/
+
+class Solution {
+    public List<String> findAllConcatenatedWordsInADict(String[] words) {
+        Set<String> set = new HashSet<>(Arrays.asList(words));
+        List<String> ans = new ArrayList<>();
+        for (String s : words) {
+            if (myMethod(s, set, 0)) {
+                ans.add(s);
+            }
+        }
+        return ans;
+    }
+
+    private boolean myMethod(String s, Set<String> set, int index) {
+        if (set.contains(s) && index != 0) {return true;}
+        for (int i = 1; i < s.length(); i++) {
+            String tmp = s.substring(0, i);
+            if (set.contains(tmp)) {
+                if (myMethod(s.substring(i), set, index + 1)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
 ```
@@ -1622,6 +1681,64 @@ class Solution {
             }
         }
         return "/" + String.join("/", ans);
+    }
+}
+```
+
+## 原子的数量
+
+> 726
+>
+> *给定一个化学式formula（作为字符串），返回每种原子的数量。*
+>
+> *原子总是以一个大写字母开始，接着跟随0个或任意个小写字母，表示原子的名字。*
+>
+> *如果数量大于 1，原子后会跟着数字表示原子的数量。如果数量等于 1 则不会跟数字。例如，H2O 和 H2O2 是可行的，但 H1O2 这个表达是不可行的。*
+>
+> *两个化学式连在一起是新的化学式。例如 H2O2He3Mg4 也是化学式。*
+>
+> *一个括号中的化学式和数字（可选择性添加）也是化学式。例如 (H2O2) 和 (H2O2)3 是化学式。*
+>
+> *给定一个化学式，输出所有原子的数量。格式为：第一个（按字典序）原子的名子，跟着它的数量（如果数量大于 1），然后是第二个原子的名字（按字典序），跟着它的数量（如果数量大于 1），以此类推。*
+
+```java
+class Solution {
+    public String countOfAtoms(String formula) {
+        int N = formula.length();
+        Stack<Map<String, Integer>> stack = new Stack();
+        stack.push(new TreeMap());
+
+        for (int i = 0; i < N;) {
+            if (formula.charAt(i) == '(') {
+                stack.push(new TreeMap());
+                i++;
+            } else if (formula.charAt(i) == ')') {
+                Map<String, Integer> top = stack.pop();
+                int iStart = ++i, multiplicity = 1;
+                while (i < N && Character.isDigit(formula.charAt(i))) i++;
+                if (i > iStart) multiplicity = Integer.parseInt(formula.substring(iStart, i));
+                for (String c: top.keySet()) {
+                    int v = top.get(c);
+                    stack.peek().put(c, stack.peek().getOrDefault(c, 0) + v * multiplicity);
+                }
+            } else {
+                int iStart = i++;
+                while (i < N && Character.isLowerCase(formula.charAt(i))) i++;
+                String name = formula.substring(iStart, i);
+                iStart = i;
+                while (i < N && Character.isDigit(formula.charAt(i))) i++;
+                int multiplicity = i > iStart ? Integer.parseInt(formula.substring(iStart, i)) : 1;
+                stack.peek().put(name, stack.peek().getOrDefault(name, 0) + multiplicity);
+            }
+        }
+
+        StringBuilder ans = new StringBuilder();
+        for (String name: stack.peek().keySet()) {
+            ans.append(name);
+            int multiplicity = stack.peek().get(name);
+            if (multiplicity > 1) ans.append("" + multiplicity);
+        }
+        return new String(ans);
     }
 }
 ```
