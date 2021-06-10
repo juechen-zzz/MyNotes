@@ -256,8 +256,10 @@ class Solution {
 }
 ```
 
-## 最长公共子序列（1143）
+## 最长公共子序列
 
+> 1143
+>
 > *给定两个字符串 text1 和 text2，返回这两个字符串的最长公共子序列的长度。*
 >
 > *一个字符串的 子序列 是指这样一个新的字符串：它是由原字符串在不改变字符的相对顺序的情况下删除某些字符（也可以不删除任何字符）后组成的新字符串。*
@@ -271,30 +273,35 @@ class Solution {
     public int longestCommonSubsequence(String text1, String text2) {
         int m = text1.length(), n = text2.length();
         int[][] dp = new int[m + 1][n + 1];
-        for (int i = 0; i <= m; i++){
-            for (int j = 0; j <= n; j++){
+        
+        for (int i = 0; i <= m; i++) {
+            for (int j = 0; j <= n; j++) {
                 if (i == 0 || j == 0) {
-                    dp[i][j] = 0;
                     continue;
                 }
-                // 若当前对比的字符相同，则直接dp[i-1][j-1]+1
-                if (text1.charAt(i - 1) == text2.charAt(j - 1)){
+                if (text1.charAt(i - 1) == text2.charAt(j - 1)) {
                     dp[i][j] = dp[i - 1][j - 1] + 1;
                 }
-                // 若不相同，则max(dp[i - 1][j], dp[i][j - 1])
                 else {
                     dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
                 }
             }
         }
+
         return dp[m][n];
     }
 }
 ```
 
-## 最长重复子数组（0718）
+## 最长重复子数组
 
+> 718
+>
 > *给两个整数数组 A 和 B ，返回两个数组中公共的、长度最长的子数组的长度。*
+>
+> A: [1,2,3,2,1]
+> B: [3,2,1,4,7]
+> 输出：3
 
 ```java
 class Solution {
@@ -309,7 +316,7 @@ class Solution {
                 ans = Math.max(ans, dp[i][j]);
             }
         }
-        
+
         return ans;
     }
 }
@@ -346,71 +353,56 @@ class Solution {
 }
 ```
 
-## 两个字符串的删除操作（0583）
+## 两个字符串的删除操作
 
+> 583
+>
 > *给定两个单词 word1 和 word2，找到使得 word1 和 word2 相同所需的最小步数，每步可以删除任意一个字符串中的一个字符。*
 
 ```java
-// 最长公共子序列（超时）
 class Solution {
     public int minDistance(String word1, String word2) {
-        return word1.length() + word2.length() - 2 * lcs(word1, word2, word1.length(), word2.length());
-    }
+        int n = word1.length(), m = word2.length();
+        int[][] dp = new int[n + 1][m + 1];
 
-    private static int lcs(String s1, String s2, int m, int n) {
-        if (m == 0 || n == 0) {return 0;}
-        if (s1.charAt(m - 1) == s2.charAt(n - 1)) {
-            return 1 + lcs(s1, s2, m - 1, n - 1);
-        }
-        else {
-            return Math.max(lcs(s1, s2, m, n - 1), lcs(s1, s2, m - 1, n));
-        }
-    }
-}
-
-// dp
-class Solution {
-    public int minDistance(String word1, String word2) {
-        int[][] dp = new int[word1.length() + 1][word2.length() + 1];
-
-        for (int i = 0; i <= word1.length(); i++) {
-            for (int j = 0; j <= word2.length(); j++) {
-                if (i == 0 || j == 0) {
-                    dp[i][j] = i + j;
-                }
+        for (int i = 0; i <= n; i++) {
+            for (int j = 0; j <= m; j++) {
+                if (i == 0 || j == 0) {dp[i][j] = i + j;}
                 else if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
                     dp[i][j] = dp[i - 1][j - 1];
                 }
                 else {
-                    dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1]);
+                    dp[i][j] = Math.min(dp[i - 1][j], dp[i][j - 1]) + 1;
                 }
             }
         }
 
-        return dp[word1.length()][word2.length()];
+        return dp[n][m];
     }
 }
 ```
 
-## 两个字符串的最小ASCII删除和（0712）
+## 两个字符串的最小ASCII删除和
 
+> 712
+>
 > *给定两个字符串s1, s2，找到使两个字符串相等所需删除字符的ASCII值的最小和。*
 
 ```java
 class Solution {
     public int minimumDeleteSum(String s1, String s2) {
-        int[][] dp = new int[s1.length() + 1][s2.length() + 1];
+        int n = s1.length(), m = s2.length();
+        int[][] dp = new int[n + 1][m + 1];
 
-        for (int i = s1.length() - 1; i >= 0; i--) {
-            dp[i][s2.length()] = dp[i + 1][s2.length()] + s1.codePointAt(i);
+        for (int i = n - 1; i >= 0; i--) {
+            dp[i][m] = dp[i + 1][m] + s1.codePointAt(i);
+        }
+        for (int j = m - 1; j >= 0; j--) {
+            dp[n][j] = dp[n][j + 1] + s2.codePointAt(j);
         }
 
-        for (int j = s2.length() - 1; j >= 0; j--) {
-            dp[s1.length()][j] = dp[s1.length()][j + 1] + s2.codePointAt(j);
-        }
-
-        for (int i = s1.length() - 1; i >= 0; i--) {
-            for (int j = s2.length() - 1; j >= 0; j--) {
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = m - 1; j >= 0; j--) {
                 if (s1.charAt(i) == s2.charAt(j)) {
                     dp[i][j] = dp[i + 1][j + 1];
                 }
@@ -425,8 +417,10 @@ class Solution {
 }
 ```
 
-## 正则表达式匹配（0010）
+## 正则表达式匹配
 
+> 10
+>
 > *给你一个字符串 s 和一个字符规律 p，请你来实现一个支持 '.' 和 '\*' 的正则表达式匹配。*
 >
 > *'.' 匹配任意单个字符*
@@ -436,8 +430,6 @@ class Solution {
 > *输入：s = "ab" p = ".\*"*
 >
 > *输出：true*
->
-> *解释：".\*" 表示可匹配零个或多个（'\*'）任意字符（'.'）。*
 
 ```java
 class Solution {
@@ -471,8 +463,10 @@ class Solution {
 }
 ```
 
-## 通配符匹配（0044）
+## 通配符匹配
 
+> 44
+>
 > *给定一个字符串 (s) 和一个字符模式 (p) ，实现一个支持 '?' 和 '\*' 的通配符匹配。*
 >
 > *'?' 可以匹配任何单个字符。*
@@ -484,21 +478,17 @@ class Solution {
 ```java
 class Solution {
     public boolean isMatch(String s, String p) {
-        int m = s.length();
-        int n = p.length();
-        boolean[][] dp = new boolean[m + 1][n + 1];
+        int n = s.length(), m = p.length();
+        boolean[][] dp = new boolean[n + 1][m + 1];
         dp[0][0] = true;
-        for (int i = 1; i <= n; i++) {
-            if (p.charAt(i - 1) == '*') {
-                dp[0][i] = true;
-            } 
-            else {
-                break;
-            }
-        }
 
         for (int i = 1; i <= m; i++) {
-            for (int j = 1; j <= n; j++) {
+            if (p.charAt(i - 1) == '*') {dp[0][i] = true;}
+            else {break;}
+        }
+
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= m; j++) {
                 if (p.charAt(j - 1) == '*') {
                     dp[i][j] = dp[i - 1][j] || dp[i][j - 1];
                 }
@@ -508,45 +498,52 @@ class Solution {
             }
         }
 
-        return dp[m][n];
+        return dp[n][m];
     }
 }
 ```
 
-## 最小路径和（0064）
+## 最小路径和
 
-> 给定一个包含非负整数的 `*m* x *n*` 网格 `grid` ，请找出一条从左上角到右下角的路径，使得路径上的数字总和为最小。
+> 64
+>
+> 给定一个包含非负整数的 `m x n` 网格 `grid` ，请找出一条从左上角到右下角的路径，使得路径上的数字总和为最小。
 >
 > **说明：**每次只能向下或者向右移动一步。
 
 ```java
 class Solution {
     public int minPathSum(int[][] grid) {
-        int m = grid.length, n = grid[0].length;
-        int[][] dp = new int[m][n];
+        int n = grid.length, m = grid[0].length;
+        int[][] dp = new int[n][m];
         dp[0][0] = grid[0][0];
-        for (int i = 0; i < m; i++) {
+
+        for (int i = 0; i < n; i++) {
             if (i == 0) {continue;}
             else {dp[i][0] = dp[i - 1][0] + grid[i][0];}
         }
-        for (int j = 0; j < n; j++) {
+
+        for (int j = 0; j < m; j++) {
             if (j == 0) {continue;}
             else {dp[0][j] = dp[0][j - 1] + grid[0][j];}
         }
 
-        if (m == 1 || n == 1) {return dp[m - 1][n - 1];}
-        for (int i = 1; i < m; i++) {
-            for (int j = 1; j < n; j++) {
+        if (n == 1 || m == 1) {return dp[n - 1][m - 1];}
+        for (int i = 1; i < n; i++) {
+            for (int j = 1; j < m; j++) {
                 dp[i][j] = Math.min(dp[i - 1][j], dp[i][j - 1]) + grid[i][j];
             }
         }
-        return dp[m - 1][n - 1];
+
+        return dp[n - 1][m - 1];
     }
 }
 ```
 
-## 三角形最小路径和（0120）
+## 三角形最小路径和
 
+> 120
+>
 > *给定一个三角形 triangle ，找出自顶向下的最小路径和。*
 
 ```java
@@ -569,20 +566,15 @@ class Solution {
             }
         }
 
-        int ans = Integer.MAX_VALUE;
-        for (int i = 0; i < n; i++) {
-            if (dp[n - 1][i] < ans) {
-                ans = dp[n - 1][i];
-            }
-        }
-
-        return ans;
+        return Arrays.stream(dp[n - 1]).min().getAsInt();
     }
 }
 ```
 
-## 编辑距离（0072）
+## 编辑距离
 
+> 72
+>
 > *给你两个单词 word1 和 word2，请你计算出将 word1 转换成 word2 所使用的最少操作数 。*
 >
 > 对一个单词进行如下三种操作：*
@@ -596,13 +588,13 @@ class Solution {
 ```java
 class Solution {
     public int minDistance(String word1, String word2) {
-        int m = word1.length(), n = word2.length();
-        int[][] dp = new int[m + 1][n + 1];
-        for (int i = 1; i <= m; i++) {dp[i][0] = i;}
-        for (int j = 1; j <= n; j++) {dp[0][j] = j;}
+        int n = word1.length(), m = word2.length();
+        int[][] dp = new int[n + 1][m + 1];
+        for (int i = 1; i <= n; i++) {dp[i][0] = i;}
+        for (int j = 1; j <= m; j++) {dp[0][j] = j;}
 
-        for (int i = 1; i <= m; i++) {
-            for (int j = 1; j <= n; j++) {
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= m; j++) {
                 if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
                     dp[i][j] = dp[i - 1][j - 1];
                 }
@@ -612,26 +604,26 @@ class Solution {
             }
         }
 
-        return dp[m][n];
+        return dp[n][m];
     }
 }
 ```
 
-## 不同的子序列（0115）
+## 不同的子序列
 
+> 115
+>
 > 给定一个字符串 `s` 和一个字符串 `t` ，计算在 `s` 的子序列中 `t` 出现的个数。
 
 ```java
 class Solution {
     public int numDistinct(String s, String t) {
         int m = s.length(), n = t.length();
-        if (m < n) {
-            return 0;
-        }
+        if (m < n) {return 0;}
+
         int[][] dp = new int[m + 1][n + 1];
-        for (int i = 0; i <= m; i++) {
-            dp[i][n] = 1;
-        }
+        for (int i = 0; i <= m; i++) {dp[i][n] = 1;}
+
         for (int i = m - 1; i >= 0; i--) {
             char sChar = s.charAt(i);
             for (int j = n - 1; j >= 0; j--) {
@@ -643,6 +635,7 @@ class Solution {
                 }
             }
         }
+        
         return dp[0][0];
     }
 }
@@ -1870,6 +1863,44 @@ class Solution {
             dp = ndp;
         }
         return (int)dp[0];
+    }
+}
+```
+
+## 最后一块石头的重量2
+
+> 1049
+>
+> 有一堆石头，用整数数组 stones 表示。其中 stones[i] 表示第 i 块石头的重量。
+>
+> 每一回合，从中选出任意两块石头，然后将它们一起粉碎。假设石头的重量分别为 x 和 y，且 x <= y。那么粉碎的可能结果如下：
+>
+> 如果 x == y，那么两块石头都会被完全粉碎；
+> 如果 x != y，那么重量为 x 的石头将会完全粉碎，而重量为 y 的石头新重量为 y-x。
+> 最后，最多只会剩下一块 石头。返回此石头 最小的可能重量 。如果没有石头剩下，就返回 0。
+
+```java
+// 要使最后一块石头的重量尽可能地小，neg需要在不超过sum/2的前提下尽可能地大。因此本问题可以看作是背包容量为sum/2，物品重量和价值均为stonesi的0-1背包问题。
+// 对于该问题，定义二维布尔数组dp，其中dp[i+1][j]表示前i个石头能否凑出重量j。
+class Solution {
+    public int lastStoneWeightII(int[] stones) {
+        int sum = Arrays.stream(stones).sum();
+        int n = stones.length, m = sum / 2;
+        boolean[][] dp = new boolean[n + 1][m + 1];
+        dp[0][0] = true;
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j <= m; j++) {
+                if (j < stones[i]) {dp[i + 1][j] = dp[i][j];}
+                else {dp[i + 1][j] = dp[i][j] || dp[i][j - stones[i]];}
+            }
+        }
+
+        for (int j = m; j >= 0; j--) {
+            if (dp[n][j]) {return sum - 2 * j;}
+        }
+
+        return 0;
     }
 }
 ```
