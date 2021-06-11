@@ -216,6 +216,72 @@ class Solution {
 }
 ```
 
+## 最长公共子序列
+
+> 1143
+>
+> *给定两个字符串 text1 和 text2，返回这两个字符串的最长公共子序列的长度。*
+>
+> *一个字符串的 子序列 是指这样一个新的字符串：它是由原字符串在不改变字符的相对顺序的情况下删除某些字符（也可以不删除任何字符）后组成的新字符串。*
+>
+> *例如，"ace" 是 "abcde" 的子序列，但 "aec" 不是 "abcde" 的子序列。两个字符串的「公共子序列」是这两个字符串所共同拥有的子序列。*
+>
+> *若这两个字符串没有公共子序列，则返回 0。*
+
+```java
+class Solution {
+    public int longestCommonSubsequence(String text1, String text2) {
+        int m = text1.length(), n = text2.length();
+        int[][] dp = new int[m + 1][n + 1];
+        
+        for (int i = 0; i <= m; i++) {
+            for (int j = 0; j <= n; j++) {
+                if (i == 0 || j == 0) {
+                    continue;
+                }
+                if (text1.charAt(i - 1) == text2.charAt(j - 1)) {
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                }
+                else {
+                    dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+
+        return dp[m][n];
+    }
+}
+```
+
+## 最长重复子数组
+
+> 718
+>
+> *给两个整数数组 A 和 B ，返回两个数组中公共的、长度最长的子数组的长度。*
+>
+> A: [1,2,3,2,1]
+> B: [3,2,1,4,7]
+> 输出：3
+
+```java
+class Solution {
+    public int findLength(int[] nums1, int[] nums2) {
+        int n = nums1.length, m = nums2.length;
+        int[][] dp = new int[n + 1][m + 1];
+        int ans = 0;
+
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = m - 1; j >= 0; j--) {
+                dp[i][j] = (nums1[i] == nums2[j]) ? dp[i + 1][j + 1] + 1 : 0;
+                ans = Math.max(ans, dp[i][j]);
+            }
+        }
+
+        return ans;
+    }
+}
+```
+
 ## 使序列递增的最小交换次数
 
 > 801
@@ -256,39 +322,33 @@ class Solution {
 }
 ```
 
-## 最长公共子序列
+## 最长有效括号
 
-> 1143
+> 32
 >
-> *给定两个字符串 text1 和 text2，返回这两个字符串的最长公共子序列的长度。*
+> *给你一个只包含 '(' 和 ')' 的字符串，找出最长有效（格式正确且连续）括号子串的长度。*
 >
-> *一个字符串的 子序列 是指这样一个新的字符串：它是由原字符串在不改变字符的相对顺序的情况下删除某些字符（也可以不删除任何字符）后组成的新字符串。*
+> *输入：s = "(()"*
 >
-> *例如，"ace" 是 "abcde" 的子序列，但 "aec" 不是 "abcde" 的子序列。两个字符串的「公共子序列」是这两个字符串所共同拥有的子序列。*
->
-> *若这两个字符串没有公共子序列，则返回 0。*
+> *输出：2*
 
 ```java
 class Solution {
-    public int longestCommonSubsequence(String text1, String text2) {
-        int m = text1.length(), n = text2.length();
-        int[][] dp = new int[m + 1][n + 1];
-        
-        for (int i = 0; i <= m; i++) {
-            for (int j = 0; j <= n; j++) {
-                if (i == 0 || j == 0) {
-                    continue;
-                }
-                if (text1.charAt(i - 1) == text2.charAt(j - 1)) {
-                    dp[i][j] = dp[i - 1][j - 1] + 1;
-                }
-                else {
-                    dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+    public int longestValidParentheses(String s) {
+        int n = s.length();
+        if (n == 0) {return 0;}
+        int[] dp = new int[n];
+
+        for (int i = 1; i < n; i++) {
+            if (s.charAt(i) == ')' && i - dp[i - 1] - 1 >= 0 && s.charAt(i - dp[i - 1] - 1) == '(') {
+                dp[i] = dp[i - 1] + 2;
+                if (i - dp[i - 1] - 2 >= 0) {
+                    dp[i] += dp[i - dp[i - 1] - 2];
                 }
             }
         }
 
-        return dp[m][n];
+        return Arrays.stream(dp).max().getAsInt();
     }
 }
 ```
@@ -327,66 +387,6 @@ class Solution {
         }
 
         return Math.max(up[n - 1], down[n - 1]);
-    }
-}
-```
-
-## 最长重复子数组
-
-> 718
->
-> *给两个整数数组 A 和 B ，返回两个数组中公共的、长度最长的子数组的长度。*
->
-> A: [1,2,3,2,1]
-> B: [3,2,1,4,7]
-> 输出：3
-
-```java
-class Solution {
-    public int findLength(int[] nums1, int[] nums2) {
-        int n = nums1.length, m = nums2.length;
-        int[][] dp = new int[n + 1][m + 1];
-        int ans = 0;
-
-        for (int i = n - 1; i >= 0; i--) {
-            for (int j = m - 1; j >= 0; j--) {
-                dp[i][j] = (nums1[i] == nums2[j]) ? dp[i + 1][j + 1] + 1 : 0;
-                ans = Math.max(ans, dp[i][j]);
-            }
-        }
-
-        return ans;
-    }
-}
-```
-
-## 最长有效括号
-
-> 32
->
-> *给你一个只包含 '(' 和 ')' 的字符串，找出最长有效（格式正确且连续）括号子串的长度。*
->
-> *输入：s = "(()"*
->
-> *输出：2*
-
-```java
-class Solution {
-    public int longestValidParentheses(String s) {
-        int n = s.length();
-        if (n == 0) {return 0;}
-        int[] dp = new int[n];
-
-        for (int i = 1; i < n; i++) {
-            if (s.charAt(i) == ')' && i - dp[i - 1] - 1 >= 0 && s.charAt(i - dp[i - 1] - 1) == '(') {
-                dp[i] = dp[i - 1] + 2;
-                if (i - dp[i - 1] - 2 >= 0) {
-                    dp[i] += dp[i - dp[i - 1] - 2];
-                }
-            }
-        }
-
-        return Arrays.stream(dp).max().getAsInt();
     }
 }
 ```
