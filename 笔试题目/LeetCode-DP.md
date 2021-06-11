@@ -293,6 +293,44 @@ class Solution {
 }
 ```
 
+## 摆动序列
+
+> 376
+>
+> [1,7,4,9,2,5] 是一个摆动序列，因为差值 (6,-3,5,-7,3) 是正负交替出现的。相反, [1,4,7,2,5] 和 [1,7,4,5,5] 不是摆动序列，第一个序列是因为它的前两个差值都是正数，第二个序列是因为它的最后一个差值为零。
+>
+> 给定一个整数序列，返回作为摆动序列的最长子序列的长度。 通过从原始序列中删除一些（也可以不删除）元素来获得子序列，剩下的元素保持其原始顺序。
+
+```java
+class Solution {
+    public int wiggleMaxLength(int[] nums) {
+        int n = nums.length;
+        if (n < 2) {return n;}
+
+        int[] up = new int[n];
+        int[] down = new int[n];
+        up[0] = down[0] = 1;
+        
+        for (int i = 1; i < n; i++) {
+            if (nums[i] > nums[i - 1]) {
+                up[i] = Math.max(up[i - 1], down[i - 1] + 1);
+                down[i] = down[i - 1];
+            }
+            else if (nums[i] < nums[i - 1]) {
+                up[i] = up[i - 1];
+                down[i] = Math.max(down[i - 1], up[i - 1] + 1);
+            }
+            else {
+                up[i] = up[i - 1];
+                down[i] = down[i - 1];
+            }
+        }
+
+        return Math.max(up[n - 1], down[n - 1]);
+    }
+}
+```
+
 ## 最长重复子数组
 
 > 718
@@ -344,6 +382,75 @@ class Solution {
                 dp[i] = dp[i - 1] + 2;
                 if (i - dp[i - 1] - 2 >= 0) {
                     dp[i] += dp[i - dp[i - 1] - 2];
+                }
+            }
+        }
+
+        return Arrays.stream(dp).max().getAsInt();
+    }
+}
+```
+
+## 最长湍流子数组
+
+> 978
+>
+> *当 A 的子数组 A[i], A[i+1], ..., A[j] 满足下列条件时，我们称其为湍流子数组：*
+>
+> *若 i <= k < j，当 k 为奇数时， A[k] > A[k+1]，且当 k 为偶数时，A[k] < A[k+1]；*
+>
+> *或 若 i <= k < j，当 k 为偶数时，A[k] > A[k+1] ，且当 k 为奇数时， A[k] < A[k+1]。*
+>
+> *也就是说，如果比较符号在子数组中的每个相邻元素对之间翻转，则该子数组是湍流子数组。*
+>
+> *返回 A 的最大湍流子数组的长度。*
+
+```java
+class Solution {
+    public int maxTurbulenceSize(int[] arr) {
+        if (arr.length == 1) {return 1;}
+        int n = arr.length;
+        int[][] dp = new int[n][2];
+        dp[0][0] = dp[0][1] = 1;
+
+        for (int i = 1; i < n; i++) {
+            dp[i][0] = dp[i][1] = 1;
+            if (arr[i - 1] > arr[i]) {dp[i][0] = dp[i - 1][1] + 1;}
+            else if (arr[i - 1] < arr[i]) {dp[i][1] = dp[i - 1][0] + 1;}
+        }
+
+        int ans = 1;
+        for (int i = 0; i < n; i++) {
+            ans = Math.max(ans, Math.max(dp[i][0], dp[i][1]));
+        }
+        return ans;
+    }
+}
+```
+
+## 最长数对链
+
+> 646
+>
+> *给出 n 个数对。 在每一个数对中，第一个数字总是比第二个数字小。*
+>
+> *现在，我们定义一种跟随关系，当且仅当 b < c 时，数对(c, d) 才可以跟在 (a, b) 后面。我们用这种形式来构造一个数对链。*
+>
+> *给定一个数对集合，找出能够形成的最长数对链的长度。你不需要用到所有的数对，你可以以任何顺序选择其中的一些数对来构造。*
+
+```java
+class Solution {
+    public int findLongestChain(int[][] pairs) {
+        Arrays.sort(pairs, (a, b) -> a[0] - b[0]);
+        int n = pairs.length;
+        
+        int[] dp = new int[n];
+        Arrays.fill(dp, 1);
+
+        for (int j = 1; j < n; j++) {
+            for (int i = 0; i < j; i++) {
+                if (pairs[i][1] < pairs[j][0]) {
+                    dp[j] = Math.max(dp[j], dp[i] + 1);
                 }
             }
         }
@@ -641,38 +748,40 @@ class Solution {
 }
 ```
 
-## 计算各个位数不同的数字个数（0357）
+## 计算各个位数不同的数字个数
 
+> 357
+>
 > *给定一个非负整数 n，计算各位数字都不同的数字 x 的个数，其中 0 ≤ x < 10n 。*
 
 ```java
 class Solution {
+    /**
+     * 排列组合：n位有效数字 = 每一位都从 0~9 中选择，且不能以 0 开头
+     * 1位数字：0~9                      10
+     * 2位数字：C10-2，且第一位不能是0      9 * 9
+     * 3位数字：C10-3，且第一位不能是0      9 * 9 * 8
+     * 4位数字：C10-4，且第一位不能是0      9 * 9 * 8 * 7
+     * ... ...
+     * 最后，总数 = 所有 小于 n 的位数个数相加
+     */
     public int countNumbersWithUniqueDigits(int n) {
-        //个位为0，
-        if(n == 0) {return 1;}
-        int ans = 0;
-        int[] dp = new int[n];
-        dp[0] = 9;
-        //分别计算 i位数 不包含0时对应的数量
-        for (int i = 1; i < n; i++) {
-            dp[i] = dp[i - 1] * (9 - i);
+        if (n == 0) {return 1;}
+        int first = 10, second = 9 * 9;
+        int size = Math.min(n, 10);
+        for (int i = 2; i <= size; i++) {
+            first += second;
+            second *= (10 - i);
         }
-        //最终结果加上不包含0的情况
-        for (int i = 0; i < n ; i++) {
-            ans += dp[i];
-        }
-        //最终结果加上包含0的情况
-        for (int i = 2; i <= n; i++) {
-            ans += dp[i - 2] * (i - 1);
-        }
-        //加上0这种特殊情况
-        return ans + 1;
+        return first;
     }
 }
 ```
 
-## 乘积最大子数组（0152）
+## 乘积最大子数组
 
+> 152
+>
 > *给你一个整数数组 nums ，请你找出数组中乘积最大的连续子数组（该子数组中至少包含一个数字），并返回该子数组所对应的乘积。*
 
 ```java
@@ -684,35 +793,35 @@ class Solution {
         maxDp[0] = nums[0];
         minDp[0] = nums[0];
 
-        int ans = nums[0];
         for (int i = 1; i < n; i++) {
-            maxDp[i] = Math.max(nums[i], Math.max(nums[i] * maxDp[i - 1], nums[i] * minDp[i - 1]));
-            minDp[i] = Math.min(nums[i], Math.min(nums[i] * maxDp[i - 1], nums[i] * minDp[i - 1]));
-            ans = Math.max(ans, maxDp[i]);
+            maxDp[i] = Math.max(nums[i], Math.max(maxDp[i - 1] * nums[i], minDp[i - 1] * nums[i]));
+            minDp[i] = Math.min(nums[i], Math.min(maxDp[i - 1] * nums[i], minDp[i - 1] * nums[i]));
         }
 
-        return ans;
+        return Arrays.stream(maxDp).max().getAsInt();
     }
 }
 ```
 
-## 地下城游戏（0174）
+## 地下城游戏
 
+> 174
+>
 > *编写一个函数来计算确保骑士能够拯救到公主所需的最低初始健康点数。*
 
 ```java
 class Solution {
     public int calculateMinimumHP(int[][] dungeon) {
-        int m = dungeon.length, n = dungeon[0].length;
-        int[][] dp = new int[m + 1][n + 1];
-        for (int i = 0; i <= m; ++i) {Arrays.fill(dp[i], Integer.MAX_VALUE);}
-        dp[m][n - 1] = dp[m - 1][n] = 1;
+        int n = dungeon.length, m = dungeon[0].length;
+        int[][] dp = new int[n + 1][m + 1];
+        for (int i = 0; i <= n; i++) {Arrays.fill(dp[i], Integer.MAX_VALUE);}
+        dp[n][m - 1] = dp[n - 1][m] = 1;
 
         // needMin + globalDun[i][j] = Math.min(dp[i + 1][j], dp[i][j + 1])
-        for (int i = m - 1; i >= 0; i--) {
-            for (int j = n - 1; j >= 0; j--) {
-                int minn = Math.min(dp[i + 1][j], dp[i][j + 1]);
-                dp[i][j] = Math.max(minn - dungeon[i][j], 1);
+        for (int i = n - 1; i >= 0; i--) {
+            for (int j = m - 1; j >= 0; j--) {
+                int minCur = Math.min(dp[i + 1][j], dp[i][j + 1]);
+                dp[i][j] = Math.max(minCur - dungeon[i][j], 1);
             }
         }
 
@@ -721,20 +830,22 @@ class Solution {
 }
 ```
 
-## 最大正方形（0221）
+## 最大正方形
 
+> 221
+>
 > *在一个由 '0' 和 '1' 组成的二维矩阵内，找到只包含 '1' 的最大正方形，并返回其面积。*
 
 ```java
 class Solution {
     public int maximalSquare(char[][] matrix) {
-        int ans = 0;
-        if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {return 0;}
+        if (matrix.length == 0 || matrix[0].length == 0) {return 0;}
+        int n = matrix.length, m = matrix[0].length;
+        int[][] dp = new int[n][m];
 
-        int m = matrix.length, n = matrix[0].length;
-        int[][] dp = new int[m][n];
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
+        int ans = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
                 if (matrix[i][j] == '1') {
                     if (i == 0 || j == 0) {dp[i][j] = 1;}
                     else {
@@ -750,8 +861,10 @@ class Solution {
 }
 ```
 
-## 二维区域检索求和（0304）
+## 二维区域检索求和
 
+> 304
+>
 > 给定一个二维矩阵，计算其子矩形范围内元素的总和，该子矩阵的左上角为 `(row1, col1)` ，右下角为 `(row2, col2)` 。
 
 ```java
@@ -782,6 +895,8 @@ class NumMatrix {
 
 ## 零钱兑换
 
+> 322
+>
 > *给定不同面额的硬币 coins 和一个总金额 amount。*
 >
 > *编写一个函数来计算可以凑成总金额所需的最少的硬币个数。如果没有任何一种硬币组合能组成总金额，返回 -1。*
@@ -806,6 +921,8 @@ class Solution {
 }
 ```
 
+> 518
+>
 > *给定不同面额的硬币和一个总金额。写出函数来计算可以凑成总金额的硬币组合数。假设每一种面额的硬币有无限个。* 
 
 ```java
@@ -824,8 +941,10 @@ class Solution {
 }
 ```
 
-## 解码方法（0091）
+## 解码方法
 
+> 91
+>
 > *'A' -> 1*
 >
 > *'B' -> 2*
@@ -842,21 +961,15 @@ class Solution {
 class Solution {
     public int numDecodings(String s) {
         int n = s.length();
-        if (n == 0) {return 0;}
         int[] dp = new int[n + 1];
         dp[0] = 1;
-        dp[1] = s.charAt(0) == '0' ? 0 : 1;
 
-        for (int i = 1; i < n; i++) {
-            if ((s.charAt(i - 1) == '1') || (s.charAt(i - 1) == '2' && s.charAt(i) < '7')) {
-                if (s.charAt(i) == '0') {dp[i + 1] = dp[i - 1];}
-                else {dp[i + 1] = dp[i] + dp[i - 1];}
+        for (int i = 1; i <= n; i++) {
+            if (s.charAt(i - 1) != '0') {
+                dp[i] += dp[i - 1];
             }
-            else if (s.charAt(i) == '0') {
-                return 0;
-            }
-            else {
-                dp[i + 1] = dp[i];
+            if (i > 1 && s.charAt(i - 2) != '0' && (s.charAt(i - 2) - '0') * 10 + (s.charAt(i - 1) - '0') <= 26) {
+                dp[i] += dp[i - 2];
             }
         }
 
@@ -865,8 +978,10 @@ class Solution {
 }
 ```
 
-## 俄罗斯套娃（0354）
+## 俄罗斯套娃
 
+> 354
+>
 > *给定一些标记了宽度和高度的信封，宽度和高度以整数对形式 (w, h) 出现。当另一个信封的宽度和高度都比这个信封大的时候，这个信封就可以放进另一个信封里，如同俄罗斯套娃一样。*
 >
 > *请计算最多能有多少个信封能组成一组“俄罗斯套娃”信封（即可以把一个信封放到另一个信封里面）。*
@@ -875,84 +990,49 @@ class Solution {
 class Solution {
     public int maxEnvelopes(int[][] envelopes) {
         int n = envelopes.length;
-        Arrays.sort(envelopes, new Comparator<int[]>(){
-            public int compare(int[] a, int[] b){
-                return a[0] == b[0] ? b[1] - a[1] : a[0] - b[0];
-            }
-        });
+        Arrays.sort(envelopes, (a, b) -> a[0] == b[0] ? b[1] - a[1] : a[0] - b[0]);
 
         int[] height = new int[n];
-        for (int i = 0;i < n; i++){
-            height[i] = envelopes[i][1];
-        }
-        return lengthOfLIS(height);
+        for (int i = 0; i < n; i++) {height[i] = envelopes[i][1];}
+        
+        return myMethod(height);
     }
 
-    public int lengthOfLIS(int[] height){
+    // 对于每一种 w 值，其对应的信封在排序后的数组中是按照 h 值递减的顺序出现的，那么这些 h 值不可能组成长度超过 1 的严格递增的序列
+    private static int myMethod(int[] height) {
         int n = height.length;
         int[] dp = new int[n];
         Arrays.fill(dp, 1);
 
-        for (int i = 0; i < n; i++){
-            for (int j = 0; j < i; j++){
-                if (height[i] > height[j]){
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < i; j++) {
+                if (height[i] > height[j]) {
                     dp[i] = Math.max(dp[i], dp[j] + 1);
                 }
             }
         }
 
-        int ans = 0;
-        for (int i = 0; i < n; i++){
-            ans = Math.max(ans, dp[i]);
-        }
-        return ans;
-    }
-} 
-```
-
-## 矩形区域不超过 K 的最大数值和（0363）
-
-> *给定一个非空二维矩阵 matrix 和一个整数 k，找到这个矩阵内部不大于 k 的最大矩形和。*
-
-```java
-class Solution {
-    public int maxSumSubmatrix(int[][] matrix, int k) {
-        int m = matrix.length, n = matrix[0].length;
-        int ans = Integer.MIN_VALUE;
-        
-        for (int i1 = 1; i1 <= m; i1++) {
-            for (int j1 = 1; j1 <= n; j1++) {
-                int[][] dp = new int[m + 1][n + 1];
-                dp[i1][j1] = matrix[i1 - 1][j1 - 1];
-                
-                for (int i2 = i1; i2 <= m; i2++) {
-                    for (int j2 = j1; j2 <= n; j2++) {
-                        dp[i2][j2] = dp[i2 - 1][j2] + dp[i2][j2 - 1] - dp[i2 - 1][j2 - 1] + matrix[i2 - 1][j2 - 1];
-                        if (dp[i2][j2] <= k && dp[i2][j2] > ans) {
-                            ans = dp[i2][j2];
-                        }
-                    }
-                }
-            }
-        }
-        return ans;
+        return Arrays.stream(dp).max().getAsInt();
     }
 }
 ```
 
-## 最大整除子集（0368）
+## 最大整除子集
 
+> 368
+>
 > *给出一个由无重复的正整数组成的集合，找出其中最大的整除子集，子集中任意一对 (Si，Sj) 都要满足：Si % Sj = 0 或 Sj % Si = 0。*
 >
 > *如果有多个目标子集，返回其中任何一个均可。*
 
 ```java
-class Solution {
+ class Solution {
     public List<Integer> largestDivisibleSubset(int[] nums) {
         int n = nums.length;
         if (n == 0) {return new ArrayList<>();}
         Arrays.sort(nums);
 
+        // dp[i]表示必选nums[i]的情况下的最大整除子集
         List[] dp = new List[n];
         dp[0] = new ArrayList<>();
         dp[0].add(nums[0]);
@@ -962,9 +1042,10 @@ class Solution {
             dp[i] = new ArrayList<>();
             dp[i].add(nums[i]);
 
+            // 若nums[i]整除nums[j]，说明可以将dp[j]+nums[i]作为dp[i]
             for (int j = 0; j < i; j++) {
                 if (nums[i] % nums[j] == 0 && dp[i].size() < dp[j].size() + 1) {
-                    dp[i] = new ArrayList(dp[j]);
+                    dp[i] = new ArrayList<>(dp[j]);
                     dp[i].add(nums[i]);
                 }
             }
@@ -977,8 +1058,10 @@ class Solution {
 }
 ```
 
-## 猜数字大小（0375）
+## 猜数字大小
 
+> 375
+>
 > *我们正在玩一个猜数游戏，游戏规则如下：*
 >
 > *我从 1 到 n 之间选择一个数字，你来猜我选了哪个数字。*
@@ -993,15 +1076,16 @@ class Solution {
         if (n == 1) {return 0;}
         int[][] dp = new int[n + 1][n + 1];
 
-        for (int i = 1; i < n + 1; i++) {
+        // dp[i][j]表示从(j,i)区间选择内的最小值，选定区间后，在用k划分成子问题
+        for (int i = 1; i <= n; i++) {
             for (int j = i - 1; j > 0; j--) {
-                int min = Integer.MAX_VALUE, left = 0, right = 0;
+                int curMin = Integer.MAX_VALUE, left = 0, right = 0;
                 for (int k = i; k > j - 1; k--) {
-                    left = (k == j || j == k - 1) ? -1 : dp[k - 1][j];
-                    right = (k == i || i == k + 1) ? -1 : dp[i][k + 1];
-                    min = (left == -1 && right == -1) ? k : Math.min(min, k + Math.max(left, right));
+                    left = (k == j || k - 1 == j) ? -1 : dp[k - 1][j];
+                    right = (k == i || k + 1 == i) ? -1 : dp[i][k + 1];
+                    curMin = (left == -1 && right == -1) ? k : Math.min(curMin, k + Math.max(left, right));
                 }
-                dp[i][j] = min;
+                dp[i][j] = curMin;
             }
         }
         return dp[n][1];
@@ -1009,45 +1093,10 @@ class Solution {
 }
 ```
 
-## 摆动序列（0376）
+## 分割数组的最大值
 
-> 如果连续数字之间的差严格地在正数和负数之间交替，则数字序列称为摆动序列。第一个差（如果存在的话）可能是正数或负数。少于两个元素的序列也是摆动序列。
+> 410
 >
-> 例如， [1,7,4,9,2,5] 是一个摆动序列，因为差值 (6,-3,5,-7,3) 是正负交替出现的。相反, [1,4,7,2,5] 和 [1,7,4,5,5] 不是摆动序列，第一个序列是因为它的前两个差值都是正数，第二个序列是因为它的最后一个差值为零。
->
-> 给定一个整数序列，返回作为摆动序列的最长子序列的长度。 通过从原始序列中删除一些（也可以不删除）元素来获得子序列，剩下的元素保持其原始顺序。
-
-```java
-class Solution {
-    public int wiggleMaxLength(int[] nums) {
-        int n = nums.length;
-        if (n < 2) {return n;}
-
-        int[] up = new int[n];
-        int[] down = new int[n];
-        up[0] = down[0] = 1;
-        for (int i = 1; i < n; i++) {
-            if (nums[i] > nums[i - 1]) {
-                up[i] = Math.max(up[i - 1], down[i - 1] + 1);
-                down[i] = down[i - 1];
-            }
-            else if (nums[i] < nums[i - 1]) {
-                up[i] = up[i - 1];
-                down[i] = Math.max(down[i - 1], up[i - 1] + 1);
-            }
-            else {
-                up[i] = up[i - 1];
-                down[i] = down[i - 1];
-            }
-        }
-
-        return Math.max(up[n - 1], down[n - 1]);
-    }
-}
-```
-
-## 分割数组的最大值（0410）
-
 > *给定一个非负整数数组 nums 和一个整数 m ，你需要将这个数组分成 m 个非空的连续子数组。*
 >
 > *设计一个算法使得这 m 个子数组各自和的最大值最小。*
@@ -1056,15 +1105,18 @@ class Solution {
 class Solution {
     public int splitArray(int[] nums, int m) {
         int n = nums.length;
+        // dp[i][j]表示前i个数字分成j组的最大值
         int[][] dp = new int[n + 1][m + 1];
         for (int i = 0; i <= n; i++) {Arrays.fill(dp[i], Integer.MAX_VALUE);}
 
+        // 记录和，这样能快速算出sum(i, j)
         int[] sum = new int[n + 1];
         for (int i = 0; i < n; i++) {sum[i + 1] = sum[i] + nums[i];}
 
         dp[0][0] = 0;
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j <= Math.min(i, m); j++) {
+                // 遍历k位置
                 for (int k = 0; k < i; k++) {
                     dp[i][j] = Math.min(dp[i][j], Math.max(dp[k][j - 1], sum[i] - sum[k]));
                 }
@@ -1076,8 +1128,10 @@ class Solution {
 }
 ```
 
-## 分割等和子集（0416）
+## 分割等和子集
 
+> 416
+>
 > *给定一个只包含正整数的非空数组。是否可以将这个数组分割成两个子集，使得两个子集的元素和相等。*
 
 ```java
@@ -1086,16 +1140,14 @@ class Solution {
         int n = nums.length;
         if (n < 2) {return false;}
 
-        int sum = 0, maxNum = 0;
-        for (int num : nums) {
-            sum += num;
-            maxNum = Math.max(maxNum, num);
-        }
-        if ((sum & 1) != 0) {return false;}
+        int sum = Arrays.stream(nums).sum();
+        int maxNum = Arrays.stream(nums).max().getAsInt();
+        
+        if (sum % 2 == 1) {return false;}
+        if (maxNum > sum / 2) {return false;}
         int target = sum / 2;
-        if (maxNum > target) {return false;}
 
-        // dp[i][j]表示从数组的[0,i]下标范围内选取若干个正整数，是否存在一种方案的和为j
+        // dp[i][j]表示从数组的(0,i)范围内取若干个数，是否存在一种方案的和为j
         boolean[][] dp = new boolean[n][target + 1];
         for (int i = 0; i < n; i++) {dp[i][0] = true;}
         dp[0][nums[0]] = true;
@@ -1119,7 +1171,7 @@ class Solution {
 
 ## 一和零
 
-> 474   可以理解为二维的背包问题
+> 474   
 >
 > 给你一个二进制字符串数组 strs 和两个整数 m 和 n 。
 >
@@ -1129,6 +1181,7 @@ class Solution {
 
 ```java
 class Solution {
+    // 可以理解为二维的背包问题,dp[i][j]表示有i个0,j个1的情况下的最大子集
     public int findMaxForm(String[] strs, int m, int n) {
         int[][] dp = new int[m + 1][n + 1];
         for (String cur : strs) {
@@ -1153,40 +1206,39 @@ class Solution {
 }
 ```
 
-## 我能赢吗（0464）
+## 目标和
 
-> 在 "100 game" 这个游戏中，两名玩家轮流选择从 1 到 10 的任意整数，累计整数和，先使得累计整数和达到或超过 100 的玩家，即为胜者。
+> 494
 >
-> 如果我们将游戏规则改为 “玩家不能重复使用整数” 呢？
+> 给定一个非负整数数组，a1, a2, ..., an, 和一个目标数，S。现在你有两个符号 + 和 -。对于数组中的任意一个整数，你都可以从 + 或 -中选择一个符号添加在前面。
 >
-> 例如，两个玩家可以轮流从公共整数池中抽取从 1 到 15 的整数（不放回），直到累计整数和 >= 100。
+> 返回可以使最终数组和为目标数 S 的所有添加符号的方法数。
 
 ```java
 class Solution {
-    public boolean canIWin(int maxChoosableInteger, int desiredTotal) {
-        if ((1 + maxChoosableInteger) * maxChoosableInteger / 2 < desiredTotal) {return false;}
-        return myMethod(maxChoosableInteger, desiredTotal, new Boolean[1 << maxChoosableInteger], 0);
-    }
+    public int findTargetSumWays(int[] nums, int S) {
+        int[][] dp = new int[nums.length][2001];
+        dp[0][nums[0] + 1000] = 1;
+        dp[0][-nums[0] + 1000] += 1;
 
-    private boolean myMethod(int maxChoosableInteger, int desiredTotal, Boolean[] dp, int state) {
-        if (dp[state] != null) {return dp[state];}
-
-        for (int i = 1; i <= maxChoosableInteger; i++) {
-            int cur = 1 << (i - 1);
-            if ((cur & state) != 0) {continue;}
-
-            if (desiredTotal - i <= 0 || myMethod(maxChoosableInteger, desiredTotal - i, dp, state | cur) == false){
-                return dp[state] = true;
+        for (int i = 1; i < nums.length; i++) {
+            for (int sum = -1000; sum <= 1000; sum++) {
+                if (dp[i - 1][sum + 1000] > 0) {
+                    dp[i][sum + nums[i] + 1000] += dp[i - 1][sum + 1000];
+                    dp[i][sum - nums[i] + 1000] += dp[i - 1][sum + 1000];
+                }
             }
         }
 
-        return dp[state] = false;
+        return S > 1000 ? 0 : dp[nums.length - 1][S + 1000];
     }
 }
 ```
 
-## 环绕字符串中唯一的子字符串（0467）
+## 环绕字符串中唯一的子字符串
 
+> 467
+>
 > 把字符串 s 看作是“abcdefghijklmnopqrstuvwxyz”的无限环绕字符串，所以 s 看起来是这样的："...zabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcd....". 
 >
 > 现在我们有了另一个字符串 p 。你需要的是找出 s 中有多少个唯一的 p 的非空子串，尤其是当你的输入是字符串 p ，你需要输出字符串 s 中 p 的不同的非空子串的数目。 
@@ -1205,15 +1257,15 @@ class Solution {
             dp[array[i] - 'a'] = Math.max(dp[array[i] - 'a'], count);
         }
 
-        int ans = 0;
-        for (int n : dp) {ans += n;}
-        return ans;
+        return Arrays.stream(dp).sum();
     }
 }
 ```
 
-## 预测赢家（0486）
+## 预测赢家
 
+> 486
+>
 > *给定一个表示分数的非负整数数组。 玩家 1 从数组任意一端拿取一个分数，随后玩家 2 继续从剩余数组任意一端拿取分数，然后玩家 1 拿，…… 。每次一个玩家只能拿取一个分数，分数被拿取之后不再可取。直到没有剩余分数可取时游戏结束。最终获得分数总和最多的玩家获胜。*
 >
 > *给定一个表示分数的数组，预测玩家1是否会成为赢家。你可以假设每个玩家的玩法都会使他的分数最大化。*
@@ -1255,35 +1307,10 @@ class Solution {
 }
 ```
 
-## 目标和（0494）
+## 移除盒子
 
-> 给定一个非负整数数组，a1, a2, ..., an, 和一个目标数，S。现在你有两个符号 + 和 -。对于数组中的任意一个整数，你都可以从 + 或 -中选择一个符号添加在前面。
+> 546
 >
-> 返回可以使最终数组和为目标数 S 的所有添加符号的方法数。
-
-```java
-class Solution {
-    public int findTargetSumWays(int[] nums, int S) {
-        int[][] dp = new int[nums.length][2001];
-        dp[0][nums[0] + 1000] = 1;
-        dp[0][-nums[0] + 1000] += 1;
-
-        for (int i = 1; i < nums.length; i++) {
-            for (int sum = -1000; sum <= 1000; sum++) {
-                if (dp[i - 1][sum + 1000] > 0) {
-                    dp[i][sum + nums[i] + 1000] += dp[i - 1][sum + 1000];
-                    dp[i][sum - nums[i] + 1000] += dp[i - 1][sum + 1000];
-                }
-            }
-        }
-
-        return S > 1000 ? 0 : dp[nums.length - 1][S + 1000];
-    }
-}
-```
-
-## 移除盒子（0546）
-
 > *给出一些不同颜色的盒子，盒子的颜色由数字表示，即不同的数字表示不同的颜色。*
 >
 > *你将经过若干轮操作去去掉盒子，直到所有的盒子都去掉为止。每一轮你可以移除具有相同颜色的连续 k 个盒子（k >= 1），这样一轮之后你将得到 k \* k 个积分。*
@@ -1317,6 +1344,140 @@ class Solution {
 }
 ```
 
+## 停在原地的方案数
+
+> 1269
+>
+> *有一个长度为 arrLen 的数组，开始有一个指针在索引 0 处。*
+>
+> *每一步操作中，你可以将指针向左或向右移动 1 步，或者停在原地（指针不能被移动到数组范围外）。*
+>
+> *给你两个整数 steps 和 arrLen ，请你计算并返回：在恰好执行 steps 次操作以后，指针仍然指向索引 0 处的方案数。*
+>
+> *由于答案可能会很大，请返回方案数 模 10^9 + 7 后的结果。*
+
+```java
+class Solution {
+    private static final int MOD = 10_0000_0007;
+
+    public int numWays(int steps, int arrLen) {
+        int maxDis = Math.min(arrLen - 1, steps);
+        // dp[i][j]表示走了i步停在j处的方案数
+        int[][] dp = new int[steps + 1][maxDis + 1];
+        dp[0][0] = 1;
+
+        for (int i = 1; i <= steps; i++) {
+            for (int j = 0; j <= maxDis; j++) {
+                dp[i][j] = dp[i - 1][j];
+                if (j - 1 >= 0) {
+                    dp[i][j] = (dp[i][j] + dp[i - 1][j - 1]) % MOD;
+                }
+                if (j + 1 <= maxDis) {
+                    dp[i][j] = (dp[i][j] + dp[i - 1][j + 1]) % MOD;
+                }
+            }
+        }
+
+        return dp[steps][0];
+    }
+}
+```
+
+## 出界的路径数
+
+> 576
+>
+> *给定一个 m × n 的网格和一个球。球的起始坐标为 (i,j) ，你可以将球移到相邻的单元格内，或者往上、下、左、右四个方向上移动使球穿过网格边界。*
+>
+> *但是，你最多可以移动 N 次。找出可以将球移出边界的路径数量。答案可能非常大，返回 结果 mod 109 + 7 的值。*
+
+```java
+// DFS 超时
+class Solution {
+    int res = 0;
+    public int findPaths(int m, int n, int N, int i, int j) {
+        dfs(m, n, N, i, j);
+        return res;
+    }
+    public void dfs(int m, int n, int N, int i, int j){
+        if(N == 0 && i >= 0 && i < m && j >= 0 && j < n) return;
+        if(i >= N && m - i > N && j >= N && n - j > N) return;
+        if(N >= 0 && (i == -1 || j == -1 || i == m || j == n)){
+            res = (res + 1) % 1000000007;
+            return;
+        }
+        dfs(m, n, N - 1, i + 1, j);
+        dfs(m, n, N - 1, i - 1, j);
+        dfs(m, n, N - 1, i, j + 1);
+        dfs(m, n, N - 1, i, j - 1);
+    }
+}
+
+// DP
+class Solution {
+    public int findPaths(int m, int n, int N, int i, int j) {
+        if (N == 0) {return 0;}
+        long[][][] dp = new long[m + 2][n + 2][N + 1];
+
+        for (int r = 0; r <= m + 1; r++) {
+            dp[r][0][0] = 1;
+            dp[r][n + 1][0] = 1;
+        }
+        for (int c = 0; c <= n + 1; c++) {
+            dp[0][c][0] = 1;
+            dp[m + 1][c][0] = 1;
+        }
+
+        for (int k = 1; k <= N; k++) {
+            for (int r = 1; r <= m; r++) {
+                for (int c = 1; c <= n; c++) {
+                    dp[r][c][k] = (dp[r - 1][c][k - 1] + dp[r + 1][c][k - 1] + dp[r][c - 1][k - 1] + dp[r][c + 1][k - 1]) % 1000000007;
+                }
+            }
+        }
+
+        int ans = 0;
+        for (int k = 1; k <= N; k++) {
+            ans = (int)((ans + dp[i + 1][j + 1][k]) % 1000000007);
+        }
+        return ans;
+    }
+}
+```
+
+## K个逆序对数组
+
+> 629
+>
+> 给出两个整数 n 和 k，找出所有包含从 1 到 n 的数字，且恰好拥有 k 个逆序对的不同的数组的个数。
+>
+> 逆序对的定义如下：对于数组的第i个和第 j个元素，如果满i < j且 a[i] > a[j]，则其为一个逆序对；否则不是。
+>
+> 由于答案可能很大，只需要返回 答案 mod 109 + 7 的值
+
+```java
+public class Solution {
+    public int kInversePairs(int n, int k) {
+        int[][] dp = new int[n + 1][k + 1];
+        int mod = 1000000007;
+        for (int i = 1; i <= n; i++) {
+            for (int j = 0; j <= k && j <= i * (i - 1) / 2; j++) {
+                if (i == 1 && j == 0) {
+                    dp[i][j] = 1;
+                    break;
+                } else if (j == 0)
+                    dp[i][j] = 1;
+                else {
+                    int val = (dp[i - 1][j] + mod - ((j - i) >= 0 ? dp[i - 1][j - i] : 0)) % mod;
+                    dp[i][j] = (dp[i][j - 1] + val) % mod;
+                }
+            }
+        }
+        return dp[n][k];
+    }
+}
+```
+
 ## 学生出勤记录
 
 > *给定一个字符串来代表一个学生的出勤记录，这个记录仅包含以下三个字符：*
@@ -1336,18 +1497,18 @@ class Solution {
     public boolean checkRecord(String s) {
         int countA = 0;
         int preL = 0;
+
         for (int i = 0; i < s.length(); i++) {
             if (s.charAt(i) == 'A') {
                 countA++;
                 if (countA > 1) {return false;}
             }
             else if (s.charAt(i) == 'L') {
-                if (preL == i - 1 && (i > 1 && s.charAt(i - 2) == 'L')) {
-                    return false;
-                }
+                if (preL == i - 1 && (i > 1 && s.charAt(i - 2) == 'L')) {return false;}
                 preL = i;
             }
         }
+
         return true;
     }
 }
@@ -1390,182 +1551,158 @@ class Solution {
 }
 ```
 
-## 最长湍流子数组（0978）
+## 矩形区域不超过 K 的最大数值和
 
-> *当 A 的子数组 A[i], A[i+1], ..., A[j] 满足下列条件时，我们称其为湍流子数组：*
+> 363
 >
-> *若 i <= k < j，当 k 为奇数时， A[k] > A[k+1]，且当 k 为偶数时，A[k] < A[k+1]；*
->
-> *或 若 i <= k < j，当 k 为偶数时，A[k] > A[k+1] ，且当 k 为奇数时， A[k] < A[k+1]。*
->
-> *也就是说，如果比较符号在子数组中的每个相邻元素对之间翻转，则该子数组是湍流子数组。*
->
-> *返回 A 的最大湍流子数组的长度。*
+> *给定一个非空二维矩阵 matrix 和一个整数 k，找到这个矩阵内部不大于 k 的最大矩形和。*
 
 ```java
 class Solution {
-    public int maxTurbulenceSize(int[] arr) {
-        if (arr.length == 1) {return 1;}
-        int n = arr.length;
-        int[][] dp = new int[n][2];
-        dp[0][0] = dp[0][1] = 1;
-
-        for (int i = 1; i < n; i++) {
-            dp[i][0] = dp[i][1] = 1;
-            if (arr[i - 1] > arr[i]) {
-                dp[i][0] = dp[i - 1][1] + 1;
-            }
-            else if (arr[i - 1] < arr[i]) {
-                dp[i][1] = dp[i - 1][0] + 1;
+    public int maxSumSubmatrix(int[][] matrix, int k) {
+        int m = matrix.length, n = matrix[0].length;
+        int ans = Integer.MIN_VALUE;
+        
+        for (int i1 = 1; i1 <= m; i1++) {
+            for (int j1 = 1; j1 <= n; j1++) {
+                int[][] dp = new int[m + 1][n + 1];
+                dp[i1][j1] = matrix[i1 - 1][j1 - 1];
+                
+                for (int i2 = i1; i2 <= m; i2++) {
+                    for (int j2 = j1; j2 <= n; j2++) {
+                        dp[i2][j2] = dp[i2 - 1][j2] + dp[i2][j2 - 1] - dp[i2 - 1][j2 - 1] + matrix[i2 - 1][j2 - 1];
+                        if (dp[i2][j2] <= k && dp[i2][j2] > ans) {
+                            ans = dp[i2][j2];
+                        }
+                    }
+                }
             }
         }
+        return ans;
+    }
+}
+```
 
-        int ans = 1;
+## 最后一块石头的重量2
+
+> 1049
+>
+> 有一堆石头，用整数数组 stones 表示。其中 stones[i] 表示第 i 块石头的重量。
+>
+> 每一回合，从中选出任意两块石头，然后将它们一起粉碎。假设石头的重量分别为 x 和 y，且 x <= y。那么粉碎的可能结果如下：
+>
+> 如果 x == y，那么两块石头都会被完全粉碎；
+> 如果 x != y，那么重量为 x 的石头将会完全粉碎，而重量为 y 的石头新重量为 y-x。
+> 最后，最多只会剩下一块 石头。返回此石头 最小的可能重量 。如果没有石头剩下，就返回 0。
+
+```java
+// 要使最后一块石头的重量尽可能地小，neg需要在不超过sum/2的前提下尽可能地大。因此本问题可以看作是背包容量为sum/2，物品重量和价值均为stonesi的0-1背包问题。
+// 对于该问题，定义二维布尔数组dp，其中dp[i+1][j]表示前i个石头能否凑出重量j。
+class Solution {
+    public int lastStoneWeightII(int[] stones) {
+        int sum = Arrays.stream(stones).sum();
+        int n = stones.length, m = sum / 2;
+        boolean[][] dp = new boolean[n + 1][m + 1];
+        dp[0][0] = true;
+
         for (int i = 0; i < n; i++) {
-            ans = Math.max(ans, Math.max(dp[i][0], dp[i][1]));
+            for (int j = 0; j <= m; j++) {
+                if (j < stones[i]) {dp[i + 1][j] = dp[i][j];}
+                else {dp[i + 1][j] = dp[i][j] || dp[i][j - stones[i]];}
+            }
         }
-        return ans;
+
+        for (int j = m; j >= 0; j--) {
+            if (dp[n][j]) {return sum - 2 * j;}
+        }
+
+        return 0;
     }
 }
 ```
 
-## 给N*3网格图涂色（1411）
+## 我能赢吗
 
-> *你有一个 n x 3 的网格图 grid ，你需要用 红，黄，绿 三种颜色之一给每一个格子上色，且确保相邻格子颜色不同*
+> 464
 >
-> *（也就是有相同水平边或者垂直边的格子颜色不同）。*
+> 在 "100 game" 这个游戏中，两名玩家轮流选择从 1 到 10 的任意整数，累计整数和，先使得累计整数和达到或超过 100 的玩家，即为胜者。
 >
-> *给你网格图的行数 n 。*
+> 如果我们将游戏规则改为 “玩家不能重复使用整数” 呢？
 >
-> *请你返回给 grid 涂色的方案数。由于答案可能会非常大，请你返回答案对 10^9 + 7 取余的结果。*
+> 例如，两个玩家可以轮流从公共整数池中抽取从 1 到 15 的整数（不放回），直到累计整数和 >= 100。
 
 ```java
 class Solution {
-    public int numOfWays(int n) {
-        long dp2 = 6, dp3 = 6, mod = 1000000007;
-        for(int i = 1; i < n; i++) {
-            long temp2 = dp2;
-            long temp3 = dp3;
-            // 若当前使用 2 种颜色组成网格
-            // 如果上一个网格是 2 种颜色，则当前网格有 3 种可能
-            // 如果上一个网格是 3 种颜色，则当前网格有 2 种可能
-            dp2 = (temp2 * 3 % mod + temp3 * 2 % mod) % mod;
-            // 若当前使用 3 种颜色组成网格
-            // 如果上一个网格是 2 种颜色，则当前网格有 2 种可能
-            // 如果上一个网格是 3 种颜色，则当前网格有 2 种可能
-            dp3 = (temp2 * 2 % mod + temp3 * 2 % mod) % mod;
-        }
-        return (int)((dp2 + dp3) % mod);
+    public boolean canIWin(int maxChoosableInteger, int desiredTotal) {
+        if ((1 + maxChoosableInteger) * maxChoosableInteger / 2 < desiredTotal) {return false;}
+        return myMethod(maxChoosableInteger, desiredTotal, new Boolean[1 << maxChoosableInteger], 0);
     }
-}
-```
 
-## K个逆序对数组（0629）
+    private boolean myMethod(int maxChoosableInteger, int desiredTotal, Boolean[] dp, int state) {
+        if (dp[state] != null) {return dp[state];}
 
-> 给出两个整数 n 和 k，找出所有包含从 1 到 n 的数字，且恰好拥有 k 个逆序对的不同的数组的个数。
->
-> 逆序对的定义如下：对于数组的第i个和第 j个元素，如果满i < j且 a[i] > a[j]，则其为一个逆序对；否则不是。
->
-> 由于答案可能很大，只需要返回 答案 mod 109 + 7 的值
+        for (int i = 1; i <= maxChoosableInteger; i++) {
+            int cur = 1 << (i - 1);
+            if ((cur & state) != 0) {continue;}
 
-```java
-public class Solution {
-    public int kInversePairs(int n, int k) {
-        int[][] dp = new int[n + 1][k + 1];
-        int mod = 1000000007;
-        for (int i = 1; i <= n; i++) {
-            for (int j = 0; j <= k && j <= i * (i - 1) / 2; j++) {
-                if (i == 1 && j == 0) {
-                    dp[i][j] = 1;
-                    break;
-                } else if (j == 0)
-                    dp[i][j] = 1;
-                else {
-                    int val = (dp[i - 1][j] + mod - ((j - i) >= 0 ? dp[i - 1][j - i] : 0)) % mod;
-                    dp[i][j] = (dp[i][j - 1] + val) % mod;
-                }
+            if (desiredTotal - i <= 0 || myMethod(maxChoosableInteger, desiredTotal - i, dp, state | cur) == false){
+                return dp[state] = true;
             }
         }
-        return dp[n][k];
+
+        return dp[state] = false;
     }
 }
 ```
 
-## 最长数对链（0646）
+## 完成所有工作的最短时间
 
-> *给出 n 个数对。 在每一个数对中，第一个数字总是比第二个数字小。*
+> 1723
 >
-> *现在，我们定义一种跟随关系，当且仅当 b < c 时，数对(c, d) 才可以跟在 (a, b) 后面。我们用这种形式来构造一个数对链。*
+> *给你一个整数数组 jobs ，其中 jobs[i] 是完成第 i 项工作要花费的时间。*
 >
-> *给定一个数对集合，找出能够形成的最长数对链的长度。你不需要用到所有的数对，你可以以任何顺序选择其中的一些数对来构造。*
+> *请你将这些工作分配给 k 位工人。所有工作都应该分配给工人，且每项工作只能分配给一位工人。*
+>
+> *工人的 工作时间 是完成分配给他们的所有工作花费时间的总和。*
+>
+> *请你设计一套最佳的工作分配方案，使工人的 最大工作时间 得以 最小化 。*
+>
+> 
+>
+> *返回分配方案中尽可能 最小 的 最大工作时间 。*
 
 ```java
 class Solution {
-    public int findLongestChain(int[][] pairs) {
-        Arrays.sort(pairs, (a, b) -> a[0] - b[0]);
-        int n = pairs.length;
-        int[] dp = new int[n];
-        Arrays.fill(dp, 1);
+    public int minimumTimeRequired(int[] jobs, int k) {
+        int n = jobs.length;
+        // 用一个 n 位的二进制整数来表示哪些工作已经被分配，哪些工作尚未被分配
+        int[] sum = new int[1 << n];
+        for (int i = 1; i < (1 << n); i++) {
+            int x = Integer.numberOfTrailingZeros(i), y = i - (1 << x);
+            sum[i] = sum[y] + jobs[x];
+        }
 
-        for (int j = 1; j < n; j++) {
-            for (int i = 0; i < j; i++) {
-                if (pairs[i][1] < pairs[j][0]) {
-                    dp[j] = Math.max(dp[j], dp[i] + 1);
+        int[][] dp = new int[k][1 << n];
+        for (int i = 0; i < (1 << n); i++) {dp[0][i] = sum[i];}
+
+        for (int i = 1; i < k; i++) {
+            for (int j = 0; j < (1 << n); j++) {
+                int minN = Integer.MAX_VALUE;
+                for (int x = j; x != 0; x = (x - 1) & j) {
+                    minN = Math.min(minN, Math.max(dp[i - 1][j - x], sum[x]));
                 }
+                dp[i][j] = minN;
             }
         }
 
-        int ans = 0;
-        for (int x : dp) {
-            if (x > ans) {
-                ans = x;
-            }
-        }
-
-        return ans;
+        return dp[k - 1][(1 << n) - 1];
     }
 }
 ```
 
-## 奇怪的打印机（0664）
+## 粉刷房子
 
-> *有台奇怪的打印机有以下两个特殊要求：*
->
-> *打印机每次只能打印同一个字符序列。*
->
-> *每次可以在任意起始和结束位置打印新字符，并且会覆盖掉原来已有的字符。*
->
-> *给定一个只包含小写英文字母的字符串，你的任务是计算这个打印机打印它需要的最少次数。*
-
-```java
-class Solution {
-    int[][] memo;
-
-    public int strangePrinter(String s) {
-        int n = s.length();
-        memo = new int[n][n];
-        return myMethod(s, 0, n - 1);
-    }
-
-    private int myMethod(String s, int i, int j) {
-        if (i > j) {return 0;}
-        if (memo[i][j] == 0) {
-            int ans = myMethod(s, i + 1, j) + 1;
-            for (int k = i + 1; k <= j; k++) {
-                if (s.charAt(k) == s.charAt(i)) {
-                    ans = Math.min(ans, myMethod(s, i, k - 1) + myMethod(s, k + 1, j));
-                }
-            }
-            memo[i][j] = ans;
-        }
-        return memo[i][j];
-    }
-}
-```
-
-## 粉刷房子（1473）
-
-> *在一个小城市里，有 m 个房子排成一排，你需要给每个房子涂上 n 种颜色之一（颜色编号为 1 到 n ）。有的房子去年夏天已经涂过颜色了，所以这些房子不需要被重新涂色。*
+> 1473
 >
 > *我们将连续相同颜色尽可能多的房子称为一个街区。（比方说 houses = [1,2,2,3,3,2,1,1] ，它包含 5 个街区 [{1}, {2,2}, {3,3}, {2}, {1,1}] 。）*
 >
@@ -1634,89 +1771,78 @@ class Solution {
 }
 ```
 
-## 完成所有工作的最短时间（1723）
+## 多米诺和托米诺平铺
 
-> *给你一个整数数组 jobs ，其中 jobs[i] 是完成第 i 项工作要花费的时间。*
+> 790
 >
-> 
+> *有两种形状的瓷砖：一种是 2x1 的多米诺形，另一种是形如 "L" 的托米诺形。两种形状都可以旋转。*
 >
-> *请你将这些工作分配给 k 位工人。所有工作都应该分配给工人，且每项工作只能分配给一位工人。*
+> *XX  <- 多米诺*
 >
-> *工人的 工作时间 是完成分配给他们的所有工作花费时间的总和。*
+> *XX  <- "L" 托米诺*
 >
-> *请你设计一套最佳的工作分配方案，使工人的 最大工作时间 得以 最小化 。*
+> *X*
 >
-> 
+> *给定 N 的值，有多少种方法可以平铺 2 x N 的面板？返回值 mod 10^9 + 7。*
 >
-> *返回分配方案中尽可能 最小 的 最大工作时间 。*
+> *（平铺指的是每个正方形都必须有瓷砖覆盖。两个平铺不同，当且仅当面板上有四个方向上的相邻单元中的两个，使得恰好有一个平铺有一个瓷砖占据两个正方形。）*
 
 ```java
 class Solution {
-    public int minimumTimeRequired(int[] jobs, int k) {
-        int n = jobs.length;
-        // 用一个 n 位的二进制整数来表示哪些工作已经被分配，哪些工作尚未被分配
-        int[] sum = new int[1 << n];
-        for (int i = 1; i < (1 << n); i++) {
-            int x = Integer.numberOfTrailingZeros(i), y = i - (1 << x);
-            sum[i] = sum[y] + jobs[x];
+    private static final int MOD = 1_000_000_007;
+
+    public int numTilings(int n) {
+        long[] dp = new long[]{1, 0, 0, 0};
+        for (int i = 0; i < n; i++) {
+            long[] ndp = new long[4];
+            ndp[0] = (dp[0] + dp[3]) % MOD;
+            ndp[1] = (dp[0] + dp[2]) % MOD;
+            ndp[2] = (dp[0] + dp[1]) % MOD;
+            ndp[3] = (dp[0] + dp[1] + dp[2]) % MOD;
+            dp = ndp;
         }
-
-        int[][] dp = new int[k][1 << n];
-        for (int i = 0; i < (1 << n); i++) {dp[0][i] = sum[i];}
-
-        for (int i = 1; i < k; i++) {
-            for (int j = 0; j < (1 << n); j++) {
-                int minN = Integer.MAX_VALUE;
-                for (int x = j; x != 0; x = (x - 1) & j) {
-                    minN = Math.min(minN, Math.max(dp[i - 1][j - x], sum[x]));
-                }
-                dp[i][j] = minN;
-            }
-        }
-
-        return dp[k - 1][(1 << n) - 1];
+        return (int)dp[0];
     }
 }
 ```
 
-## 停在原地的方案数（1269）
+## 给N*3网格图涂色
 
-> *有一个长度为 arrLen 的数组，开始有一个指针在索引 0 处。*
+> 1411
 >
-> *每一步操作中，你可以将指针向左或向右移动 1 步，或者停在原地（指针不能被移动到数组范围外）。*
+> *你有一个 n x 3 的网格图 grid ，你需要用 红，黄，绿 三种颜色之一给每一个格子上色，且确保相邻格子颜色不同*
 >
-> *给你两个整数 steps 和 arrLen ，请你计算并返回：在恰好执行 steps 次操作以后，指针仍然指向索引 0 处的方案数。*
+> *（也就是有相同水平边或者垂直边的格子颜色不同）。*
 >
-> *由于答案可能会很大，请返回方案数 模 10^9 + 7 后的结果。*
+> *给你网格图的行数 n 。*
+>
+> *请你返回给 grid 涂色的方案数。由于答案可能会非常大，请你返回答案对 10^9 + 7 取余的结果。*
 
 ```java
 class Solution {
-    private static final int MOD = 10_0000_0007;
-
-    public int numWays(int steps, int arrLen) {
-        int maxDis = Math.min(arrLen - 1, steps);
-        int[][] dp = new int[steps + 1][maxDis + 1];
-        dp[0][0] = 1;
-
-        for (int i = 1; i <= steps; i++) {
-            for (int j = 0; j <= maxDis; j++) {
-                dp[i][j] = dp[i - 1][j];
-                if (j - 1 >= 0) {
-                    dp[i][j] = (dp[i][j] + dp[i - 1][j - 1]) % MOD;
-                }
-                if (j + 1 <= maxDis) {
-                    dp[i][j] = (dp[i][j] + dp[i - 1][j + 1]) % MOD;
-                }
-            }
+    public int numOfWays(int n) {
+        long dp2 = 6, dp3 = 6, mod = 1000000007;
+        for(int i = 1; i < n; i++) {
+            long temp2 = dp2;
+            long temp3 = dp3;
+            // 若当前使用 2 种颜色组成网格
+            // 如果上一个网格是 2 种颜色，则当前网格有 3 种可能
+            // 如果上一个网格是 3 种颜色，则当前网格有 2 种可能
+            dp2 = (temp2 * 3 % mod + temp3 * 2 % mod) % mod;
+            // 若当前使用 3 种颜色组成网格
+            // 如果上一个网格是 2 种颜色，则当前网格有 2 种可能
+            // 如果上一个网格是 3 种颜色，则当前网格有 2 种可能
+            dp3 = (temp2 * 2 % mod + temp3 * 2 % mod) % mod;
         }
-
-        return dp[steps][0];
+        return (int)((dp2 + dp3) % mod);
     }
 }
 ```
 
-## 最大加号标志（0764）
+## 最大加号标志
 
+> 764
+>
 > *在一个大小在 (0, 0) 到 (N-1, N-1) 的2D网格 grid 中，除了在 mines 中给出的单元为 0，其他每个单元都是 1。*
 >
 > *网格中包含 1 的最大的轴对齐加号标志是多少阶？返回加号标志的阶数。如果未找到加号标志，则返回 0。*
@@ -1771,137 +1897,3 @@ class Solution {
     }
 }
 ```
-
-## 出界的路径数
-
-> 576
->
-> *给定一个 m × n 的网格和一个球。球的起始坐标为 (i,j) ，你可以将球移到相邻的单元格内，或者往上、下、左、右四个方向上移动使球穿过网格边界。*
->
-> *但是，你最多可以移动 N 次。找出可以将球移出边界的路径数量。答案可能非常大，返回 结果 mod 109 + 7 的值。*
-
-```java
-// DFS 超时
-class Solution {
-    int res = 0;
-    public int findPaths(int m, int n, int N, int i, int j) {
-        dfs(m, n, N, i, j);
-        return res;
-    }
-    public void dfs(int m, int n, int N, int i, int j){
-        if(N == 0 && i >= 0 && i < m && j >= 0 && j < n) return;
-        if(i >= N && m - i > N && j >= N && n - j > N) return;
-        if(N >= 0 && (i == -1 || j == -1 || i == m || j == n)){
-            res = (res + 1) % 1000000007;
-            return;
-        }
-        dfs(m, n, N - 1, i + 1, j);
-        dfs(m, n, N - 1, i - 1, j);
-        dfs(m, n, N - 1, i, j + 1);
-        dfs(m, n, N - 1, i, j - 1);
-    }
-}
-
-// DP
-class Solution {
-    public int findPaths(int m, int n, int N, int i, int j) {
-        if (N == 0) {return 0;}
-        long[][][] dp = new long[m + 2][n + 2][N + 1];
-
-        for (int r = 0; r <= m + 1; r++) {
-            dp[r][0][0] = 1;
-            dp[r][n + 1][0] = 1;
-        }
-        for (int c = 0; c <= n + 1; c++) {
-            dp[0][c][0] = 1;
-            dp[m + 1][c][0] = 1;
-        }
-
-        for (int k = 1; k <= N; k++) {
-            for (int r = 1; r <= m; r++) {
-                for (int c = 1; c <= n; c++) {
-                    dp[r][c][k] = (dp[r - 1][c][k - 1] + dp[r + 1][c][k - 1] + dp[r][c - 1][k - 1] + dp[r][c + 1][k - 1]) % 1000000007;
-                }
-            }
-        }
-
-        int ans = 0;
-        for (int k = 1; k <= N; k++) {
-            ans = (int)((ans + dp[i + 1][j + 1][k]) % 1000000007);
-        }
-        return ans;
-    }
-}
-```
-
-## 多米诺和托米诺平铺（0790）
-
-> *有两种形状的瓷砖：一种是 2x1 的多米诺形，另一种是形如 "L" 的托米诺形。两种形状都可以旋转。*
->
-> *XX  <- 多米诺*
->
-> *XX  <- "L" 托米诺*
->
-> *X*
->
-> *给定 N 的值，有多少种方法可以平铺 2 x N 的面板？返回值 mod 10^9 + 7。*
->
-> *（平铺指的是每个正方形都必须有瓷砖覆盖。两个平铺不同，当且仅当面板上有四个方向上的相邻单元中的两个，使得恰好有一个平铺有一个瓷砖占据两个正方形。）*
-
-```java
-class Solution {
-    private static final int MOD = 1_000_000_007;
-
-    public int numTilings(int n) {
-        long[] dp = new long[]{1, 0, 0, 0};
-        for (int i = 0; i < n; i++) {
-            long[] ndp = new long[4];
-            ndp[0] = (dp[0] + dp[3]) % MOD;
-            ndp[1] = (dp[0] + dp[2]) % MOD;
-            ndp[2] = (dp[0] + dp[1]) % MOD;
-            ndp[3] = (dp[0] + dp[1] + dp[2]) % MOD;
-            dp = ndp;
-        }
-        return (int)dp[0];
-    }
-}
-```
-
-## 最后一块石头的重量2
-
-> 1049
->
-> 有一堆石头，用整数数组 stones 表示。其中 stones[i] 表示第 i 块石头的重量。
->
-> 每一回合，从中选出任意两块石头，然后将它们一起粉碎。假设石头的重量分别为 x 和 y，且 x <= y。那么粉碎的可能结果如下：
->
-> 如果 x == y，那么两块石头都会被完全粉碎；
-> 如果 x != y，那么重量为 x 的石头将会完全粉碎，而重量为 y 的石头新重量为 y-x。
-> 最后，最多只会剩下一块 石头。返回此石头 最小的可能重量 。如果没有石头剩下，就返回 0。
-
-```java
-// 要使最后一块石头的重量尽可能地小，neg需要在不超过sum/2的前提下尽可能地大。因此本问题可以看作是背包容量为sum/2，物品重量和价值均为stonesi的0-1背包问题。
-// 对于该问题，定义二维布尔数组dp，其中dp[i+1][j]表示前i个石头能否凑出重量j。
-class Solution {
-    public int lastStoneWeightII(int[] stones) {
-        int sum = Arrays.stream(stones).sum();
-        int n = stones.length, m = sum / 2;
-        boolean[][] dp = new boolean[n + 1][m + 1];
-        dp[0][0] = true;
-
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j <= m; j++) {
-                if (j < stones[i]) {dp[i + 1][j] = dp[i][j];}
-                else {dp[i + 1][j] = dp[i][j] || dp[i][j - stones[i]];}
-            }
-        }
-
-        for (int j = m; j >= 0; j--) {
-            if (dp[n][j]) {return sum - 2 * j;}
-        }
-
-        return 0;
-    }
-}
-```
-
