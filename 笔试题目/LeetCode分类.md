@@ -2,36 +2,10 @@
 
 # 1 哈希表
 
-## 两数之和（0001）
+## 有效的数独
 
-> *给定一个整数数组 nums 和一个目标值 target，请你在该数组中找出和为目标值的那 两个 整数，并返回他们的数组下标。*
+> 36
 >
-> *给定 nums = [2, 7, 11, 15], target = 9*
->
-> *因为 nums[0] + nums[1] = 2 + 7 = 9*
->
-> *所以返回 [0, 1]*
-
-```java
-class Solution {
-    public int[] twoSum(int[] nums, int target) {
-        HashMap<Integer, Integer> map = new HashMap<>();
-        for (int i = 0; i < nums.length; i++){
-            int n = target - nums[i];
-            if (map.containsKey(n)){
-                return new int[]{map.get(n), i};
-            }
-            else {
-                map.put(nums[i], i);
-            }
-        }
-        return new int[0];
-    }
-}
-```
-
-## 有效的数独（0036）
-
 > *判断一个 9x9 的数独是否有效。只需要根据以下规则，验证已经填入的数字是否有效即可。*
 >
 > *数字 1-9 在每一行只能出现一次。*
@@ -43,9 +17,9 @@ class Solution {
 ```java
 class Solution {
     public boolean isValidSudoku(char[][] board) {
-        HashMap<Integer, Integer>[] row = new HashMap[9];
-        HashMap<Integer, Integer>[] col = new HashMap[9];
-        HashMap<Integer, Integer>[] box = new HashMap[9];
+        Map<Integer, Integer>[] row = new HashMap[9];
+        Map<Integer, Integer>[] col = new HashMap[9];
+        Map<Integer, Integer>[] box = new HashMap[9];
         for (int i = 0; i < 9; i++) {
             row[i] = new HashMap<Integer, Integer>();
             col[i] = new HashMap<Integer, Integer>();
@@ -73,8 +47,10 @@ class Solution {
 }
 ```
 
-## 缺失的第一个正数（0041）
+## 缺失的第一个正数
 
+> 41
+>
 > *给你一个未排序的整数数组 nums ，请你找出其中没有出现的最小的正整数。*
 >
 > *进阶：你可以实现时间复杂度为 O(n) 并且只使用常数级别额外空间的解决方案吗？*
@@ -83,18 +59,23 @@ class Solution {
 class Solution {
     public int firstMissingPositive(int[] nums) {
         int n = nums.length;
-        for (int i = 0; i < n; ++i) {
+        // 1 将数组中所有小于等于0的数修改为N+1
+        // 2 遍历，原本的数是|x|，如果x <= N，则添加一个负号
+        // 3 如果数组中每个数都是负数（打过标记），则答案是N+1，否则是第一个正数的位置+1
+        for (int i = 0; i < n; i++) {
             if (nums[i] <= 0) {
                 nums[i] = n + 1;
             }
         }
-        for (int i = 0; i < n; ++i) {
-            int num = Math.abs(nums[i]);
-            if (num <= n) {
-                nums[num - 1] = -Math.abs(nums[num - 1]);
+
+        for (int i = 0; i < n; i++) {
+            int cur = Math.abs(nums[i]);
+            if (cur <= n) {
+                nums[cur - 1] = -Math.abs(nums[cur - 1]);
             }
         }
-        for (int i = 0; i < n; ++i) {
+
+        for (int i = 0; i < n; i++) {
             if (nums[i] > 0) {
                 return i + 1;
             }
@@ -104,8 +85,10 @@ class Solution {
 }
 ```
 
-## 单词规律（0290）
+## 单词规律
 
+> 290
+>
 > *给定一种规律 pattern 和一个字符串 str ，判断 str 是否遵循相同的规律。*
 >
 > *这里的 遵循 指完全匹配，例如， pattern 里的每个字母和字符串 str 中的每个非空单词之间存在着双向连接的对应规律。*
@@ -114,7 +97,7 @@ class Solution {
 class Solution {
     public boolean wordPattern(String pattern, String s) {
         Map<Character, String> map = new HashMap<>();
-        String[] strs = s.split(" ");
+        String[] strs = s.split("\\s+");
         int n = strs.length;
         if (n != pattern.length()) {return false;}
 
@@ -124,9 +107,7 @@ class Solution {
                 if (!map.containsValue(strs[i])) {
                     map.put(c, strs[i]);
                 }
-                else {
-                    return false;
-                }
+                else {return false;}
             }
             else if (!map.get(c).equals(strs[i])) {
                 return false;
@@ -138,21 +119,41 @@ class Solution {
 }
 ```
 
-## 根据字符出现频率排序（0451）
+## 根据字符出现频率排序
 
+> 451
+>
 > *给定一个字符串，请将字符串里的字符按照出现的频率降序排列。*
 >
-> *示例 1:*
+> *输入:"tree"*
 >
-> *输入:*
->
-> *"tree"*
->
-> *输出:*
->
-> *"eert"*
+> *输出:"eert"*
 
 ```java
+// HashMap排序
+class Solution {
+    public String frequencySort(String s) {
+        if (s.isEmpty() || s.length() == 1) {return s;}
+        Map<Character, Integer> count = new HashMap<>();
+        for (char c : s.toCharArray()) {count.put(c, count.getOrDefault(c, 0) + 1);}
+
+        List<Map.Entry<Character, Integer>> curList = new ArrayList<>(count.entrySet());
+        curList.sort((a, b) -> b.getValue().compareTo(a.getValue()));
+
+        StringBuilder ans = new StringBuilder();
+        for (int i = 0; i < curList.size(); i++) {
+            char c = curList.get(i).getKey();
+            int curNum = curList.get(i).getValue();
+            while (curNum > 0) {
+                ans.append(c);
+                curNum--;
+            }
+        }
+
+        return ans.toString();
+    }
+}
+
 // 桶排序
 class Solution {
     public String frequencySort(String s) {
@@ -195,30 +196,6 @@ class Solution {
         return ans.toString();
     }
 }
-
-// HashMap排序
-class Solution {
-    public String frequencySort(String s) {
-        if (s.isEmpty() || s.length() == 1) {return s;}
-
-        Map<Character, Integer> count = new HashMap<>();
-        for (char c : s.toCharArray()) {
-            count.put(c, count.getOrDefault(c, 0) + 1);
-        }
-
-        List<Map.Entry<Character, Integer>> curList = new ArrayList<>(count.entrySet());
-        curList.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
-
-        StringBuilder ans = new StringBuilder();
-        for (int i = 0; i < curList.size(); i++) {
-            for (int j = 0; j < curList.get(i).getValue(); j++) {
-                ans.append(curList.get(i).getKey());
-            }
-        }
-
-        return ans.toString();
-    }
-}
 ```
 
 ## 连续的子数组和
@@ -228,7 +205,7 @@ class Solution {
 > 给定一个包含 非负数 的数组和一个目标 整数 k ，编写一个函数来判断该数组是否含有连续的子数组，其大小至少为 2，且总和为 k 的倍数，即总和为 n * k ，其中 n 也是一个整数。
 
 ```java
-// 哈希表存储的是每个余数第一次出现的下标，因此当遇到重复的余数时，根据当前下标和哈希表中存储的下标计算得到的子数组长度是以当前下标结尾的子数组中满足元素和为 kk 的倍数的子数组长度中的最大值。只要最大长度至少为 22，即存在符合要求的子数组。
+// 哈希表存储的是每个余数第一次出现的下标，因此当遇到重复的余数时，判定区间即可
 class Solution {
     public boolean checkSubarraySum(int[] nums, int k) {
         int n = nums.length;
@@ -241,7 +218,7 @@ class Solution {
             if (k != 0) {sum = sum % k;}
 
             if (map.containsKey(sum)) {
-                if (i - map.get(sum) > 1) {
+                if (i - map.get(sum) > 1) {		// 确保区间内至少有一个数
                     return true;
                 }
             }
@@ -255,8 +232,10 @@ class Solution {
 }
 ```
 
-## 连续数组（0525）
+## 连续数组
 
+> 525
+>
 > 给定一个二进制数组, 找到含有相同数量的 0 和 1 的最长连续子数组（的长度）。
 
 ```java
@@ -264,6 +243,7 @@ class Solution {
     public int findMaxLength(int[] nums) {
         Map<Integer, Integer> map = new HashMap<>();
         map.put(0, -1);
+
         int ans = 0, count = 0;
         for (int i = 0; i < nums.length; i++) {
             count += (nums[i] == 1 ? 1 : -1);
@@ -274,29 +254,31 @@ class Solution {
                 map.put(count, i);
             }
         }
+
         return ans;
     }
 }
 ```
 
-## 和为K的子数组（0560）
+## 和为K的子数组
 
+> 560
+>
 > *给定一个整数数组和一个整数 k，你需要找到该数组中和为 k 的连续的子数组的个数。*
 
 ```java
 class Solution {
     public int subarraySum(int[] nums, int k) {
-        int ans = 0;
-        int pre = 0;
+        int ans = 0, preSum = 0;
         Map<Integer, Integer> map = new HashMap<>();
         map.put(0, 1);
 
         for (int i = 0; i < nums.length; i++) {
-            pre += nums[i];
-            if (map.containsKey(pre - k)) {
-                ans += map.get(pre - k);
+            preSum += nums[i];
+            if (map.containsKey(preSum - k)) {
+                ans += map.get(preSum - k);
             }
-            map.put(pre, map.getOrDefault(pre, 0) + 1);
+            map.put(preSum, map.getOrDefault(preSum, 0) + 1);
         }
 
         return ans;
@@ -304,8 +286,10 @@ class Solution {
 }
 ```
 
-## 两个列表的最小索引总和（0599）
+## 两个列表的最小索引总和
 
+> 599
+>
 > *假设Andy和Doris想在晚餐时选择一家餐厅，并且他们都有一个表示最喜爱餐厅的列表，每个餐厅的名字用字符串表示。*
 >
 > *你需要帮助他们用最少的索引和找出他们共同喜爱的餐厅。 如果答案不止一个，则输出所有答案并且不考虑顺序。 你可以假设总是存在一个答案。*
@@ -335,8 +319,10 @@ class Solution {
 }
 ```
 
-## 任务调度器（0621）
+## 任务调度器
 
+> 621
+>
 > *给你一个用字符数组 tasks 表示的 CPU 需要执行的任务列表。其中每个字母表示一种不同种类的任务。任务可以以任意顺序执行，并且每个任务都可以在 1 个单位时间内执行完。在任何一个单位时间，CPU 可以完成一个任务，或者处于待命状态。*
 >
 > *然而，两个 相同种类 的任务之间必须有长度为整数 n 的冷却时间，因此至少有连续 n 个单位时间内 CPU 在执行不同的任务，或者在待命状态。*
@@ -344,29 +330,32 @@ class Solution {
 > *你需要计算完成所有任务所需要的 最短时间 。*
 
 ```java
+// 对于任意一种任务而言，一定不会被放入同一行两次（否则说明该任务的执行次数大于等于 maxcExec)，并且由于我们是按照列优先的顺序放入这些任务，因此任意两个相邻的任务之间要么间隔n，要么间隔n+1，都是满足题目要求的。
 class Solution {
     public int leastInterval(char[] tasks, int n) {
-        Map<Character, Integer> map = new HashMap<>();
-        int maxTimes = 0;
+        Map<Character, Integer> count = new HashMap<>();
+        int maxTime = 0;
         for (char c : tasks) {
-            map.put(c, map.getOrDefault(c, 0) + 1);
-            maxTimes = Math.max(maxTimes, map.get(c));
+            count.put(c, count.getOrDefault(c, 0) + 1);
+            maxTime = Math.max(maxTime, count.get(c));
         }
 
         int maxCount = 0;
-        for (char c : map.keySet()) {
-            if (map.get(c) == maxTimes) {
+        for (char c : count.keySet()) {
+            if (count.get(c) == maxTime) {
                 maxCount++;
             }
         }
 
-        return Math.max((maxTimes - 1) * (n + 1) + maxCount, tasks.length);
+        return Math.max((maxTime - 1) * (n + 1) + maxCount, tasks.length);
     }
 }
 ```
 
-## 分割数组为连续子序列（0659）
+## 分割数组为连续子序列
 
+> 659
+>
 > *给你一个按升序排序的整数数组 num（可能包含重复数字），请你将它们分割成一个或多个长度至少为 3 的子序列，其中每个子序列都由连续整数组成。*
 >
 > *如果可以完成上述分割，则返回 true ；否则，返回 false 。*
