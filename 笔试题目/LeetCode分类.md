@@ -391,8 +391,10 @@ class Solution {
 
 # 2 位运算
 
-## 颠倒二进制位（0190）
+## 颠倒二进制位
 
+> 190
+>
 > *颠倒给定的 32 位无符号整数的二进制位。*
 >
 > *输入: 00000010100101000001111010011100*
@@ -414,8 +416,10 @@ public class Solution {
 }
 ```
 
-## 位1的个数（0191）
+## 位1的个数
 
+> 191
+>
 > *编写一个函数，输入是一个无符号整数（以二进制串的形式），返回其二进制表达式中数字位数为 '1' 的个数（也被称为汉明重量）。*
 
 ```java
@@ -432,14 +436,17 @@ public class Solution {
 }
 ```
 
-## 数字范围按位与（0201）
+## 数字范围按位与
 
+> 201
+>
 > *给定范围 [m, n]，其中 0 <= m <= n <= 2147483647，返回此范围内所有数字的按位与（包含 m, n 两端点）。*
 
 ```java
 class Solution {
     public int rangeBitwiseAnd(int m, int n) {
         while (m < n) {
+            // 对数字n迭代，清除最右边的1，直到小于等于m，此时非公共前缀部分的1均被消去
             // 抹去最右边的 1
             n = n & (n - 1);
         }
@@ -450,29 +457,34 @@ class Solution {
 
 ## 数组中两个数的最大异或值
 
+> 421
+>
 > *给定一个非空数组，数组中元素为 a0, a1, a2, … , an-1，其中 0 ≤ ai < 231 。*
 >
 > *找到 ai 和aj 最大的异或 (XOR) 运算结果，其中0 ≤ i, j < n 。*
 
 ```java
 class Solution {
+    // 假设我们已经确定了 x 最高的若干个二进制位，当前正在确定第 k 个二进制位。我们希望第 k 个二进制位能够取到 1。
     public int findMaximumXOR(int[] nums) {
-        int maxNum = nums[0];
-        for (int num : nums) {maxNum = Math.max(maxNum, num);}
-        int n = (Integer.toBinaryString(maxNum)).length();
+        int maxNum = Arrays.stream(nums).max().getAsInt();
+        int n = Integer.toBinaryString(maxNum).length();
 
-        int ans = 0, curXor;
-        Set<Integer> prefixes = new HashSet<>();
+        int ans = 0, curXor = 0;
+        Set<Integer> prefix = new HashSet<>();
         for (int i = n - 1; i >= 0; i--) {
             ans = ans << 1;
             curXor = ans | 1;
-            prefixes.clear();
+            prefix.clear();
 
             for (int num : nums) {
-                prefixes.add(num >> i);
+                // 如果只想保留从最高位开始到第 i 个二进制位为止的部分,将其右移 i 位
+                prefix.add(num >> i);
             }
-            for (int p : prefixes) {
-                if (prefixes.contains(curXor ^ p)) {
+
+            for (int p : prefix) {
+                // 如果存在，说明第i个位置可以取1，否则只能为0
+                if (prefix.contains(curXor ^ p)) {
                     ans = curXor;
                     break;
                 }
@@ -484,8 +496,10 @@ class Solution {
 }
 ```
 
-## 形成两个异或相等数组的三元组数目（1442）
+## 形成两个异或相等数组的三元组数目
 
+> 1442
+>
 > *给你一个整数数组 arr 。*
 >
 > *现需要从数组中取三个下标 i、j 和 k ，其中 (0 <= i < j <= k < arr.length) 。*
@@ -523,8 +537,10 @@ class Solution {
 }
 ```
 
-## 找出第K大的异或坐标值（1738）
+## 找出第K大的异或坐标值
 
+> 1738
+>
 > *给你一个二维矩阵 matrix 和一个整数 k ，矩阵大小为 m x n 由非负整数组成。*
 >
 > *矩阵中坐标 (a, b) 的 值 可由对所有满足 0 <= i <= a < m 且 0 <= j <= b < n 的元素 matrix[i][j]（下标从 0 开始计数）执行异或运算得到。*
@@ -559,6 +575,8 @@ class Solution {
 
 ## 特殊数字
 
+> 202
+>
 > 快乐数：*对于一个正整数，每一次将该数替换为它每个位置上的数字的平方和。*
 
 ```java
@@ -572,11 +590,10 @@ class Solution {
         return n == 1;
     }
 
-    public int getNextNum(int n) {
+    private static int getNextNum(int n) {
         int ans = 0;
         while (n > 0) {
-            int d = n % 10;
-            ans += d * d;
+            ans += Math.pow(n % 10, 2);
             n /= 10;
         }
         return ans;
@@ -584,109 +601,125 @@ class Solution {
 }
 ```
 
+> 204
+>
 > 质数：*统计所有小于非负整数 n 的质数的数量*
 
 ```java
 class Solution {
     public int countPrimes(int n) {
+        int[] isPrime = new int[n];
+        Arrays.fill(isPrime, 1);
         int ans = 0;
         for (int i = 2; i < n; i++) {
-            ans += isPrime(i) ? 1 : 0;
+            if (isPrime[i] == 1) {
+                ans += 1;
+                if ((long) i * i < n) {
+                    for (int j = i * i; j < n; j += i) {
+                        isPrime[j] = 0;
+                    }
+                }
+            }
         }
         return ans;
-    }
-
-    public boolean isPrime(int n) {
-        for (int i = 2; i * i <= n; i++) {
-            if (n % i == 0) {return false;}
-        }
-        return true;
     }
 }
 ```
 
+> 263
+>
 > 丑数：*丑数就是只包含质因数 2, 3, 5 的正整数。*
 
 ```java
 class Solution {
-    public boolean isUgly(int num) {
-        while (num > 1 && (num % 2 == 0 || num % 3 == 0 || num % 5 == 0)) {
-            if (num % 2 == 0) {num /= 2;}
-            if (num % 3 == 0) {num /= 3;}
-            if (num % 5 == 0) {num /= 5;}
+    public boolean isUgly(int n) {
+        while (n > 1 && (n % 2 == 0 || n % 3 == 0 || n % 5 == 0)) {
+            if (n % 2 == 0) {n /= 2;}
+            if (n % 3 == 0) {n /= 3;}
+            if (n % 5 == 0) {n /= 5;}
         }
-        return num == 1;
+        return n == 1;
     }
 }
 ```
 
-> *编写一个程序，找出第 n 个丑数。*
+> 264
+>
+> 丑数2：*编写一个程序，找出第 n 个丑数。*
 
 ```java
 class Solution {
     public int nthUglyNumber(int n) {
         int[] dp = new int[n];
         dp[0] = 1;
-        int index2 = 0, index3 = 0, index5 = 0;
+        int idx2 = 0, idx3 = 0, idx5 = 0;
+
         for (int i = 1; i < n; i++) {
-            int minValue = Math.min(Math.min(dp[index2] * 2, dp[index3] * 3), dp[index5] * 5);
+            int minValue = Math.min(Math.min(dp[idx2] * 2, dp[idx3] * 3), dp[idx5] * 5);
             dp[i] = minValue;
-            if (dp[index2] * 2 == minValue) {index2++;}
-            if (dp[index3] * 3 == minValue) {index3++;}
-            if (dp[index5] * 5 == minValue) {index5++;}
+            if (dp[idx2] * 2 == minValue) {idx2++;}
+            if (dp[idx3] * 3 == minValue) {idx3++;}
+            if (dp[idx5] * 5 == minValue) {idx5++;}
         }
+
         return dp[n - 1];
     }
 }
 ```
 
-> *编写一段程序来查找第 n 个超级丑数。*
+> 313
+>
+> 超级丑数：*编写一段程序来查找第 n 个超级丑数。*
 >
 > *超级丑数是指其所有质因数都是长度为 k 的质数列表 primes 中的正整数。*
 
 ```java
 class Solution {
-    public class SuperUglyNumber {
-        public int nthSuperUglyNumber(int n, int[] primes) {
-            int len = primes.length;
-            int dp[] = new int[n];
-            dp[0] = 1;
-            /*梳理一下思路，dp[i]保存的是第i个超级丑数*/
-            /*index[i]表示的是primes里面的第i个数下一个将要相乘的数在dp中的位置，
+    public int nthSuperUglyNumber(int n, int[] primes) {
+        int len = primes.length;
+        int[] dp = new int[n];
+        dp[0] = 1;
+
+        /* dp[i]保存的是第i个超级丑数 */
+        /*
+            index[i]表示的是primes里面的第i个数下一个将要相乘的数在dp中的位置，
             反过来想，对于每个primes来说，我们都需要和dp中已经算出来的结果相乘算，
             然后取最小的那个作为新的dp元素
-            索引index实际上表示是这个素数已经和dp中的哪个位置结合了，下一个位置的坐标是多少 */
-            int index[] = new int[len];
-            /*可能存在重复的丑数，所以呢，不要在for循环里面加break，把所有的情况都+1*/
-            for (int i = 1; i < n; i++) {
-                int min = Integer.MAX_VALUE;
-                /*遍历对比一下值，找出最小的，*/
-                for (int j = 0; j < len; j++) {
-                    if (min > primes[j] * dp[index[j]]) {
-                        min = primes[j] * dp[index[j]];//这个地方就是当前质因数和他要结合的dp
-                    }
-                }
-                dp[i] = min;
-                /*那个素数要乘以dp的坐标index要加1，向后推一个位
-                * 如果存在重复的值，也就是说不同的质因数相乘，得出来相同的结果了，
-                * 我们就把这几个位置都+1，这样就可以避免出现重复的值了。
-                * 你想想，假如你找到了对应的素数的index，把它加1之后就break掉，那么后面的数也可以算出这个结果，
-                * 下次循环的时候，势必会把这个重复的数当成下一个dp，因为这个数肯定要比下一个丑数小
-                * 所以我们在for循环中不要加break；*/
-                for (int j = 0; j < len; j++) {
-                    if (min == primes[j] * dp[index[j]]) {
-                        index[j]++;
-                    }
-                }
+            索引index实际上表示是这个素数已经和dp中的哪个位置结合了，下一个位置的坐标是多少 
+        */
+        int[] index = new int[len];
 
+        /* 可能存在重复的丑数，所以呢，不要在for循环里面加break，把所有的情况都+1 */
+        for (int i = 1; i < n; i++) {
+            int curMin = Integer.MAX_VALUE;
+            /*遍历对比一下值，找出最小的，*/
+            for (int j = 0; j < len; j++) {
+                if (curMin > primes[j] * dp[index[j]]) {
+                    curMin = primes[j] * dp[index[j]];//这个地方就是当前质因数和他要结合的dp
+                }
             }
-            return dp[n - 1];
+            dp[i] = curMin;
+            /*那个素数要乘以dp的坐标index要加1，向后推一个位
+            * 如果存在重复的值，也就是说不同的质因数相乘，得出来相同的结果了，
+            * 我们就把这几个位置都+1，这样就可以避免出现重复的值了。
+            * 你想想，假如你找到了对应的素数的index，把它加1之后就break掉，那么后面的数也可以算出这个结果，
+            * 下次循环的时候，势必会把这个重复的数当成下一个dp，因为这个数肯定要比下一个丑数小
+            * 所以我们在for循环中不要加break；*/
+            for (int j = 0; j < len; j++) {
+                if (curMin == primes[j] * dp[index[j]]) {
+                    index[j]++;
+                }
+            }
         }
+
+        return dp[n - 1];
     }
 }
 ```
 
 
+> 279
+>
 > 完全平方数：
 >
 > *给定正整数 n，找到若干个完全平方数（比如 1, 4, 9, 16, ...）使得它们的和等于 n。你需要让组成和的完全平方数的个数最少。*
@@ -714,22 +747,24 @@ class Solution {
 }
 ```
 
-> 平方数之和：*给定一个非负整数 c ，你要判断是否存在两个整数 a 和 b，使得 a2 + b2 = c 。**给定一个非负整数 c ，你要判断是否存在两个整数 a 和 b，使得 a2 + b2 = c 。*
+> 633
 >
-> *一个非负整数 c 能够表示为两个整数的平方和，当且仅当 c 的所有形如 4k+3 的质因子的幂次均为偶数。*
+> 平方数之和：给定一个非负整数 c ，你要判断是否存在两个整数 a 和 b，使得 a2 + b2 = c 。
 
 ```java
-public class Solution {
+// 费马平方和定理:一个非负整数 c 如果能够表示为两个整数的平方和，当且仅当 c 的所有形如 4k + 3 的质因子的幂均为偶数。
+class Solution {
     public boolean judgeSquareSum(int c) {
         for (int i = 2; i * i <= c; i++) {
             int count = 0;
             if (c % i == 0) {
                 while (c % i == 0) {
-                    count++;
+                    count ++;
                     c /= i;
                 }
-                if (i % 4 == 3 && count % 2 != 0)
+                if (i % 4 == 3 && count % 2 != 0) {
                     return false;
+                }
             }
         }
         return c % 4 != 3;
@@ -738,6 +773,8 @@ public class Solution {
 ```
 
 
+> 507
+>
 > 完美数：
 >
 > *对于一个 正整数，如果它和除了它自身以外的所有 正因子 之和相等，我们称它为 「完美数」。*
@@ -766,6 +803,8 @@ class Solution {
 
 ## 买卖股票
 
+> 121
+>
 > *只允许完成一笔交易（即买入和卖出一支股票一次），设计一个算法来计算你所能获取的最大利润*
 
 ```java
@@ -774,32 +813,41 @@ class Solution {
         if (prices.length < 2) {return 0;}
         int minPrice = prices[0];
         int ans = 0;
-        for (int i = 0; i < prices.length; i++){
+
+        for (int i = 0; i < prices.length; i++) {
             minPrice = Math.min(minPrice, prices[i]);
             ans = Math.max(ans, prices[i] - minPrice);
         }
+
         return ans;
     }
 }
 ```
 
+> 122
+>
 > *可以尽可能地完成更多的交易（多次买卖一支股票）*
 
 ```java
 class Solution {
     public int maxProfit(int[] prices) {
         if (prices.length < 2) {return 0;}
+        int n = prices.length;
         int ans = 0;
-        for (int i = 1; i < prices.length; i++){
-            if (prices[i] > prices[i - 1]){
-                ans = ans + prices[i] - prices[i - 1];
+
+        for (int i = 1; i < n; i++) {
+            if (prices[i] > prices[i - 1]) {
+                ans += (prices[i] - prices[i - 1]);
             }
         }
+
         return ans;
     }
 }
 ```
 
+> 123
+>
 > *最多可以完成 两笔 交易*
 
 ```java
@@ -810,27 +858,27 @@ class Solution {
         int buy1 = Integer.MAX_VALUE, buy2 = Integer.MAX_VALUE;
         int pro1 = Integer.MIN_VALUE, pro2 = Integer.MIN_VALUE;
 
-        for (int i = 0; i < prices.length; i++){
+        for (int i = 0; i < prices.length; i++) {
             buy1 = Math.min(buy1, prices[i]);
             pro1 = Math.max(pro1, prices[i] - buy1);
             buy2 = Math.min(buy2, prices[i] - pro1);
             pro2 = Math.max(pro2, prices[i] - buy2);
         }
+
         return pro2;
     }
 }
 ```
 
+> 188
+>
 > *设计一个算法来计算你所能获取的最大利润。你最多可以完成 k 笔交易。*
 
 ```java
 class Solution {
     public int maxProfit(int k, int[] prices) {
         int n = prices.length;
-        if(n < 2) return 0;
-
-        // 如果k超过了最大可买卖次数，那就将k置为最大买卖次数
-        // 最大买卖次数就是天数的一半，如果当前卖出又买入，是没有意义的
+        if (n < 2) {return 0;}
         k = Math.min(k, n / 2);
 
         int[] buy = new int[k + 1];
@@ -840,8 +888,8 @@ class Solution {
         buy[0] = 0;
         pro[0] = 0;
 
-        for (int i = 0; i < n; i++){
-            for (int j = 1; j <= k; j++){
+        for (int i = 0; i < n; i++) {
+            for (int j = 1; j <= k; j++) {
                 buy[j] = Math.min(buy[j], prices[i] - pro[j - 1]);
                 pro[j] = Math.max(pro[j], prices[i] - buy[j]);
             }
@@ -852,6 +900,8 @@ class Solution {
 }
 ```
 
+> 309
+>
 > *设计一个算法计算出最大利润。在满足以下约束条件下，你可以尽可能地完成更多的交易（多次买卖一支股票）:*
 >
 > *你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）。*
@@ -880,6 +930,8 @@ class Solution {
 }
 ```
 
+> 714
+>
 > *给定一个整数数组 prices，其中第 i 个元素代表了第 i 天的股票价格 ；非负整数 fee 代表了交易股票的手续费用。*
 >
 > *你可以无限次地完成交易，但是你每笔交易都需要付手续费。如果你已经购买了一个股票，在卖出它之前你就不能再继续购买股票了。*
@@ -904,7 +956,9 @@ class Solution {
 
 ## 打家劫舍
 
-> *你是一个专业的小偷，计划偷窃沿街的房屋。每间房内都藏有一定的现金，影响你偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。*
+> 198
+>
+> *如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。*
 >
 > *给定一个代表每个房屋存放金额的非负整数数组，计算你 不触动警报装置的情况下 ，一夜之内能够偷窃到的最高金额。*
 
@@ -918,50 +972,50 @@ class Solution {
         int[] dp = new int[n];
         dp[0] = nums[0];
         dp[1] = Math.max(nums[0], nums[1]);
+
         for (int i = 2; i < n; i++) {
             dp[i] = Math.max(dp[i - 1], dp[i - 2] + nums[i]);
         }
+
         return dp[n - 1];
     }
 }
 ```
 
+> 213
+>
 > 环形数组，不能偷连续的两家
 
 ```java
 class Solution {
     public int rob(int[] nums) {
-        if(nums.length == 0) return 0;
-        if(nums.length == 1) return nums[0];
-        return Math.max(myRob(Arrays.copyOfRange(nums, 0, nums.length - 1)), 
-                        myRob(Arrays.copyOfRange(nums, 1, nums.length)));
-    }
-
-    private int myRob(int[] nums) {
         int n = nums.length;
         if (n == 0) {return 0;}
-        else if (n == 1) {return nums[0];}
-        else if (n == 2) {return nums[0] > nums[1] ? nums[0] : nums[1];}
+        if (n == 1) {return nums[0];}
+
+        return Math.max(myRob(Arrays.copyOfRange(nums, 0, n - 1)),
+                        myRob(Arrays.copyOfRange(nums, 1, n)));
+    }
+
+    private static int myRob(int[] nums) {
+        int n = nums.length;
+        if (n == 1) {return nums[0];}
+
         int[] dp = new int[n];
         dp[0] = nums[0];
-        dp[1] = nums[1];
+        dp[1] = Math.max(nums[0], nums[1]);
         for (int i = 2; i < n; i++) {
-            int tmp = dp[0];
-            for (int j = 1; j < i - 1; j++) {
-                if (dp[j] > tmp) {tmp = dp[j];}
-            }
-            dp[i] = Math.max(dp[i - 1], tmp + nums[i]);
+            dp[i] = Math.max(dp[i - 1], dp[i - 2] + nums[i]);
         }
+
         return dp[n - 1];
     }
 }
 ```
 
-> *在上次打劫完一条街道之后和一圈房屋后，小偷又发现了一个新的可行窃的地区。这个地区只有一个入口，我们称之为“根”。 除了“根”之外，每栋房子有且只有一个“父“房子与之相连。一番侦察之后，聪明的小偷意识到“这个地方的所有房屋的排列类似于一棵二叉树”。 如果两个直接相连的房子在同一天晚上被打劫，房屋将自动报警。*
+> 337
 >
-> *计算在不触动警报的情况下，小偷一晚能够盗取的最高金额。*
->
-> *示例 1:
+> *所有房屋的排列类似于一棵二叉树”。 如果两个直接相连的房子在同一天晚上被打劫，房屋将自动报警。*
 >
 > *输入: [3,2,3,null,3,null,1]*
 >
@@ -984,13 +1038,15 @@ class Solution {
 
         dfs(node.left);
         dfs(node.right);
+
         f.put(node, node.val + g.getOrDefault(node.left, 0) + g.getOrDefault(node.right, 0));
-        g.put(node, Math.max(f.getOrDefault(node.left, 0), g.getOrDefault(node.left, 0)) 
-            + Math.max(f.getOrDefault(node.right, 0), g.getOrDefault(node.right, 0)));
+        g.put(node, Math.max(f.getOrDefault(node.left, 0), g.getOrDefault(node.left, 0)) + Math.max(f.getOrDefault(node.right, 0), g.getOrDefault(node.right, 0)));
     }
 }
 ```
 
+> 740
+>
 > *给你一个整数数组 nums ，你可以对它进行一些操作。*
 >
 > *每次操作中，选择任意一个 nums[i] ，删除它并获得 nums[i] 的点数。之后，你必须删除每个等于 nums[i] - 1 或 nums[i] + 1 的元素。*
@@ -998,29 +1054,29 @@ class Solution {
 > *开始你拥有 0 个点数。返回你能通过这些操作获得的最大点数。*
 
 ```java
-// 类似于打家劫舍，先统计出相同数字一共有多少点数，然后就等价于打家劫舍里不能偷相邻两家
+// 类似于打家劫舍，先统计出相同数字一共有多少点数(sum[i] = i * times)，然后就等价于打家劫舍里不能偷相邻两家
 class Solution {
     public int deleteAndEarn(int[] nums) {
-        int maxVal = 0;
-        for (int n : nums) {maxVal = Math.max(maxVal, n);}
-
+        int maxVal = Arrays.stream(nums).sum();
         int[] sum = new int[maxVal + 1];
         for (int n : nums) {sum[n] += n;}
 
-        int len = sum.length;
-        int first = sum[0], second = Math.max(sum[0], sum[1]);
-        for (int i = 2; i < len; i++) {
-            int tmp = second;
-            second = Math.max(first + sum[i], second);
-            first = tmp;
+        int[] dp = new int[maxVal + 1];
+        dp[0] = sum[0];
+        dp[1] = Math.max(sum[0], sum[1]);
+        for (int i = 2; i <= maxVal; i++) {
+            dp[i] = Math.max(dp[i - 1], dp[i - 2] + sum[i]);
         }
-        return second;
+
+        return dp[maxVal];
     }
 }
 ```
 
 ## 接雨水
 
+> 42
+>
 > *给定 n 个非负整数表示每个宽度为 1 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。*
 
 ```java
@@ -1028,16 +1084,19 @@ class Solution {
     public int trap(int[] height) {
         int ans = 0;
         int leftMax = 0, rightMax = 0;
-        for (int i = 0; i < height.length; i++) {
+        int n = height.length;
+
+        for (int i = 0; i < n; i++) {
             leftMax = Math.max(leftMax, height[i]);
-            rightMax = Math.max(rightMax, height[height.length - 1 - i]);
-            ans += (leftMax + rightMax - height[i]);
+            rightMax = Math.max(rightMax, height[n - 1 - i]);
+            ans += leftMax + rightMax - height[i];
         }
-        return ans - leftMax * height.length;
+
+        return ans - leftMax * n;
     }
 }
 
-// 单独算每个坑，求出坑的最小值
+// 题目：单独算每个坑，求出坑的最小值
 class Solution {
     public int trap(int[] height) {
         int n = height.length;
@@ -1045,21 +1104,17 @@ class Solution {
 
         int[] leftMax = new int[n];
         leftMax[0] = height[0];
-        for (int i = 1; i < n; ++i) {
-            leftMax[i] = Math.max(leftMax[i - 1], height[i]);
-        }
+        for (int i = 1; i < n; ++i) {leftMax[i] = Math.max(leftMax[i - 1], height[i]);}
 
         int[] rightMax = new int[n];
         rightMax[n - 1] = height[n - 1];
-        for (int i = n - 2; i >= 0; --i) {
-            rightMax[i] = Math.max(rightMax[i + 1], height[i]);
-        }
+        for (int i = n - 2; i >= 0; --i) {rightMax[i] = Math.max(rightMax[i + 1], height[i]);}
 
         int ans = 0;
         int min = Integer.MAX_VALUE;
         // 单独算每个坑，求出坑的最小值
         for (int i = 0; i < n; ++i) {
-            if (height[i] < leftMax[i] && height[i] > rightMax[i]) {
+            if (height[i] < leftMax[i] && height[i] < rightMax[i]) {
                 ans += Math.min(leftMax[i], rightMax[i]) - height[i];
             }
             else {
@@ -1074,6 +1129,8 @@ class Solution {
 }
 ```
 
+> 407
+>
 > *给你一个 m x n 的矩阵，其中的值均为非负整数，代表二维高度图每个单元的高度，请计算图中形状最多能接多少体积的雨水。*
 
 ```java
@@ -1117,43 +1174,30 @@ class Solution {
 
 ## N数之和
 
+> 15 三数之和
+>
 > *给你一个包含 n 个整数的数组 nums，判断 nums 中是否存在三个元素 a，b，c ，使得 a + b + c = 0 ？请你找出所有满足条件且不重复的三元组。*
->
-> *注意：答案中不可以包含重复的三元组。*
->
-> *给定数组 nums = [-1, 0, 1, 2, -1, -4]，*
->
-> *满足要求的三元组集合为：*
->
-> *[*
->
->   *[-1, 0, 1],*
->
->   *[-1, -1, 2]*
->
-> *]*
 
 ```java
 class Solution {
     public List<List<Integer>> threeSum(int[] nums) {
         Arrays.sort(nums);
         List<List<Integer>> ans = new ArrayList<>();
-        if (nums.length < 3) {return ans;}
-        for (int i = 0; i < nums.length - 2; i++){
-            if (nums[i] > 0){break;}
-            if (i > 0 && nums[i] == nums[i - 1]){continue;}
+        int n = nums.length;
+        if (n < 3) {return ans;}
 
-            int left = i + 1, right = nums.length - 1;
-            while (left < right){
+        for (int i = 0; i < n - 2; i++) {
+            if (nums[i] > 0) {break;}
+            if (i > 0 && nums[i] == nums[i - 1]) {continue;}
+
+            int left = i + 1, right = n - 1;
+            while (left < right) {
                 int total = nums[i] + nums[left] + nums[right];
                 if (total < 0) {left++;}
                 else if (total > 0) {right--;}
                 else {
-                    List<Integer> list = new ArrayList<>();
-                    list.add(nums[i]);
-                    list.add(nums[left]);
-                    list.add(nums[right]);
-                    ans.add(list);
+                    List<Integer> tmp = new ArrayList<>(Arrays.asList(nums[i], nums[left], nums[right]));
+                    ans.add(tmp);
 
                     while (left < right && nums[left] == nums[left + 1]) {left++;}
                     while (left < right && nums[right] == nums[right - 1]) {right--;}
@@ -1162,31 +1206,29 @@ class Solution {
                 }
             }
         }
+
         return ans;
     }
 }
 ```
 
+> 16 最接近的三数之和
+>
 > *给定一个包括 n 个整数的数组 nums 和 一个目标值 target。找出 nums 中的三个整数，使得它们的和与 target 最接近。返回这三个数的和。假定每组输入只存在唯一答案。*
->
-> *输入：nums = [-1,2,1,-4], target = 1*
->
-> *输出：2*
->
-> *解释：与 target 最接近的和是 2 (-1 + 2 + 1 = 2)* 
 
 ```java
 class Solution {
     public int threeSumClosest(int[] nums, int target) {
         Arrays.sort(nums);
         int ans = nums[0] + nums[1] + nums[2];
+        int n = nums.length;
 
-        for (int i = 0; i < nums.length - 2; i++){
+        for (int i = 0; i < n - 2; i++) {
             if (i > 0 && nums[i] == nums[i - 1]) {continue;}
-            int left = i + 1, right = nums.length - 1;
+            int left = i + 1, right = n - 1;
             while (left < right) {
                 int total = nums[i] + nums[left] + nums[right];
-                if (Math.abs(total - target) < Math.abs(ans - target)){ans = total;}
+                if (Math.abs(total - target) < Math.abs(ans - target)) {ans = total;}
                 if (total - target < 0) {
                     while (left < right && nums[left] == nums[left + 1]) {left++;}
                     left++;
@@ -1198,49 +1240,36 @@ class Solution {
                 else {break;}
             }
         }
+
         return ans;
     }
 }
 ```
 
+> 18 四数之和
+>
 > *给定一个包含 n 个整数的数组 nums 和一个目标值 target，判断 nums 中是否存在四个元素 a，b，c 和 d ，使得 a + b + c + d 的值与 target 相等？找出所有满足条件且不重复的四元组。*
->
-> *给定数组 nums = [1, 0, -1, 0, -2, 2]，和 target = 0。*
->
-> *满足要求的四元组集合为：*
->
-> *[*
->
->   *[-1,  0, 0, 1],*
->
->   *[-2, -1, 1, 2],*
->
->   *[-2,  0, 0, 2]*
->
-> *]*
 
 ```java
 class Solution {
     public List<List<Integer>> fourSum(int[] nums, int target) {
         Arrays.sort(nums);
         List<List<Integer>> ans = new ArrayList<>();
-        if (nums.length < 4) {return ans;}
-        for (int i = 0; i < nums.length - 3; i++) {
-            // 此处不能判断nums[i]和target的大小，然后break，因为可能target是负数
+        int n = nums.length;
+        if (n < 4) {return ans;}
+
+        for (int i = 0; i < n - 3; i++) {
+            // 此处不能判断nums[i]和target的大小，然后break，因为target可能是负数
             if (i > 0 && nums[i] == nums[i - 1]) {continue;}
-            for (int j = i + 1; j < nums.length - 2; j++) {
+            for (int j = i + 1; j < n - 2; j++) {
                 if (j > i + 1 && nums[j] == nums[j - 1]) {continue;}
-                int left = j + 1, right = nums.length - 1;
+                int left = j + 1, right = n - 1;
                 while (left < right) {
                     int total = nums[i] + nums[j] + nums[left] + nums[right];
                     if (total < target) {left++;}
                     else if (total > target) {right--;}
                     else {
-                        List<Integer> tmp = new ArrayList<>();
-                        tmp.add(nums[i]);
-                        tmp.add(nums[j]);
-                        tmp.add(nums[left]);
-                        tmp.add(nums[right]);
+                        List<Integer> tmp = new ArrayList<>(Arrays.asList(nums[i], nums[j], nums[left], nums[right]));
                         ans.add(tmp);
 
                         while (left < right && nums[left] == nums[left + 1]) {left++;}
@@ -1251,6 +1280,7 @@ class Solution {
                 }
             }
         }
+
         return ans;
     }
 }
