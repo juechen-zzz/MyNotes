@@ -1288,86 +1288,86 @@ class Solution {
 
 ## 删除排序数组中的重复项
 
+> 26
+>
 > *给定一个排序数组，你需要在 原地 删除重复出现的元素，使得每个元素只出现一次，返回移除后数组的新长度。*
 >
-> *不要使用额外的数组空间，你必须在 原地 修改输入数组 并在使用 O(1) 额外空间的条件下完成。*
->
-> *给定数组 nums = [1,1,2],* 
->
-> *函数应该返回新的长度 2, 并且原数组 nums 的前两个元素被修改为 1, 2。* 
->
-> *你不需要考虑数组中超出新长度后面的元素。*
+> *原地 修改输入数组 并在使用 O(1) 额外空间的条件下完成。*
 
 ```java
 class Solution {
     public int removeDuplicates(int[] nums) {
         if (nums.length <= 1) {return nums.length;}
-        int index = 0;
-        for (int i = 0; i < nums.length; i++) {
-            if (nums[index] != nums[i]) {
-                index++;
-                nums[index] = nums[i];
+        int n = nums.length;
+        int idx = 0;
+
+        for (int i = 0; i < n; i++) {
+            if (nums[idx] != nums[i]) {
+                idx++;
+                nums[idx] = nums[i];
             }
         }
-        return index + 1;
+
+        return idx + 1;
     }
 }
 ```
 
-> *给定一个增序排列数组 nums ，你需要在 原地 删除重复出现的元素，使得每个元素最多出现两次，返回移除后数组的新长度。*
+> 80
+>
+> *给定一个增序排列数组 nums ，你需要在 原地 删除重复出现的元素，使得每个元素最多出现**两次**，返回移除后数组的新长度。*
 
 ```java
 class Solution {
     public int removeDuplicates(int[] nums) {
-        if (nums.length == 1) {return 1;}
+        int n = nums.length;
+        if (n == 1) {return 1;}
         Arrays.sort(nums);
+
         int count = 1;
-        int index = 1;
-        for (int i = 1; i < nums.length; i++) {
-            if (nums[i] == nums[i - 1]) {
-                count++;
-            }
-            else {
-                count = 1;
-            }
+        int idx = 1;
+        for (int i = 1; i < n; i++) {
+            if (nums[i] == nums[i - 1]) {count++;}
+            else {count = 1;}
+
             if (count <= 2) {
-                nums[index] = nums[i];
-                index++;
+                nums[idx] = nums[i];
+                idx++;
             }
         }
-        return index;
+
+        return idx;
     }
 }
 ```
 
 ## 跳跃游戏
 
-> *给定一个非负整数数组，你最初位于数组的第一个位置。*
+> 55
 >
-> *数组中的每个元素代表你在该位置可以跳跃的最大长度。*
->
-> *判断你是否能够到达最后一个位置。*
+> *判断你**是否能够到达**最后一个位置。*（arr[i]表示可以跳的最大长度）
 
 ```java
 class Solution {
     public boolean canJump(int[] nums) {
-        int n = nums.length, rightMost = 0;
-        for (int i = 0; i < nums.length; i++) {
-            if (i <= rightMost) {
-                rightMost = Math.max(rightMost, i + nums[i]);
-                if (rightMost >= n - 1) {return true;}
+        int n = nums.length;
+        int maxPosition = 0;
+
+        for (int i = 0; i < n; i++) {
+            if (i <= maxPosition) {
+                maxPosition = Math.max(maxPosition, i + nums[i]);
+                if (maxPosition >= n - 1) {return true;}
             }
         }
+
         return false;
     }
 }
 ```
 
-> *给定一个非负整数数组，你最初位于数组的第一个位置。*
+> 45
 >
-> *数组中的每个元素代表你在该位置可以跳跃的最大长度。*
->
-> *你的目标是使用最少的跳跃次数到达数组的最后一个位置。*
+> 使用**最少的跳跃次数**到达最后一个位置。（arr[i]表示可以跳的最大长度）
 
 ```java
 class Solution {
@@ -1375,6 +1375,8 @@ class Solution {
         int end = 0;
         int maxPosition = 0; 
         int steps = 0;
+        
+        // 不访问最后一个元素，因为在访问最后一个元素之前，边界一定大于等于最后一个位置，否则就无法跳到最后一个位置了
         for(int i = 0; i < nums.length - 1; i++){
             //找能跳的最远的
             maxPosition = Math.max(maxPosition, nums[i] + i); 
@@ -1383,14 +1385,222 @@ class Solution {
                 steps++;
             }
         }
+        
         return steps;
     }
 }
 ```
 
+> 1306
+>
+> 在位置i处，可以跳到i+arr[i]和i-arr[i]处，**初始位置给定**，判断**能否跳到任意值为0的位置处**
+
+```java
+class Solution {
+    public boolean canReach(int[] arr, int start) {
+        int n = arr.length;
+        boolean[] dp = new boolean[n];
+        Queue<Integer> queue = new LinkedList<>();
+        queue.offer(start);
+
+        while (!queue.isEmpty()) {
+            int cur = queue.poll();
+            int nextX = cur + arr[cur], preX = cur - arr[cur];
+            
+            if (nextX < n && !dp[nextX]) {
+                dp[nextX] = true;
+                queue.offer(nextX);
+                if (arr[nextX] == 0) {return true;}
+            }
+
+            if (preX >= 0 && !dp[preX]) {
+                dp[preX] = true;
+                queue.offer(preX);
+                if (arr[preX] == 0) {return true;}
+            }
+        }
+
+        return false;
+    }
+}
+```
+
+> 1345
+>
+> 在位置i处，可以跳到i+1, i-1, 以及值相等的位置处（不包括自己），使用**最少的跳跃次数**到达最后一个位置
+
+```java
+class Solution {
+    public int minJumps(int[] arr) {
+        int n = arr.length;
+        Queue<Integer> queue = new LinkedList<>();
+        Map<Integer, List<Integer>> map = new HashMap<>();
+        for(int i = 0; i < n; i++){
+            int a = arr[i];
+            List<Integer> list = map.getOrDefault(a, new ArrayList<>());
+            list.add(i);
+            map.put(a, list);
+        }
+
+        int[] dis = new int[n]; //每个元素到最后一个元素的距离，用来存结果
+        Arrays.fill(dis, Integer.MAX_VALUE);
+        dis[n - 1] = 0;
+        queue.offer(n - 1);
+
+        boolean[] visited = new boolean[n]; //记录元素是否被访问过，初始都是false
+        while (!queue.isEmpty()) {
+            int x = queue.poll();
+            if (x - 1 >= 0 && dis[x - 1] == Integer.MAX_VALUE) { //等于MAX说明x左边的元素还没有计算过
+                dis[x - 1] = dis[x] + 1;
+                queue.offer(x - 1);
+            }
+
+            if (x + 1 < n && dis[x + 1] == Integer.MAX_VALUE) {
+                dis[x + 1] = dis[x] + 1;
+                queue.offer(x + 1);
+            }
+
+            if (!visited[x]) {			// 优化，这样相同的数被访问过后就不用再去map中看所有位置了
+                for (int i : map.get(arr[x])) {
+                    if (dis[i] == Integer.MAX_VALUE) {
+                        dis[i] = dis[x] + 1;
+                        queue.offer(i);
+                        visited[i] = true;
+                    }     
+                }
+            }         
+        }
+        return dis[0];
+    }
+}
+```
+
+> 1340 
+>
+> 给你一个整数数组 arr 和一个整数 d 。每一步你可以从下标 i 跳到：
+>
+> i + x ，其中 i + x < arr.length 且 0 < x <= d 。
+> i - x ，其中 i - x >= 0 且 0 < x <= d 。
+>
+> 从i到j 需要满足i到j的路上都比i的值小，**从任意下标开始，最多访问多少位置**
+
+```java
+class Solution {
+    public int maxJumps(int[] arr, int d) {
+        int n = arr.length;
+        int[] dp = new int[n];
+        int ans = 0;
+
+        for (int i = 0; i < n; i++) {
+            ans = Math.max(ans, myMethod(arr, d, dp, i));
+        }
+
+        return ans;
+    }
+
+    private static int myMethod(int[] arr, int d, int[] dp, int p) {
+        int n = dp.length;
+        if (dp[p] != 0) {return dp[p];}
+
+        int leftMax = 0;
+        int leftDis = 1;    // 往左跳的距离
+        while (p - leftDis >= 0 && leftDis <= d) {
+            if (arr[p - leftDis] >= arr[p]) {break;}
+            else {
+                if (dp[p - leftDis] == 0) {dp[p - leftDis] = myMethod(arr, d, dp, p - leftDis);}
+                leftMax = Math.max(leftMax, dp[p - leftDis]);
+                leftDis++;
+            }
+        }
+
+        int rightMax = 0;
+        int rightDis = 1;
+        while (p + rightDis < n && rightDis <= d) {
+            if (arr[p + rightDis] >= arr[p]) {break;}
+            else {
+                if (dp[p + rightDis] == 0) {dp[p + rightDis] = myMethod(arr, d, dp, p + rightDis);}
+                rightMax = Math.max(rightMax, dp[p + rightDis]);
+                rightDis++;
+            }
+        }
+
+        dp[p] = Math.max(leftMax, rightMax) + 1;
+
+        return dp[p];
+    }
+}
+```
+
+> 1696 
+>
+> 给定数组 和 k，每次最少1步，最多跳K步
+>
+> 返回到达最后节点后，**所经过的节点的和最大**
+
+```java
+class Solution {
+    public int maxResult(int[] nums, int k) {
+        int n = nums.length;
+        Queue<int[]> queue = new PriorityQueue<int[]>((a, b) -> b[0] - a[0]);
+        queue.offer(new int[]{nums[0], 0});
+
+        int ans = nums[0];
+        for (int i = 1; i < n; i++) {
+            while (i - queue.peek()[1] > k) {
+                queue.poll();
+            }
+            ans = queue.peek()[0] + nums[i];
+            queue.offer(new int[]{ans, i});
+        }
+
+        return ans;
+    }
+}
+```
+
+> 1871
+>
+> 给你一个下标从 0 开始的二进制字符串 s 和两个整数 minJump 和 maxJump 。一开始，你在下标 0 处，且该位置的值一定为 '0' 。当同时满足如下条件时，你可以从下标 i 移动到下标 j 处：
+>
+> ​		i + minJump <= j <= min(i + maxJump, s.length - 1) 
+> ​		s[j] == '0'.
+> 如果你可以到达 s 的下标 s.length - 1 处，请你返回 true ，否则返回 false 。
+
+```java
+class Solution {
+    public boolean canReach(String s, int minJump, int maxJump) {
+        int n = s.length();
+        boolean[] dp = new boolean[n];
+        dp[0] = true;
+        int count = 1;      // count表示在闭区间[j - maxJump, j - minJump]内存在一个可达的坐标i
+        					// 滑窗count初始化，一开始是可达的，所以初始化为1
+
+        for (int i = minJump; i < n; i++) {
+            // 判断当前坐标是否可达
+            if (s.charAt(i) == '0' && count > 0) {
+                dp[i] = true;
+            }
+
+            // 滑窗移动后左端坐标离开带来的更新
+            if (i >= maxJump && dp[i - maxJump]) {
+                count--;
+            }
+
+            // 滑窗移动后右端坐标加入带来的更新
+            if (dp[i - minJump + 1]) {
+                count++;
+            }
+        }
+
+        return dp[n - 1];
+    }
+}
+```
 
 ## 螺旋矩阵
 
+> 54
+>
 > *给定一个包含 m x n 个元素的矩阵（m 行, n 列），请按照顺时针螺旋顺序，返回矩阵中的所有元素。*
 
 ```java
@@ -1427,6 +1637,8 @@ class Solution {
 }
 ```
 
+> 59
+>
 > *给定一个正整数 n，生成一个包含 1 到 n2 所有元素，且元素按顺时针顺序螺旋排列的正方形矩阵。*
 
 ```java
@@ -1453,8 +1665,10 @@ class Solution {
 }
 ```
 
-## 两个数组的交集（0350）
+## 两个数组的交集
 
+> 350
+>
 > *给定两个数组，编写一个函数来计算它们的交集。*
 
 ```java
@@ -1492,23 +1706,22 @@ class Solution {
 ```java
 class Solution {
     public int[][] merge(int[][] intervals) {
-        if (intervals.length == 0) {return new int[0][2];}
-        Arrays.sort(intervals, new Comparator<int[]>(){
-            public int compare(int[] a, int[] b) {
-                return a[0] == b[0] ? a[1] - b[1] : a[0] - b[0];
-            }
-        });
+        int n = intervals.length;
+        if (n == 0) {return new int[0][2];}
+
+        Arrays.sort(intervals, (a, b) -> a[0] == b[0] ? a[1] - b[1] : a[0] - b[0]);
 
         List<int[]> ans = new ArrayList<>();
-        for (int i = 0; i < intervals.length; i++) {
-            int L = intervals[i][0], R = intervals[i][1];
-            if (ans.size() == 0 || ans.get(ans.size() - 1)[1] < L) {
-                ans.add(new int[]{L, R});
+        for (int i = 0; i < n; i++) {
+            int left = intervals[i][0], right = intervals[i][1];
+            if (ans.size() == 0 || ans.get(ans.size() - 1)[1] < left) {
+                ans.add(new int[]{left, right});
             }
             else {
-                ans.get(ans.size() - 1)[1] = Math.max(ans.get(ans.size() - 1)[1], R);
+                ans.get(ans.size() - 1)[1] = Math.max(ans.get(ans.size() - 1)[1], right);
             }
         }
+
         return ans.toArray(new int[ans.size()][]);
     }
 }
@@ -1522,25 +1735,16 @@ class Solution {
 
 ```java
 class Solution {
-    // 1 先复制一份，加入新的数组，再合并
-    public int[][] insert(int[][] intervals, int[] newInterval) {
-        int[][] intervalsAdd = new int[intervals.length + 1][2];
-        for (int i = 0; i < intervals.length; i++) {
-            intervalsAdd[i] = intervals[i];
-        }
-        intervalsAdd[intervals.length] = newInterval;
-        return merge(intervalsAdd);
-    }
-    // 2 直接比较
     public int[][] insert(int[][] intervals, int[] newInterval) {
         int left = newInterval[0], right = newInterval[1];
-        boolean placed = false;
+        boolean flag = false;
         List<int[]> ans = new ArrayList<>();
+
         for (int[] tmp : intervals) {
             if (tmp[0] > right) {
-                if (!placed) {
+                if (!flag) {
                     ans.add(new int[]{left, right});
-                    placed = true;
+                    flag = true;
                 }
                 ans.add(tmp);
             }
@@ -1553,7 +1757,7 @@ class Solution {
             }
         }
 
-        if (!placed) {ans.add(new int[]{left, right});}
+        if (!flag) {ans.add(new int[]{left, right});}
         return ans.toArray(new int[ans.size()][]);
     }
 }
@@ -1574,18 +1778,22 @@ class Solution {
     public List<String> summaryRanges(int[] nums) {
         List<String> ans = new ArrayList<>();
         int index = 0, n = nums.length;
+
         while (index < n) {
             int start = index;
             index++;
             while (index < n && nums[index] == nums[index - 1] + 1) {index++;}
             int end = index - 1;
+            
             StringBuilder sb = new StringBuilder(Integer.toString(nums[start]));
             if (start < end) {
                 sb.append("->");
                 sb.append(Integer.toString(nums[end]));
             }
+
             ans.add(sb.toString());
         }
+
         return ans;
     }
 }
@@ -1598,15 +1806,10 @@ class Solution {
 ```java
 class Solution {
     public int eraseOverlapIntervals(int[][] intervals) {
-        if (intervals.length == 0) {return 0;}
-
-        Arrays.sort(intervals, new Comparator<int[]>() {
-            public int compare(int[] A, int[] B) {
-                return A[0] - B[0];
-            }
-        });
-
         int n = intervals.length;
+        if (n == 0) {return 0;}
+        Arrays.sort(intervals, (a, b) -> a[0] - b[0]);
+
         // dp[i]: 以区间i为最后一个区间，可以选出的区间数量的最大值
         int[] dp = new int[n];
         Arrays.fill(dp, 1);
@@ -1623,29 +1826,12 @@ class Solution {
 }
 ```
 
-## 区间和的个数（0327）
+## 区间和的个数
 
-> *给定一个整数数组 nums 。区间和 S(i, j) 表示在 nums 中，位置从 i 到 j 的元素之和，包含 i 和 j (i ≤ j)。*
+> 327
 >
-> *请你以下标 i （0 <= i <= nums.length ）为起点，元素个数逐次递增，计算子数组内的元素和。*
+> 给你一个整数数组 nums 以及两个整数 lower 和 upper 。求数组中，值位于范围 [lower, upper] （包含 lower 和 upper）之内的 区间和的个数 。
 >
-> *当元素和落在范围 [lower, upper] （包含 lower 和 upper）之内时，记录子数组当前最末元素下标 j ，记作 有效 区间和 S(i, j) 。*
->
-> *求数组中，值位于范围 [lower, upper] （包含 lower 和 upper）之内的 有效 区间和的个数。*
->
-> *输入：nums = [-2,5,-1], lower = -2, upper = 2,*
->
-> *输出：3* 
->
-> *解释：*
->
-> *下标 i = 0 时，子数组 [-2]、[-2,5]、[-2,5,-1]，对应元素和分别为 -2、3、2 ；其中 -2 和 2 落在范围 [lower = -2, upper = 2] 之间，因此记录有效区间和 S(0,0)，S(0,2) 。*
->
-> *下标 i = 1 时，子数组 [5]、[5,-1] ，元素和 5、4 ；没有满足题意的有效区间和。*
->
-> *下标 i = 2 时，子数组 [-1] ，元素和 -1 ；记录有效区间和 S(2,2) 。*
->
-> *故，共有 3 个有效区间和。*
 
 ```java
 class Solution {
@@ -1684,19 +1870,19 @@ class Solution {
             }
 
             // 随后合并两个排序数组
-            int[] sorted = new int[right - left + 1];
+            long[] sorted = new long[right - left + 1];
             int p1 = left, p2 = mid + 1;
             int p = 0;
             while (p1 <= mid || p2 <= right) {
                 if (p1 > mid) {
-                    sorted[p++] = (int) sum[p2++];
+                    sorted[p++] = sum[p2++];
                 } else if (p2 > right) {
-                    sorted[p++] = (int) sum[p1++];
+                    sorted[p++] = sum[p1++];
                 } else {
                     if (sum[p1] < sum[p2]) {
-                        sorted[p++] = (int) sum[p1++];
+                        sorted[p++] = sum[p1++];
                     } else {
-                        sorted[p++] = (int) sum[p2++];
+                        sorted[p++] = sum[p2++];
                     }
                 }
             }
@@ -1709,8 +1895,10 @@ class Solution {
 }
 ```
 
-## 寻找右区间（0436）
+## 寻找右区间
 
+> 436
+>
 > *给你一个区间数组 intervals ，其中 intervals[i] = [starti, endi] ，且每个 starti 都 不同 。*
 >
 > *区间 i 的 右侧区间 可以记作区间 j ，并满足 startj >= endi ，且 startj 最小化 。*
@@ -1752,8 +1940,10 @@ class Solution {
 }
 ```
 
-## 区间子数组个数（0795）
+## 区间子数组个数
 
+> 795
+>
 > *给定一个元素都是正整数的数组A ，正整数 L 以及 R (L <= R)。*
 >
 > *求连续、非空且其中最大元素满足大于等于L 小于等于R的子数组个数。*
@@ -1779,8 +1969,10 @@ class Solution {
 }
 ```
 
-## 设置交集大小至少为2（0757）
+## 设置交集大小至少为2
 
+> 757
+>
 > *一个整数区间 [a, b] ( a < b ) 代表着从 a 到 b 的所有连续整数，包括 a 和 b。*
 >
 > *给你一组整数区间intervals，请找到一个最小的集合 S，使得 S 里的元素与区间intervals中的每一个整数区间都至少有2个元素相交。*
