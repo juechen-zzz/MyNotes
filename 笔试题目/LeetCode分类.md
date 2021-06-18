@@ -1831,7 +1831,6 @@ class Solution {
 > 327
 >
 > 给你一个整数数组 nums 以及两个整数 lower 和 upper 。求数组中，值位于范围 [lower, upper] （包含 lower 和 upper）之内的 区间和的个数 。
->
 
 ```java
 class Solution {
@@ -2005,8 +2004,10 @@ class Solution {
 }
 ```
 
-## 格雷码（0089）
+## 格雷码
 
+> 89
+>
 > *格雷编码是一个二进制数字系统，在该系统中，两个连续的数值仅有一个位数的差异。*
 >
 > *给定一个代表编码总位数的非负整数 n，打印其格雷编码序列。即使有多个不同答案，你也只需要返回其中一种。*
@@ -2032,40 +2033,30 @@ class Solution {
 
 ## 存在重复元素
 
-> *给定一个整数数组，判断是否存在重复元素。*
-
-```java
-class Solution {
-    public boolean containsDuplicate(int[] nums) {
-        Set<Integer> set = new HashSet<Integer>();
-        for (int x : nums) {
-            if (!set.add(x)) {
-                return true;
-            }
-        }
-        return false;
-    }
-}
-```
-
+> 219
+>
 > *给定一个整数数组和一个整数 k，判断数组中是否存在两个不同的索引 i 和 j，使得 nums [i] = nums [j]，并且 i 和 j 的差的 绝对值 至多为 k。*
 
 ```java
 class Solution {
     public boolean containsNearbyDuplicate(int[] nums, int k) {
         Set<Integer> set = new HashSet<>();
-        for (int i = 0; i < nums.length; ++i) {
+
+        for (int i = 0; i < nums.length; i++) {
             if (set.contains(nums[i])) {return true;}
             set.add(nums[i]);
             if (set.size() > k) {
                 set.remove(nums[i - k]);
             }
         }
+        
         return false;
     }
 }
 ```
 
+> 220
+>
 > *在整数数组 nums 中，是否存在两个下标 i 和 j，使得 nums [i] 和 nums [j] 的差的绝对值小于等于 t ，且满足 i 和 j 的差的绝对值也小于等于 ķ 。*
 >
 > *如果存在则返回 true，不存在返回 false。*
@@ -2075,13 +2066,15 @@ class Solution {
     public boolean containsNearbyAlmostDuplicate(int[] nums, int k, int t) {
         TreeSet<Long> set = new TreeSet<>();
         int n = nums.length;
+
         for (int i = 0; i < n; i++) {
-            if (i > k) {set.remove((long)nums[i - k - 1]);}
-            // 返回在这个集合中大于或者等于给定元素的最小元素
-            Long low = set.ceiling((long) nums[i] - t);
+            if (i > k) {set.remove((long)nums[i - 1 - k]);}
+            // 返回在这个集合中大于等于给定元素的最小元素
+            Long low = set.ceiling((long)nums[i] - t);
             if (low != null && low <= (long)nums[i] + t) {return true;}
-            set.add((long) nums[i]);
+            set.add((long)nums[i]);
         }
+
         return false;
     }
 }
@@ -2089,6 +2082,8 @@ class Solution {
 
 ## H指数
 
+> 274
+>
 > *编写一个方法，计算出研究者的 h 指数。*
 
 ```java
@@ -2114,6 +2109,8 @@ class Solution {
 
 ## 前K个高频元素
 
+> 347
+>
 > 前K个高频元素
 >
 > *给定一个非空的整数数组，返回其中出现频率前 k 高的元素。*
@@ -2121,39 +2118,24 @@ class Solution {
 ```java
 class Solution {
     public int[] topKFrequent(int[] nums, int k) {
-        Map<Integer, Integer> countMap = new HashMap<>();
-        for (int n : nums) {
-            countMap.put(n, countMap.getOrDefault(n, 0) + 1);
+        Map<Integer, Integer> map = new HashMap<>();
+        for (int n : nums) {map.put(n, map.getOrDefault(n, 0) + 1);}
+
+        List<Map.Entry<Integer, Integer>> curList = new ArrayList<>(map.entrySet());
+        curList.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
+
+        int[] ans = new int[k];
+        for (int i = 0; i < k; i++) {
+            ans[i] = curList.get(i).getKey();
         }
 
-        PriorityQueue<int[]> pq = new PriorityQueue<>(new Comparator<int[]>() {
-            public int compare(int[] a, int[] b) {
-                return a[1] - b[1];
-            }
-        });
-
-        for (Map.Entry<Integer, Integer> entry : countMap.entrySet()) {
-            int num = entry.getKey(), count = entry.getValue();
-            if (pq.size() == k) {
-                if (pq.peek()[1] < count) {
-                    pq.poll();
-                    pq.offer(new int[]{num, count});
-                }
-            } else {
-                pq.offer(new int[]{num, count});
-            }
-        }
-
-        int[] ans = new int[pq.size()];
-        int index = pq.size() - 1;
-        while (!pq.isEmpty()) {
-            ans[index--] = pq.poll()[0];
-        }
         return ans;
     }
 }
 ```
 
+> 692
+>
 > 前K个高频单词
 >
 > *给一非空的单词列表，返回前 k 个出现次数最多的单词。*
@@ -2164,9 +2146,7 @@ class Solution {
 class Solution {
     public List<String> topKFrequent(String[] words, int k) {
         Map<String, Integer> map = new HashMap<>();
-        for (String s : words) {
-            map.put(s, map.getOrDefault(s, 0) + 1);
-        }
+        for (String s : words) {map.put(s, map.getOrDefault(s, 0) + 1);}
 
         List<Map.Entry<String, Integer>> curList = new ArrayList<>(map.entrySet());
         curList.sort((o1, o2) -> o1.getValue() == o2.getValue() ? o1.getKey().compareTo(o2.getKey()) : o2.getValue() - o1.getValue());
@@ -2181,8 +2161,10 @@ class Solution {
 }
 ```
 
-## 查找和最小的K对数字（0373）
+## 查找和最小的K对数字
 
+> 373
+>
 > *给定两个以升序排列的整形数组 nums1 和 nums2, 以及一个整数 k。*
 >
 > *定义一对值 (u,v)，其中第一个元素来自 nums1，第二个元素来自 nums2。*
@@ -2195,19 +2177,22 @@ class Solution {
         List<List<Integer>> ans = new ArrayList<>();
         int m = nums1.length, n = nums2.length;
         if (m == 0 || n == 0) {return ans;}
-
+		
+        // 利用一个数组来保存nums1中每个元素对应的最小组合的nums2下标，初始值为0，因为刚开始每个元素对应的最小组合肯定是对面的第一个元素
         int[] tmp = new int[m];
         while (ans.size() < k) {
             int cur = 0;
+            // 遍历每个nums1元素对应nums2最小可用组合，并获取最小组合
             for (int i = 0; i < m; i++) {
                 if (tmp[i] == n) {continue;}
-                if (tmp[cur] == n || nums1[cur] + nums2[tmp[cur]] > nums1[i] + nums2[tmp[i]]) {
-                    cur = i;
-                }
+                if (tmp[cur] == n || nums1[cur] + nums2[tmp[cur]] > nums1[i] + nums2[tmp[i]]) {cur = i;}
             }
 
+            // 所有的组合都用完了，就跳出循环
             if (tmp[cur] == n) {break;}
             ans.add(Arrays.asList(nums1[cur], nums2[tmp[cur]]));
+            
+            // 当前组合中nums1元素对应的nums2元素下标加一，这样就不会重复用到之前的组合
             tmp[cur]++;
         }
 
@@ -2216,8 +2201,10 @@ class Solution {
 }
 ```
 
-## 最长连续序列（0128）
+## 最长连续序列
 
+> 128
+>
 > *给定一个未排序的整数数组 nums ，找出数字连续的最长序列（不要求序列元素在原数组中连续）的长度。*
 
 ```java
@@ -2227,18 +2214,17 @@ class Solution {
         for (int n : nums) {set.add(n);}
 
         int ans = 0;
-
         for (int n : nums) {
             if (!set.contains(n - 1)) {
-                int currentNum = n;
-                int tmp = 1;
+                int curNum = n;
+                int count = 1;
 
-                while (set.contains(currentNum + 1)) {
-                    currentNum++;
-                    tmp++;
+                while (set.contains(curNum + 1)) {
+                    curNum++;
+                    count++;
                 }
 
-                ans = Math.max(ans, tmp);
+                ans = Math.max(ans, count);
             }
         }
 
