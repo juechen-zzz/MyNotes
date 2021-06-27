@@ -694,3 +694,73 @@ class Solution {
 }
 ```
 
+## 供暖器
+
+> 475
+>
+> 冬季已经来临。 你的任务是设计一个有固定加热半径的供暖器向所有房屋供暖。
+>
+> 在加热器的加热半径范围内的每个房屋都可以获得供暖。
+>
+> 现在，给出位于一条水平线上的房屋 houses 和供暖器 heaters 的位置，请你找出并返回可以覆盖所有房屋的最小加热半径。
+
+```java
+class Solution {
+    public int findRadius(int[] houses, int[] heaters) {
+        int radius = 0;
+        int n = heaters.length;
+        Arrays.sort(houses);
+        Arrays.sort(heaters);
+        
+        for (int house: houses) {
+            int left = 0;
+            int right = n;
+            // 寻找最后一个不大于或者第一个不小于目标值（也就是house）的值
+            // 区别在于最后的返回值是right还是right-1
+            // 下面是查找第一个不小于house的值
+            while (left < right) {
+                int mid = left + (right - left) / 2;
+                if (heaters[mid] < house) {
+                    left = mid + 1;
+                } else {
+                    right = mid;
+                }
+            }
+            // 通过right，也就是右侧收敛的情况来判断是左侧还是右侧的最近的heater
+            int rightDist = (right == n) ? Integer.MAX_VALUE : Math.abs(house - heaters[right]);
+            int leftDist = (right == 0) ? Integer.MAX_VALUE : Math.abs(house - heaters[right - 1]);
+            radius = Math.max(radius, Math.min(rightDist, leftDist));
+        }
+        return radius;
+    }
+}
+
+class Solution {
+    // 双指针
+    public int findRadius(int[] houses, int[] heaters) {
+        // 1. 排序
+        Arrays.sort(houses);
+        Arrays.sort(heaters);
+
+        // 2. 双指针计算最大半径
+        // 下面的代码最难懂的地方是 Math.abs(heaters[i] - house) >= Math.abs(heaters[i + 1] - house)
+        // 我们举一个例子来说明这行代码的意思：
+        // houses：1，2，3，4
+        // heaters：1，4
+        // 对于 house 1，heater 1 比 heater 4 更接近 house1，所以不将 i 移动到 i + 1
+        // 对于 house 2，heater 1 比 heater 4 更接近 house2，所以不将 i 移动到 i + 1
+        // 对于 house 3，heater 4 比 heater 1 更接近 house3，所以将 i 移动到 i + 1
+        // 对于 house 4，依次类推
+        int ans = 0, idx = 0;
+        for (int h : houses) {
+            while (idx < heaters.length - 1 && Math.abs(heaters[idx] - h) >= Math.abs(heaters[idx + 1] - h)) {
+                idx++;
+            }
+            ans = Math.max(ans, Math.abs(heaters[idx] - h));
+        }
+
+        return ans;
+    }
+}
+```
+

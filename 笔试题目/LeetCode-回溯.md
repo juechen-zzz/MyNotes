@@ -820,6 +820,110 @@ class Solution {
 }
 ```
 
+## 复原IP地址
+
+> 给定一个只包含数字的字符串，用以表示一个 IP 地址，返回所有可能从 `s` 获得的 **有效 IP 地址** 。你可以按任何顺序返回答案。
+
+```java
+class Solution {
+    public List<String> restoreIpAddresses(String s) {
+        List<String> ans = new ArrayList<>();
+        int[] segment = new int[4];
+        dfs(s, ans, segment, 0, 0);
+        return ans;
+    }
+
+    private static void dfs(String s, List<String> ans, int[] segment, int segId, int segStart) {
+        // 如果找到了 4 段 IP 地址并且遍历完了字符串，那么就是一种答案
+        if (segId == 4) {
+            if (segStart == s.length()) {
+                StringBuilder ipAddr = new StringBuilder();
+                for (int i = 0; i < 4; ++i) {
+                    ipAddr.append(segment[i]);
+                    if (i != 3) {
+                        ipAddr.append('.');
+                    }
+                }
+                ans.add(ipAddr.toString());
+            }
+            return;
+        }
+
+        // 如果还没有找到 4 段 IP 地址就已经遍历完了字符串，那么提前回溯
+        if (segStart == s.length()) {return;}
+
+        // 由于不能有前导零，如果当前数字为 0，那么这一段 IP 地址只能为 0
+        if (s.charAt(segStart) == '0') {
+            segment[segId] = 0;
+            dfs(s, ans, segment, segId + 1, segStart + 1);
+        }
+
+        // 一般情况，枚举每一种可能性并递归
+        int addr = 0;
+        for (int segEnd = segStart; segEnd < s.length(); ++segEnd) {
+            addr = addr * 10 + (s.charAt(segEnd) - '0');
+            if (addr > 0 && addr <= 0xFF) {
+                segment[segId] = addr;
+                dfs(s, ans, segment, segId + 1, segEnd + 1);
+            } else {
+                break;
+            }
+        }
+    }
+}
+```
+
+## 验证IP地址
+
+> 编写一个函数来验证输入的字符串是否是有效的 IPv4 或 IPv6 地址。
+>
+> 如果是有效的 IPv4 地址，返回 "IPv4" ；
+> 如果是有效的 IPv6 地址，返回 "IPv6" ；
+> 如果不是上述类型的 IP 地址，返回 "Neither" 。
+> IPv4 地址由十进制数和点来表示，每个地址包含 4 个十进制数，其范围为 0 - 255， 用(".")分割。比如，172.16.254.1；
+>
+> 同时，IPv4 地址内的数不会以 0 开头。比如，地址 172.16.254.01 是不合法的。
+>
+> IPv6 地址由 8 组 16 进制的数字来表示，每组表示 16 比特。这些组数字通过 (":")分割。比如,  2001:0db8:85a3:0000:0000:8a2e:0370:7334 是一个有效的地址。而且，我们可以加入一些以 0 开头的数字，字母可以使用大写，也可以是小写。所以， 2001:db8:85a3:0:0:8A2E:0370:7334 也是一个有效的 IPv6 address地址 (即，忽略 0 开头，忽略大小写)。
+
+```java
+class Solution {
+    public String validIPAddress(String IP) {
+        if (IP.chars().filter(c -> c == '.').count() == 3) {
+            return validateIPv4(IP);
+        }
+        else if (IP.chars().filter(c -> c == ':').count() == 7) {
+            return validateIPv6(IP);
+        }
+        return "Neither";
+    }
+
+    private static String validateIPv4(String IP) {
+        String[] nums = IP.split("\\.", -1);
+        for (String s : nums) {
+            if (s.length() == 0 || s.length() > 3 || (s.charAt(0) == '0' && s.length() != 1)) {return "Neither";}
+            for (char c : s.toCharArray()) {
+                if (!Character.isDigit(c)) {return "Neither";}
+            }
+            if (Integer.parseInt(s) > 255) {return "Neither";}
+        }
+        return "IPv4";
+    }
+
+    private static String validateIPv6(String IP) {
+        String[] nums = IP.split(":", -1);
+        String hexDigits = "0123456789abcdefABCDEF";
+        for (String s : nums) {
+            if (s.length() == 0 || s.length() > 4) {return "Neither";}
+            for (char c : s.toCharArray()) {
+                if (hexDigits.indexOf(c) == -1) {return "Neither";}
+            }
+        }
+        return "IPv6";
+    }
+}
+```
+
 ## 字典树排数（0386）
 
 > *给定一个整数 n, 返回从 1 到 n 的字典顺序。*

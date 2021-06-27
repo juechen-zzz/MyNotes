@@ -1597,6 +1597,46 @@ class Solution {
 }
 ```
 
+## 青蛙过河
+
+> 403
+>
+> *一只青蛙想要过河。 假定河流被等分为若干个单元格，并且在每一个单元格内都有可能放有一块石子（也有可能没有）。 青蛙可以跳上石子，但是不可以跳入水中。*
+>
+> *给你石子的位置列表 stones（用单元格序号 升序 表示）， 请判定青蛙能否成功过河（即能否在最后一步跳至最后一块石子上）。*
+>
+> *开始时， 青蛙默认已站在第一块石子上，并可以假定它第一步只能跳跃一个单位（即只能从单元格 1 跳至单元格 2 ）。*
+>
+> *如果青蛙上一步跳跃了 k 个单位，那么它接下来的跳跃距离只能选择为 k - 1、k 或 k + 1 个单位。 另请注意，青蛙只能向前方（终点的方向）跳跃。*
+
+```java
+class Solution {
+    public boolean canCross(int[] stones) {
+        int n = stones.length;
+        boolean[][] dp = new boolean[n][n];
+        dp[0][0] = true;
+        for (int i = 1; i < n; i++) {
+            if (stones[i] - stones[i - 1] > i) {
+                return false;
+            }
+        }
+
+        for (int i = 1; i < n; i++) {
+            for (int j = i - 1; j >= 0; j--) {
+                int k = stones[i] - stones[j];
+                if (k > j + 1) {break;}
+                dp[i][k] = dp[j][k - 1] || dp[j][k] || dp[j][k + 1];
+                if (i == n - 1 && dp[i][k]) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+}
+```
+
 ## 螺旋矩阵
 
 > 54
@@ -1660,6 +1700,46 @@ class Solution {
             left++;
         }
         
+        return ans;
+    }
+}
+```
+
+## 对角线遍历
+
+> 498
+>
+> 给定一个含有 M x N 个元素的矩阵（M 行，N 列），请以对角线遍历的顺序返回这个矩阵中的所有元素，对角线遍历如下图所示。
+
+```java
+class Solution {
+    public int[] findDiagonalOrder(int[][] mat) {
+        if (mat.length == 0) {return new int[0];}
+
+        int n = mat.length, m = mat[0].length;
+        int[] ans = new int[n * m];
+
+        int idx = 0;
+        List<Integer> tmp = new ArrayList<>();
+
+        for (int i = 0; i < n + m - 1; i++) {
+            tmp.clear();
+
+            int row = i < m ? 0 : i - m + 1;
+            int col = i < m ? i : m - 1;
+
+            while (row < n && col >= 0) {
+                tmp.add(mat[row][col]);
+                row++;
+                col--;
+            }
+
+            if (i % 2 == 0) {Collections.reverse(tmp);}
+            for (int j = 0; j < tmp.size(); j++) {
+                ans[idx++] = tmp.get(j);
+            }
+        }
+
         return ans;
     }
 }
@@ -2233,34 +2313,38 @@ class Solution {
 }
 ```
 
-## 长度最小的子数组（0209）
+## 长度最小的子数组
 
+> 209
+>
 > 给定一个含有 n 个正整数的数组和一个正整数 target 。
 >
 > 找出该数组中满足其和 ≥ target 的长度最小的 连续子数组 [numsl, numsl+1, ..., numsr-1, numsr] ，并返回其长度。如果不存在符合条件的子数组，返回 0 。
 
 ```java
 class Solution {
-    public int minSubArrayLen(int s, int[] nums) {
+    public int minSubArrayLen(int target, int[] nums) {
         int left = 0, right = 0;
         int sum = 0;
-        int min  = Integer.MAX_VALUE;
+        int ans = Integer.MAX_VALUE;
 
         while (right < nums.length) {
             sum += nums[right++];
-            while (sum >= s) {
-                min = Math.min(min, right - left);
+            while (sum >= target) {
+                ans = Math.min(ans, right - left);
                 sum -= nums[left++];
             }
         }
-        
-        return min == Integer.MAX_VALUE ? 0 : min;
+
+        return ans == Integer.MAX_VALUE ? 0 : ans;
     }
 }
 ```
 
-## 三个无重叠子数组的最大和（0689）
+## 三个无重叠子数组的最大和
 
+> 689
+>
 > *给定数组 nums 由正整数组成，找到三个互不重叠的子数组的最大和。*
 >
 > *每个子数组的长度为k，我们要使这3\*k个项的和最大化。*
@@ -2319,8 +2403,10 @@ class Solution {
 }
 ```
 
-## 加油站（0134）
+## 加油站
 
+> 134
+>
 > *在一条环路上有 N 个加油站，其中第 i 个加油站有汽油 gas[i] 升。*
 >
 > *你有一辆油箱容量无限的的汽车，从第 i 个加油站开往第 i+1 个加油站需要消耗汽油 cost[i] 升。你从其中的一个加油站出发，开始时油箱为空。*
@@ -2332,13 +2418,13 @@ class Solution {
     public int canCompleteCircuit(int[] gas, int[] cost) {
         int n = gas.length;
         int ans = 0;
-        int curSpace = Integer.MAX_VALUE;
+        int curPos = Integer.MAX_VALUE;
         int curIndex = 0;
 
         for (int i = 0; i < n; i++) {
             ans += gas[i] - cost[i];
-            if (ans < curSpace) {
-                curSpace = ans;
+            if (ans < curPos) {
+                curPos = ans;
                 curIndex = i;
             }
         }
@@ -2348,8 +2434,10 @@ class Solution {
 }
 ```
 
-## 分发糖果（0135）
+## 分发糖果
 
+> 135
+>
 > *老师想给孩子们分发糖果，有 N 个孩子站成了一条直线，老师会根据每个孩子的表现，预先给他们评分。*
 >
 > *你需要按照以下要求，帮助老师给这些孩子分发糖果：*
@@ -2364,34 +2452,39 @@ class Solution {
 class Solution {
     public int candy(int[] ratings) {
         int n = ratings.length;
-        int[] tmp = new int[n];
+        int[] nums = new int[n];
+
+        // 从左向右遍历
         for (int i = 0; i < n; i++) {
             if (i > 0 && ratings[i - 1] < ratings[i]) {
-                tmp[i] = tmp[i - 1] + 1;
+                nums[i] = nums[i - 1] + 1;
             }
             else {
-                tmp[i] = 1;
+                nums[i] = 1;
             }
         }
 
-        int ans = 0, num = 0;
+        // 从右向左遍历
+        int cur = 0;
         for (int i = n - 1; i >= 0; i--) {
             if (i < n - 1 && ratings[i] > ratings[i + 1]) {
-                num++;
+                cur++;
             }
             else {
-                num = 1;
+                cur = 1;
             }
-            ans += Math.max(tmp[i], num);
+            nums[i] = Math.max(nums[i], cur);
         }
 
-        return ans;
+        return Arrays.stream(nums).sum();
     }
 }
 ```
 
-## 戳气球（0312）
+## 戳气球
 
+> 312
+>
 > *有 n 个气球，编号为0 到 n - 1，每个气球上都标有一个数字，这些数字存在数组 nums 中。*
 >
 > *现在要求你戳破所有的气球。戳破第 i 个气球，你可以获得 nums[i - 1] \* nums[i] \* nums[i + 1] 枚硬币。* 
@@ -2406,61 +2499,79 @@ class Solution {
 class Solution {
     public int maxCoins(int[] nums) {
         int n = nums.length;
-        // rec[i][j] 表示[i,j]区间内的最大硬币数
-        int[][] rec = new int[n + 2][n + 2];
+        // ans[i][j]表示(i,j)区间的最大硬币数
+        int[][] ans = new int[n + 2][n + 2];
 
+        // 构造新的数组
         int[] val = new int[n + 2];
         val[0] = val[n + 1] = 1;
         for (int i = 1; i <= n; i++) {val[i] = nums[i - 1];}
-        
+
         for (int i = n - 1; i >= 0; i--) {
             for (int j = i + 2; j <= n + 1; j++) {
                 for (int k = i + 1; k < j; k++) {
                     int sum = val[i] * val[k] * val[j];
-                    sum += (rec[i][k] + rec[k][j]);
-                    rec[i][j] = Math.max(rec[i][j], sum);
+                    sum += (ans[i][k] + ans[k][j]);
+                    ans[i][j] = Math.max(ans[i][j], sum);
                 }
             }
         }
-        return rec[0][n + 1];
+
+        return ans[0][n + 1];
     }
 }
 ```
 
 ## 只出现一次的数字
 
-> *给定一个非空整数数组，除了某个元素只出现一次以外，其余每个元素均出现两次。找出那个只出现了一次的元素。*
+> 136
+>
+> *除了某个元素只出现一次以外，其余每个元素均出现两次。*
+>
+> *找出那个只出现了一次的元素。*
 
 ```java
 class Solution {
     public int singleNumber(int[] nums) {
         int ans = 0;
-        for (int num : nums) {
-            ans ^= num;
+        for (int n : nums) {
+            ans ^= n;
         }
         return ans;
     }
 }
 ```
 
-> *给定一个非空整数数组，除了某个元素只出现一次以外，其余每个元素均出现了三次。找出那个只出现了一次的元素。*
+> 137
+>
+> *除了某个元素只出现一次以外，其余每个元素均出现了三次。*
+>
+> *找出那个只出现了一次的元素。*
 
 ```java
 class Solution {
     public int singleNumber(int[] nums) {
         Set<Long> set = new HashSet<>();
         long sumSet = 0, sumArray = 0;
+
         for(int n : nums) {
             sumArray += n;
-            set.add((long)n);
+            if (!set.contains((long)n)) {
+                set.add((long)n);
+                sumSet += (long)n;
+            }
         }
-        for(Long s : set) {sumSet += s;}
+
         return (int)((3 * sumSet - sumArray) / 2);
     }
 }
 ```
 
-> 给定一个整数数组 `nums`，其中恰好有两个元素只出现一次，其余所有元素均出现两次。 找出只出现一次的那两个元素。你可以按 **任意顺序** 返回答案。
+> 260
+>
+> 有两个元素只出现一次，其余所有元素均出现两次。 
+>
+> 找出只出现一次的那两个元素。你可以按 **任意顺序** 返回答案。
 
 ```java
 class Solution {
@@ -2474,49 +2585,22 @@ class Solution {
                 set.add(n);
             }
         }
+        
         int[] ans = new int[set.size()];
         List<Integer> list = new ArrayList<>(set);
         for (int i = 0; i < list.size(); i++) {
             ans[i] = list.get(i);
-        } 
+        }
+
         return ans;
     }
 }
 ```
 
-> *给定一个只包含整数的有序数组，每个元素都会出现两次，唯有一个数只会出现一次，找出这个数。*
+## 数组中重复的数据
 
-```java
-class Solution {
-    public int singleNonDuplicate(int[] nums) {
-        int ans = 0;
-        for (int num : nums) {
-            ans ^= num;
-        }
-        return ans;
-    }
-}
-
-class Solution {
-    public int singleNonDuplicate(int[] nums) {
-        int left = 0;
-        int right = nums.length - 1;
-        while (left < right) {
-            int mid = left + (right - left) / 2;
-            if (nums[mid] == nums[mid ^ 1]) {
-                left = mid + 1;
-            }
-            else {
-                right = mid;
-            }
-        }
-        return nums[left];
-    }
-}
-```
-
-## 数组中重复的数据（0442）
-
+> 442
+>
 > *给定一个整数数组 a，其中1 ≤ a[i] ≤ n （n为数组长度）, 其中有些元素出现两次而其他元素出现一次。*
 >
 > *找到所有出现两次的元素。*
@@ -2544,7 +2628,7 @@ class Solution {
         return ans;
     }
 
-    private void swap(int[] nums, int idx1, int idx2) {
+    private static void swap(int[] nums, int idx1, int idx2) {
         int tmp = nums[idx1];
         nums[idx1] = nums[idx2];
         nums[idx2] = tmp;
@@ -2552,8 +2636,10 @@ class Solution {
 }
 ```
 
-## 找到所有数组中消失的数字（0448）
+## 找到所有数组中消失的数字
 
+> 448
+>
 > *给定一个范围在 1 ≤ a[i] ≤ n ( n = 数组大小 ) 的 整型数组，数组中的元素一些出现了两次，另一些只出现一次。*
 >
 > *找到所有在 [1, n] 范围之间没有出现在数组中的数字。*
@@ -2561,6 +2647,7 @@ class Solution {
 ```java
 class Solution {
     public List<Integer> findDisappearedNumbers(int[] nums) {
+        // 记录数组nums中的数字，由于数字范围均在[1,n]中，记录数字后在检查[1,n]中的每一个数是否出现，从而找到缺失的数字
         int n = nums.length;
         for (int num : nums) {
             int x = (num - 1) % n;
@@ -2578,8 +2665,10 @@ class Solution {
 }
 ```
 
-## 阶乘后的零（0172）
+## 阶乘后的零
 
+> 172
+>
 > *给定一个整数 n，返回 n! 结果尾数中零的数量。*
 
 ```java
@@ -2598,41 +2687,10 @@ class Solution {
 }
 ```
 
-## 数字1的个数（0233）
+## 除自身以外数组的乘积
 
-> *给定一个整数 n，计算所有小于等于 n 的非负整数中数字 1 出现的个数。*
-
-```java
-class Solution {
-    public int countDigitOne(int n) {
-        int ans = 0;
-        int base = 1;
-        int k = 1;
-        if (n <= 0) {return 0;}
-
-        while (n / base != 0) {
-            int cur = (n / base) % 10;
-            int high = n / (base * 10);
-            int low = n - n / base * base;
-            if (cur > k) {
-                ans += (high + 1) * base;
-            }
-            if (cur == k) {
-                ans += high * base + low + 1;
-            }
-            if (cur < k) {
-                ans += high * base;
-            }
-            base *= 10;
-        }
-
-        return ans;
-    }
-}
-```
-
-## 除自身以外数组的乘积（0238）
-
+> 238
+>
 > *给你一个长度为 n 的整数数组 nums，其中 n > 1，返回输出数组 output ，其中 output[i] 等于 nums 中除 nums[i] 之外其余各元素的乘积。*
 
 ```java
@@ -2645,10 +2703,10 @@ class Solution {
         int[] ans = new int[n];
 
         left[0] = 1;
-        for (int i = 1; i < n; i++) {left[i] = nums[i - 1] * left[i - 1];}
+        for (int i = 1; i < n; i++) {left[i] = left[i - 1] * nums[i - 1];}
 
         right[n - 1] = 1;
-        for (int i = n - 2; i >= 0; i--) {right[i] = nums[i + 1] * right[i + 1];}
+        for (int i = n - 2; i >= 0; i--) {right[i] = right[i + 1] * nums[i + 1];}
 
         for (int i = 0; i < n; i++) {
             ans[i] = left[i] * right[i];
@@ -2659,8 +2717,10 @@ class Solution {
 }
 ```
 
-## 滑动窗口最大值（0239）
+## 滑动窗口最大值
 
+> 239
+>
 > *给你一个整数数组 nums，有一个大小为 k 的滑动窗口从数组的最左侧移动到数组的最右侧。你只可以看到在滑动窗口内的 k 个数字。滑动窗口每次只向右移动一位。*
 >
 > *返回滑动窗口中的最大值。*
@@ -2669,12 +2729,7 @@ class Solution {
 class Solution {
     public int[] maxSlidingWindow(int[] nums, int k) {
         int n = nums.length;
-        PriorityQueue<int[]> pq = new PriorityQueue<>(new Comparator<int[]>() {
-            public int compare(int[] A, int[] B) {
-                return A[0] != B[0] ? B[0] - A[0] : B[1] - A[1];
-            }
-        });
-
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[0] != b[0] ? b[0] - a[0] : b[1] - a[1]);
         for (int i = 0; i < k; i++) {pq.offer(new int[]{nums[i], i});}
 
         int[] ans = new int[n - k + 1];
@@ -2691,8 +2746,665 @@ class Solution {
 }
 ```
 
-## 拼接最大数（0321）
+## 按要求补齐数组
 
+> 330
+>
+> *给定一个已排序的正整数数组 nums，和一个正整数 n 。*
+>
+> *从 [1, n] 区间内选取任意个数字补充到 nums 中，使得 [1, n] 区间内的任何数字都可以用 nums 中某几个数字的和来表示。*
+>
+> *请输出满足上述要求的最少需要补充的数字个数。*
+
+```java
+class Solution {
+    public int minPatches(int[] nums, int n) {
+        int ans = 0;
+        long x = 1;
+        int index = 0;
+
+        while (x <= n) {
+            if (index < nums.length && nums[index] <= x) {
+                x += nums[index];
+                index++;
+            }
+            else {
+                x *= 2;
+                ans++;
+            }
+        }
+
+        return ans;
+    }
+}
+```
+
+## 水壶问题
+
+> 365
+>
+> *有两个容量分别为 x升 和 y升 的水壶以及无限多的水。请判断能否通过使用这两个水壶，从而可以得到恰好 z升 的水？*
+>
+> *如果可以，最后请用以上水壶中的一或两个来盛放取得的 z升 水。*
+
+```java
+class Solution {
+    public boolean canMeasureWater(int x, int y, int z) {
+        if (x + y < z) {return false;}
+        if (x == 0 || y == 0) {return z == 0 || x + y == z;}
+        return z % gcd(x, y) == 0;
+    }
+
+    // 求最大公约数
+    private static int gcd(int x, int y) {
+        int tmp = x % y;
+        while (tmp != 0) {
+            x = y;
+            y = tmp;
+            tmp = x % y;
+        }
+        return y;
+    }
+}
+```
+
+## 文件的最长绝对路径
+
+> 388
+>
+> 输入：input = "dir\n\tsubdir1\n\tsubdir2\n\t\tfile.ext"
+> 输出：20
+> 解释：只有一个文件，绝对路径为 "dir/subdir2/file.ext" ，路径长度 20
+> 路径 "dir/subdir1" 不含任何文件
+
+```java
+class Solution {
+    public int lengthLongestPath(String input) {
+        if (input.length() == 0) {return 0;}
+        int ans = 0;
+        int[] sum = new int[input.length() + 1];    //从1开始，第0层就是0
+
+        for (String s : input.split("\n")) {
+            int level = s.lastIndexOf("\t") + 2;    // 计算当前在第几层（从第一层开始，没有\t就是第一层）
+            int len = s.length() - (level - 1);     // 计算当前这一行的长度
+            if (s.contains(".")) {
+                ans = Math.max(ans, sum[level - 1] + len);
+            }
+            else {
+                sum[level] = sum[level - 1] + len + 1;  //是目录，要+1，目录有个/的
+            }
+        }
+
+        return ans;
+    }
+}
+```
+
+## 消除游戏
+
+> 390
+>
+> *给定一个从1 到 n 排序的整数列表。*
+>
+> *首先，从左到右，从第一个数字开始，每隔一个数字进行删除，直到列表的末尾。*
+>
+> *第二步，在剩下的数字中，从右到左，从倒数第一个数字开始，每隔一个数字进行删除，直到列表开头。*
+>
+> *我们不断重复这两步，从左到右和从右到左交替进行，直到只剩下一个数字。*
+>
+> *返回长度为 n 的列表中，最后剩下的数字。*
+
+```java
+class Solution {
+    public int lastRemaining(int n) {
+        if (n == 0) {return 0;}
+
+        int first = 1, factor = 1;
+        boolean isLeft = true;
+        boolean isEven = ((n & 1) == 0);
+
+        while (n != 1) {
+            if (isLeft || !isEven) {
+                first += factor;
+            }
+            n = n >> 1;
+            factor = factor << 1;
+            isLeft = !isLeft;
+            isEven = ((n & 1) == 0);
+        }
+
+        return first;
+    }
+}
+
+class Solution {
+    public int lastRemaining(int n) {
+        return n == 1 ? 1 : 2 * (n / 2 + 1 - lastRemaining(n / 2));
+    }
+}
+```
+
+## 青蛙过河
+
+> 403
+>
+> *一只青蛙想要过河。 假定河流被等分为若干个单元格，并且在每一个单元格内都有可能放有一块石子（也有可能没有）。 青蛙可以跳上石子，但是不可以跳入水中。*
+>
+> *给你石子的位置列表 stones（用单元格序号 升序 表示）， 请判定青蛙能否成功过河（即能否在最后一步跳至最后一块石子上）。*
+>
+> *开始时， 青蛙默认已站在第一块石子上，并可以假定它第一步只能跳跃一个单位（即只能从单元格 1 跳至单元格 2 ）。*
+>
+> *如果青蛙上一步跳跃了 k 个单位，那么它接下来的跳跃距离只能选择为 k - 1、k 或 k + 1 个单位。 另请注意，青蛙只能向前方（终点的方向）跳跃。*
+
+```java
+class Solution {
+    public boolean canCross(int[] stones) {
+        Map<Integer, Set<Integer>> map = new HashMap<>();
+        int n = stones.length;
+        for (int i = 0; i < n; i++) {
+            map.put(stones[i], new HashSet<Integer>());
+        }
+        map.get(0).add(0);
+
+        for (int i = 0; i < n; i++) {
+            for (int k : map.get(stones[i])) {
+                for (int step = k - 1; step <= k + 1; step++) {
+                    if (step > 0 && map.containsKey(stones[i] + step)) {
+                        map.get(stones[i] + step).add(step);
+                    }
+                }
+            }
+        }
+
+        return map.get(stones[n - 1]).size() > 0;
+    }
+}
+```
+
+## 根据身高重建队列
+
+> 406
+>
+> *假设有打乱顺序的一群人站成一个队列，数组 people 表示队列中一些人的属性（不一定按顺序）。每个 people[i] = [hi, ki] 表示第 i 个人的身高为 hi ，前面 正好 有 ki 个身高大于或等于 hi 的人。*
+>
+> *请你重新构造并返回输入数组 people 所表示的队列。返回的队列应该格式化为数组 queue ，其中 queue[j] = [hj, kj] 是队列中第 j 个人的属性（queue[0] 是排在队列前面的人）。*
+
+```java
+class Solution {
+    public int[][] reconstructQueue(int[][] people) {
+        Arrays.sort(people, (a, b) -> a[0] == b[0] ? b[1] - a[1] : a[0] - b[0]);
+
+        int n = people.length;
+        int[][] ans = new int[n][];
+        for (int[] cur : people) {
+            int space = cur[1] + 1;
+            for (int i = 0; i < n; i++) {
+                if (ans[i] == null) {
+                    space--;
+                    if (space == 0) {
+                        ans[i] = cur;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return ans;
+    }
+}
+```
+
+## 最小基因变化
+
+> 433
+>
+> 一条基因序列由一个带有8个字符的字符串表示，其中每个字符都属于 "A", "C", "G", "T"中的任意一个。
+>
+> 假设我们要调查一个基因序列的变化。一次基因变化意味着这个基因序列中的一个字符发生了变化。
+>
+> 例如，基因序列由"AACCGGTT" 变化至 "AACCGGTA" 即发生了一次基因变化。
+>
+> 与此同时，每一次基因变化的结果，都需要是一个合法的基因串，即该结果属于一个基因库。
+>
+> 现在给定3个参数 — start, end, bank，分别代表起始基因序列，目标基因序列及基因库，请找出能够使起始基因序列变化为目标基因序列所需的最少变化次数。如果无法实现目标变化，请返回 -1。
+
+```java
+class Solution {
+    public int minMutation(String start, String end, String[] bank) {
+        Set<String> set = new HashSet<>(Arrays.asList(bank));
+        if (!set.contains(end)) {return -1;}
+        char[] dir = {'A', 'C', 'G', 'T'};
+
+        Queue<String> queue = new LinkedList<>();
+        queue.offer(start);
+        set.remove(start);
+        int step = 0;
+
+        while (queue.size() > 0) {
+            step++;
+            int count = queue.size();
+            for (int k = 0; k < count; k++) {
+                char[] tmp = queue.poll().toCharArray();
+                int n = tmp.length;
+                for (int i = 0; i < n; i++) {
+                    char oldChar = tmp[i];
+                    for (int j = 0; j < 4; j++) {
+                        tmp[i] = dir[j];
+                        String newGenetic = new String(tmp);
+                        if (end.equals(newGenetic)) {return step;}
+                        else if (set.contains(newGenetic)) {
+                            set.remove(newGenetic);
+                            queue.offer(newGenetic);
+                        }
+                    }
+                    tmp[i] = oldChar;
+                }
+            }
+        }
+
+        return -1;
+    }
+}
+```
+
+## 环形数组是否存在循环
+
+> 457
+>
+> 存在一个不含 0 的 环形 数组 nums ，每个 nums[i] 都表示位于下标 i 的角色应该向前或向后移动的下标个数：
+>
+> 如果 nums[i] 是正数，向前 移动 nums[i] 步
+> 如果 nums[i] 是负数，向后 移动 nums[i] 步
+> 因为数组是 环形 的，所以可以假设从最后一个元素向前移动一步会到达第一个元素，而第一个元素向后移动一步会到达最后一个元素。
+
+```java
+// 对于不够构成循环的元素，它的下一个元素要么正负相反，要么指向自己。循环不断排除这种元素，最终如果还有剩余，那么就说明存在循环。
+class Solution {
+    //因为每个元素走的步数是固定的，所以：如果存在这样一个环，那么从这个环的任意一个索引出发，都能走出整个环；环中不会有重复的索引；环中所有元素都大于0或者小于0；形成闭环的那个元素和上一个元素的索引相同的时候就不存在。
+    //换一种思路，如果不存在的话，那么必然要求最后走到的那个元素最后指向它自己；排除它自己和能走到它的元素。
+    public boolean circularArrayLoop(int[] nums) {
+        int allZeroNum = 0;
+        while (true) {
+            int currentZeroNum = 0;
+            for (int i = 0; i < nums.length; i++) {
+                if (nums[i] == 0) {continue;}
+                
+                int newIndex = (i + nums[i]) % nums.length;
+                if (newIndex < 0) {
+                    newIndex = nums.length + newIndex;
+                } 
+
+                if (newIndex == i || nums[newIndex] == 0 || nums[i] * nums[newIndex] < 0) {
+                    allZeroNum++;
+                    currentZeroNum++;
+                    nums[i] = 0;
+                }
+            }
+
+            if (currentZeroNum == 0 || allZeroNum == nums.length) {break;}
+        }
+
+        return nums.length != allZeroNum;
+    }
+}
+```
+
+## 翻转对
+
+> 493
+>
+> 给定一个数组 nums ，如果 i < j 且 nums[i] > 2*nums[j] 我们就将 (i, j) 称作一个重要翻转对。
+>
+> 你需要返回给定数组中的重要翻转对的数量。
+>
+
+```java
+class Solution {
+    public int reversePairs(int[] nums) {
+        if (nums.length == 0) {return 0;}
+        return myMethod(nums, 0, nums.length - 1);
+    }
+
+    private static int myMethod(int[] nums, int left, int right) {
+        if (left == right) {return 0;}
+        else {
+            int mid = left + (right - left) / 2;
+            int countLeft = myMethod(nums, left, mid);
+            int countRight = myMethod(nums, mid + 1, right);
+            int ans = countLeft + countRight;
+
+            int i = left, j = mid + 1;
+            while (i <= mid) {
+                while (j <= right && (long)nums[i] > 2 * (long)nums[j]) {j++;}
+                ans += j - mid - 1;
+                i++;
+            }
+
+            int[] sorted = new int[right - left + 1];
+            int p1 = left, p2 = mid + 1;
+            int p = 0;
+            while (p1 <= mid || p2 <= right) {
+                if (p1 > mid) {
+                    sorted[p++] = nums[p2++];
+                }
+                else if (p2 > right) {
+                    sorted[p++] = nums[p1++];
+                }
+                else {
+                    if (nums[p1] < nums[p2]) {
+                        sorted[p++] = nums[p1++];
+                    }
+                    else {
+                        sorted[p++] = nums[p2++];
+                    }
+                }
+            }
+
+            for (int k = 0; k < sorted.length; k++) {
+                nums[left + k] = sorted[k];
+            }
+            return ans;
+        }
+    }
+}
+```
+
+## 只有两个键的键盘
+
+> 650
+>
+> *最初在一个记事本上只有一个字符 'A'。你每次可以对这个记事本进行两种操作：*
+>
+> *Copy All (复制全部) : 你可以复制这个记事本中的所有字符(部分的复制是不允许的)。*
+>
+> *Paste (粘贴) : 你可以粘贴你上一次复制的字符。*
+>
+> *给定一个数字 n 。你需要使用最少的操作次数，在记事本中打印出恰好 n 个 'A'。输出能够打印出 n 个 'A' 的最少操作次数。*
+
+```java
+class Solution {
+    public int minSteps(int n) {
+        int ans = 0, d = 2;
+        while (n > 1) {
+            while (n % d == 0) {
+                ans += d;
+                n /= d;
+            } 
+            d++;
+        }
+        return ans;
+    }
+}
+```
+
+## 非递减数列
+
+> 665
+>
+> *给你一个长度为 n 的整数数组，请你判断在 最多 改变 1 个元素的情况下，该数组能否变成一个非递减数列。*
+>
+> *我们是这样定义一个非递减数列的： 对于数组中任意的 i (0 <= i <= n-2)，总满足 nums[i] <= nums[i + 1]。*
+
+```java
+class Solution {
+    public boolean checkPossibility(int[] nums) {
+        int n = nums.length;
+        int count = 0;
+        for (int i = 0; i < n - 1; i++) {
+            int x = nums[i], y = nums[i + 1];
+            if (x > y) {
+                count++;
+                if (count > 1) {return false;}
+                if (i > 0 && y < nums[i - 1]) {nums[i + 1] = x;}
+            }
+        }
+        return true;
+    }
+}
+```
+
+## 单调递增的数字
+
+> 738
+>
+> *给定一个非负整数 N，找出小于或等于 N 的最大的整数，同时这个整数需要满足其各个位数上的数字是单调递增。*
+>
+> *（当且仅当每个相邻位数上的数字 x 和 y 满足 x <= y 时，我们称这个整数是单调递增的。）*
+
+```java
+class Solution {
+    public int monotoneIncreasingDigits(int n) {
+        char[] nums = Integer.toString(n).toCharArray();
+        int idx = 1;
+        while (idx < nums.length && nums[idx - 1] <= nums[idx]) {idx += 1;}
+
+        if (idx < nums.length) {
+            while (idx > 0 && nums[idx - 1] > nums[idx]) {
+                nums[idx - 1] -= 1;
+                idx -= 1;
+            }
+            idx += 1;
+            while (idx < nums.length) {
+                nums[idx] = '9';
+                idx++;
+            }
+        }
+
+        return Integer.parseInt(new String(nums));
+    }
+}
+```
+
+## 最大交换
+
+> 670
+>
+> *给定一个非负整数，你至多可以交换一次数字中的任意两位。返回你能得到的最大值。*
+
+```java
+class Solution {
+    public int maximumSwap(int num) {
+        String s = String.valueOf(num);
+        int n = s.length();
+        char[] charArray = s.toCharArray();
+
+        int[] last = new int[10];
+        for (int i = 0; i < n; i++) {
+            last[charArray[i] - '0'] = i;
+        }
+
+        for (int i = 0; i < n - 1; i++) {
+            for (int d = 9; d > charArray[i] - '0'; d--) {
+                if (last[d] > i) {
+                    swap(charArray, i, last[d]);
+                    return Integer.parseInt(new String(charArray));
+                }
+            }
+        }
+        
+        return num;
+    }
+
+    private static void swap(char[] charArray, int index1, int index2) {
+        char tmp = charArray[index1];
+        charArray[index1] = charArray[index2];
+        charArray[index2] = tmp;
+    }
+}
+```
+
+## 最多能完成排序的块
+
+> 769
+>
+> *数组arr是[0, 1, ..., arr.length - 1]的一种排列，我们将这个数组分割成几个“块”，并将这些块分别进行排序。之后再连接起来，使得连接的结果和按升序排序后的原数组相同。*
+>
+> *我们最多能将数组分成多少块？*
+
+```java
+// 如果当前下标i(含)之前的最大值为i，则说明可以切一刀；否则前半部分有大于i的元素，后半部分有小于i的元素，必不满足题意
+class Solution {
+    public int maxChunksToSorted(int[] arr) {
+        int ans = 0, max = 0;
+        for (int i = 0; i < arr.length; ++i) {
+            max = Math.max(max, arr[i]);
+            if (max == i) {ans++;}
+        }
+        return ans;
+    }
+}
+```
+
+> 768
+>
+> *这个问题和“最多能完成排序的块”相似，但给定数组中的元素可以重复，输入数组最大长度为2000，其中的元素最大为10**8。*
+>
+> *arr是一个可能包含重复元素的整数数组，我们将这个数组分割成几个“块”，并将这些块分别进行排序。之后再连接起来，使得连接的结果和按升序排序后的原数组相同。*
+>
+> *我们最多能将数组分成多少块？*
+
+```java
+// 滑动窗口
+class Solution {
+    public int maxChunksToSorted(int[] arr) {
+        Map<Integer, Integer> count = new HashMap<>();
+        int ans = 0, nonzero = 0;
+
+        int[] arr2 = arr.clone();
+        Arrays.sort(arr2);
+
+        for (int i = 0; i < arr.length; i++) {
+            int x = arr[i], y = arr2[i];
+
+            count.put(x, count.getOrDefault(x, 0) + 1);
+            if (count.get(x) == 0) {nonzero--;}
+            if (count.get(x) == 1) {nonzero++;}
+
+            count.put(y, count.getOrDefault(y, 0) - 1);
+            if (count.get(y) == -1) {nonzero++;}
+            if (count.get(y) == 0) {nonzero--;}
+
+            if (nonzero == 0) {ans++;} 
+        }
+
+        return ans;
+    }
+}
+```
+
+## 完美矩形
+
+> 391
+>
+> *我们有 N 个与坐标轴对齐的矩形, 其中 N > 0, 判断它们是否能精确地覆盖一个矩形区域。*
+
+```java
+class Solution {
+    public boolean isRectangleCover(int[][] rectangles) {
+        // 完美矩形的左下角和右上角坐标
+        int X1 = Integer.MAX_VALUE, Y1 = Integer.MAX_VALUE;
+        int X2 = Integer.MIN_VALUE, Y2 = Integer.MIN_VALUE;
+
+        // 小矩形面积之和
+        int areas = 0;
+        // 记录所有顶点的出现情况
+        Set<String> set = new HashSet<>();
+        for (int[] tmp : rectangles) {
+            int x1 = tmp[0], y1 = tmp[1], x2 = tmp[2], y2 = tmp[3];
+
+            X1 = Math.min(X1, x1);
+            Y1 = Math.min(Y1, y1);
+            X2 = Math.max(X2, x2);
+            Y2 = Math.max(Y2, y2);
+            areas += (x2 - x1) * (y2 - y1);
+
+            String[] curPoints = {x1 + " " + y1, x2 + " " + y2, x1 + " " + y2, x2 + " " + y1};
+            for (String s : curPoints) {
+                if (set.contains(s)) {set.remove(s);}
+                else {set.add(s);}
+            }
+        }
+
+        // 面积是否相等
+        if (areas != (X2 - X1) * (Y2 - Y1)) {return false;}
+
+        // 顶点情况是否满足
+        if (set.size() != 4 || !set.contains(X1 + " " + Y1) || !set.contains(X2 + " " + Y2)
+            || !set.contains(X1 + " " + Y2) || !set.contains(X2 + " " + Y1)) {
+                return false;
+            }
+        return true;
+    }
+}
+```
+
+## 猜数字
+
+> 299
+>
+> *你写出一个秘密数字，并请朋友猜这个数字是多少。*
+>
+> *朋友每猜测一次，你就会给他一个提示，告诉他的猜测数字中有多少位属于数字和确切位置都猜对了（称为“Bulls”, 公牛），有多少位属于数字猜对了但是位置不对（称为“Cows”, 奶牛）。*
+>
+> *朋友根据提示继续猜，直到猜出秘密数字。*
+>
+> *请写出一个根据秘密数字和朋友的猜测数返回提示的函数，返回字符串的格式为 xAyB ，x 和 y 都是数字，A 表示公牛，用 B 表示奶牛。*
+
+```java
+class Solution {
+    public String getHint(String secret, String guess) {
+        // secretArray 和 guessArray 分别记录 两个字符串中非公牛的各个数字的数量
+        int[] secretArray = new int[10];
+        int[] guessArray = new int[10];
+        // 公牛
+        int A = 0;
+        for (int i = 0; i < secret.length(); i++) {
+            // 如果同位的数字相等则，公牛++
+            if (secret.charAt(i) == guess.charAt(i)) {
+                A++;
+            } else {
+                secretArray[secret.charAt(i) - '0']++;
+                guessArray[guess.charAt(i) - '0']++;
+            }
+        }
+        // 奶牛
+        int B = 0;
+        for (int i = 0; i < 10; i++) {
+            // 不同位上的相同数字的数量
+            B += Math.min(secretArray[i], guessArray[i]);
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+        return stringBuilder.append(A).append('A').append(B).append('B').toString();
+    }
+}
+```
+
+## 数字1的个数
+
+> 233
+>
+> *给定一个整数 n，计算所有小于等于 n 的非负整数中数字 1 出现的个数。*
+
+```java
+class Solution {
+    public int countDigitOne(int n) {
+        int count = 0;
+
+        for (long k = 1; k <= n; k *= 10) {
+            long r = n / k, m = n % k;
+            // sum up the count of ones on every place k
+            count += (r + 8) / 10 * k + (r % 10 == 1 ? m + 1 : 0);
+        }
+
+        return count;
+    }
+}
+```
+
+## 拼接最大数
+
+> 321
+>
 > *给定长度分别为 m 和 n 的两个数组，其元素由 0-9 构成，表示两个自然数各位上的数字。*
 >
 > *现在从这两个数组中选出 k (k <= m + n) 个数字拼接成一个新的数，要求从同一个数组中取出的数字保持其在原数组中的相对顺序。*
@@ -2768,575 +3480,10 @@ class Solution {
 }
 ```
 
-## 猜数字（0299）
+## 求解方程
 
-> *你写出一个秘密数字，并请朋友猜这个数字是多少。*
+> 640
 >
-> *朋友每猜测一次，你就会给他一个提示，告诉他的猜测数字中有多少位属于数字和确切位置都猜对了（称为“Bulls”, 公牛），有多少位属于数字猜对了但是位置不对（称为“Cows”, 奶牛）。*
->
-> *朋友根据提示继续猜，直到猜出秘密数字。*
->
-> *请写出一个根据秘密数字和朋友的猜测数返回提示的函数，返回字符串的格式为 xAyB ，x 和 y 都是数字，A 表示公牛，用 B 表示奶牛。*
-
-```java
-class Solution {
-    public String getHint(String secret, String guess) {
-        // secretArray 和 guessArray 分别记录 两个字符串中非公牛的各个数字的数量
-        int[] secretArray = new int[10];
-        int[] guessArray = new int[10];
-        // 公牛
-        int A = 0;
-        for (int i = 0; i < secret.length(); i++) {
-            // 如果同位的数字相等则，公牛++
-            if (secret.charAt(i) == guess.charAt(i)) {
-                A++;
-            } else {
-                secretArray[secret.charAt(i) - '0']++;
-                guessArray[guess.charAt(i) - '0']++;
-            }
-        }
-        // 奶牛
-        int B = 0;
-        for (int i = 0; i < 10; i++) {
-            // 不同位上的相同数字的数量
-            B += Math.min(secretArray[i], guessArray[i]);
-        }
-        StringBuilder stringBuilder = new StringBuilder();
-        return stringBuilder.append(A).append('A').append(B).append('B').toString();
-    }
-}
-```
-
-## 按要求补齐数组（0330）
-
-> *给定一个已排序的正整数数组 nums，和一个正整数 n 。*
->
-> *从 [1, n] 区间内选取任意个数字补充到 nums 中，使得 [1, n] 区间内的任何数字都可以用 nums 中某几个数字的和来表示。*
->
-> *请输出满足上述要求的最少需要补充的数字个数。*
-
-```java
-class Solution {
-    public int minPatches(int[] nums, int n) {
-        int ans = 0;
-        long x = 1;
-        int index = 0;
-
-        while (x <= n) {
-            if (index < nums.length && nums[index] <= x) {
-                x += nums[index];
-                index++;
-            }
-            else {
-                x *= 2;
-                ans ++;
-            }
-        }
-
-        return ans;
-    }
-}
-```
-
-## 水壶问题（0365）
-
-> *有两个容量分别为 x升 和 y升 的水壶以及无限多的水。请判断能否通过使用这两个水壶，从而可以得到恰好 z升 的水？*
->
-> *如果可以，最后请用以上水壶中的一或两个来盛放取得的 z升 水。*
-
-```java
-class Solution {
-    public boolean canMeasureWater(int x, int y, int z) {
-        if (x + y < z) {return false;}
-        if (x == 0 || y == 0) {return z == 0 || x + y == z;}
-        return z % gcd(x, y) == 0;
-    }
-
-    private int gcd(int x, int y) {
-        int tmp = x % y;
-        while (tmp != 0) {
-            x = y; 
-            y = tmp;
-            tmp = x % y;
-        }
-        return y;
-    }
-}
-```
-
-## 摆动序列（0376）
-
-> *如果连续数字之间的差严格地在正数和负数之间交替，则数字序列称为摆动序列。第一个差（如果存在的话）可能是正数或负数。少于两个元素的序列也是摆动序列。*
->
-> *例如， [1,7,4,9,2,5] 是一个摆动序列，因为差值 (6,-3,5,-7,3) 是正负交替出现的。相反, [1,4,7,2,5] 和 [1,7,4,5,5] 不是摆动序列，第一个序列是因为它的前两个差值都是正数，第二个序列是因为它的最后一个差值为零。*
->
-> *给定一个整数序列，返回作为摆动序列的最长子序列的长度。 通过从原始序列中删除一些（也可以不删除）元素来获得子序列，剩下的元素保持其原始顺序。*
-
-```java
-class Solution {
-    public int wiggleMaxLength(int[] nums) {
-        int n = nums.length;
-        if (n < 2) {return n;}
-        
-        int[] up = new int[n];
-        int[] down = new int[n];
-        up[0] = down[0] = 1;
-        for (int i = 1; i < n; i++) {
-            if (nums[i] > nums[i - 1]) {
-                up[i] = Math.max(up[i - 1], down[i - 1] + 1);
-                down[i] = down[i - 1];
-            }
-            else if (nums[i] < nums[i - 1]) {
-                down[i] = Math.max(down[i - 1], up[i - 1] + 1);
-                up[i] = up[i - 1];
-            }
-            else {
-                up[i] = up[i - 1];
-                down[i] = down[i - 1];
-            }
-        }
-
-        return Math.max(up[n - 1], down[n - 1]);
-    }
-}
-```
-
-## 文件的最长绝对路径（0388）
-
-> *在文本格式中，如下所示(⟶表示制表符)：*
->
-> *dir*
->
-> *⟶ subdir1*
->
-> *⟶ ⟶ file1.ext*
->
-> *⟶ ⟶ subsubdir1*
->
-> *⟶ subdir2*
->
-> *⟶ ⟶ subsubdir2*
->
-> *⟶ ⟶ ⟶ file2.ext*
-
-```java
-class Solution {
-    public int lengthLongestPath(String input) {
-        if (input.length() == 0) {return 0;}
-        int ans = 0;
-        int[] sum = new int[input.length() + 1];    //从1开始，第0层就是0
-
-        for (String s : input.split("\n")) {
-            System.out.println(s);
-            int level = s.lastIndexOf('\t') + 2;    // 计算当前在第几层（从第一层开始，没有\t就是第一层）
-            int len = s.length() - (level - 1);     // 计算当前这一行的长度
-            if (s.contains(".")) {
-                ans = Math.max(ans, sum[level - 1] + len);
-            } else {
-                sum[level] = sum[level - 1] + len + 1;  //是目录，要+1，目录有个/的
-            }
-        }
-        return ans;
-    }
-}
-```
-
-## 消除游戏（0390）
-
-> *给定一个从1 到 n 排序的整数列表。*
->
-> *首先，从左到右，从第一个数字开始，每隔一个数字进行删除，直到列表的末尾。*
->
-> *第二步，在剩下的数字中，从右到左，从倒数第一个数字开始，每隔一个数字进行删除，直到列表开头。*
->
-> *我们不断重复这两步，从左到右和从右到左交替进行，直到只剩下一个数字。*
->
-> *返回长度为 n 的列表中，最后剩下的数字。*
-
-```java
-class Solution {
-    public int lastRemaining(int n) {
-        if (n == 0) {return 0;}
-        
-        int first = 1;
-        int factor = 1;
-        boolean isLeft = true;
-        boolean isEven = ((n & 1) == 0);
-
-        while (n != 1) {
-            if (isLeft || !isEven) {
-                first += factor;
-            }
-            n = n >> 1;
-            factor = factor << 1;
-            isLeft = !isLeft;
-            isEven = ((n & 1) == 0);
-        }
-
-        return first;
-    }
-}
-```
-
-## 完美矩形（0391）
-
-> *我们有 N 个与坐标轴对齐的矩形, 其中 N > 0, 判断它们是否能精确地覆盖一个矩形区域。*
-
-```java
-class Solution {
-    public boolean isRectangleCover(int[][] rectangles) {
-        // 完美矩形的左下角和右上角坐标
-        int X1 = Integer.MAX_VALUE, Y1 = Integer.MAX_VALUE;
-        int X2 = Integer.MIN_VALUE, Y2 = Integer.MIN_VALUE;
-
-        // 小矩形面积之和
-        int areas = 0;
-        // 记录所有顶点的出现情况
-        Set<String> set = new HashSet<>();
-        for (int[] tmp : rectangles) {
-            int x1 = tmp[0], y1 = tmp[1], x2 = tmp[2], y2 = tmp[3];
-
-            X1 = Math.min(X1, x1);
-            Y1 = Math.min(Y1, y1);
-            X2 = Math.max(X2, x2);
-            Y2 = Math.max(Y2, y2);
-            areas += (x2 - x1) * (y2 - y1);
-
-            String[] curPoints = {x1 + " " + y1, x2 + " " + y2, x1 + " " + y2, x2 + " " + y1};
-            for (String s : curPoints) {
-                if (set.contains(s)) {set.remove(s);}
-                else {set.add(s);}
-            }
-        }
-
-        // 面积是否相等
-        if (areas != (X2 - X1) * (Y2 - Y1)) {return false;}
-
-        // 顶点情况是否满足
-        if (set.size() != 4 || !set.contains(X1 + " " + Y1) || !set.contains(X2 + " " + Y2)
-            || !set.contains(X1 + " " + Y2) || !set.contains(X2 + " " + Y1)) {
-                return false;
-            }
-        return true;
-    }
-}
-```
-
-## 青蛙过河（0403）
-
-> *一只青蛙想要过河。 假定河流被等分为若干个单元格，并且在每一个单元格内都有可能放有一块石子（也有可能没有）。 青蛙可以跳上石子，但是不可以跳入水中。*
->
-> *给你石子的位置列表 stones（用单元格序号 升序 表示）， 请判定青蛙能否成功过河（即能否在最后一步跳至最后一块石子上）。*
->
-> *开始时， 青蛙默认已站在第一块石子上，并可以假定它第一步只能跳跃一个单位（即只能从单元格 1 跳至单元格 2 ）。*
->
-> *如果青蛙上一步跳跃了 k 个单位，那么它接下来的跳跃距离只能选择为 k - 1、k 或 k + 1 个单位。 另请注意，青蛙只能向前方（终点的方向）跳跃。*
-
-```java
-class Solution {
-    public boolean canCross(int[] stones) {
-        Map<Integer, Set<Integer>> map = new HashMap<>();
-        int n = stones.length;
-        for (int i = 0; i < n; i++) {
-            map.put(stones[i], new HashSet<Integer>());
-        }
-        map.get(0).add(0);
-
-        for (int i = 0; i < n; i++) {
-            for (int k : map.get(stones[i])) {
-                for (int step = k - 1; step <= k + 1; step++) {
-                    if (step > 0 && map.containsKey(stones[i] + step)) {
-                        map.get(stones[i] + step).add(step);
-                    }
-                }
-            }
-        }
-
-        return map.get(stones[n - 1]).size() > 0;
-    }
-}
-```
-
-## 根据身高重建队列（0406）
-
-> *假设有打乱顺序的一群人站成一个队列，数组 people 表示队列中一些人的属性（不一定按顺序）。每个 people[i] = [hi, ki] 表示第 i 个人的身高为 hi ，前面 正好 有 ki 个身高大于或等于 hi 的人。*
->
-> *请你重新构造并返回输入数组 people 所表示的队列。返回的队列应该格式化为数组 queue ，其中 queue[j] = [hj, kj] 是队列中第 j 个人的属性（queue[0] 是排在队列前面的人）。*
-
-```java
-class Solution {
-    public int[][] reconstructQueue(int[][] people) {
-        Arrays.sort(people, new Comparator<int[]>(){
-            public int compare(int[] A, int[] B) {
-                return A[0] == B[0] ? B[1] - A[1] : A[0] - B[0];
-            } 
-        });
-
-        int n = people.length;
-        int[][] ans = new int[n][];
-        for (int[] cur : people) {
-            int space = cur[1] + 1;
-            for (int i = 0; i < n; i++) {
-                if (ans[i] == null) {
-                    space--;
-                    if (space == 0) {
-                        ans[i] = cur;
-                        break;
-                    }
-                }
-            }
-        }
-
-        return ans;
-    }
-}
-```
-
-## 最小基因变化（0433）
-
-> 一条基因序列由一个带有8个字符的字符串表示，其中每个字符都属于 "A", "C", "G", "T"中的任意一个。
->
-> 假设我们要调查一个基因序列的变化。一次基因变化意味着这个基因序列中的一个字符发生了变化。
->
-> 例如，基因序列由"AACCGGTT" 变化至 "AACCGGTA" 即发生了一次基因变化。
->
-> 与此同时，每一次基因变化的结果，都需要是一个合法的基因串，即该结果属于一个基因库。
->
-> 现在给定3个参数 — start, end, bank，分别代表起始基因序列，目标基因序列及基因库，请找出能够使起始基因序列变化为目标基因序列所需的最少变化次数。如果无法实现目标变化，请返回 -1。
-
-```java
-class Solution {
-    public int minMutation(String start, String end, String[] bank) {
-        Set<String> set = new HashSet<>(Arrays.asList(bank));
-        if (!set.contains(end)) {return -1;}
-        char[] dir = {'A', 'C', 'G', 'T'};
-
-        Queue<String> queue = new LinkedList<>();
-        queue.offer(start);
-        set.remove(start);
-        int step = 0;
-
-        while (queue.size() > 0) {
-            step++;
-            int count = queue.size();
-            for (int k = 0; k < count; k++) {
-                char[] tmp = queue.poll().toCharArray();
-                int n = tmp.length;
-                for (int i = 0; i < n; i++) {
-                    char oldChar = tmp[i];
-                    for (int j = 0; j < 4; j++) {
-                        tmp[i] = dir[j];
-                        String newGenetic = new String(tmp);
-                        if (end.equals(newGenetic)) {return step;}
-                        else if (set.contains(newGenetic)) {
-                            set.remove(newGenetic);
-                            queue.offer(newGenetic);
-                        }
-                    }
-                    tmp[i] = oldChar;
-                }
-            }
-        }
-
-        return -1;
-    }
-}
-```
-
-## 环形数组是否存在循环（0457）
-
-> 存在一个不含 0 的 环形 数组 nums ，每个 nums[i] 都表示位于下标 i 的角色应该向前或向后移动的下标个数：
->
-> 如果 nums[i] 是正数，向前 移动 nums[i] 步
-> 如果 nums[i] 是负数，向后 移动 nums[i] 步
-> 因为数组是 环形 的，所以可以假设从最后一个元素向前移动一步会到达第一个元素，而第一个元素向后移动一步会到达最后一个元素。
-
-```java
-class Solution {
-    public boolean circularArrayLoop(int[] nums) {
-        int n = nums.length;
-        if (n == 1 || n == 0) {return false;}
-        if (n == 2 && nums[0] * nums[1] <= 0) {return false;}
-
-        int[] nums2 = new int[n];
-        for (int i = 0; i < n; i++) {nums2[i] = nums[i];}
-
-        for (int i = 0; i < n; i++) {
-            if (nums2[i] == 0) {continue;}
-            else {
-                int curNum = nums[i], curIndex = i;
-                nums2[i] = 0;
-                int circleLen = 0;
-                while (true) {
-                    int nextIndex = curIndex + curNum;
-                    if (nextIndex >= 0) {nextIndex %= n;}
-                    else {nextIndex = n - ((0 - nextIndex) % n);}
-
-                    int nextNum = nums[nextIndex];
-                    if (nextIndex == curIndex || nextNum * curNum <= 0) {break;}
-
-                    if (circleLen > n) {return true;}
-
-                    circleLen++;
-                    nums2[nextIndex] = 0;
-                    curNum = nextNum;
-                    curIndex = nextIndex;
-                }
-            }
-        }
-
-        return false;
-    }
-}
-```
-
-## 供暖器（0475）
-
-> 冬季已经来临。 你的任务是设计一个有固定加热半径的供暖器向所有房屋供暖。
->
-> 在加热器的加热半径范围内的每个房屋都可以获得供暖。
->
-> 现在，给出位于一条水平线上的房屋 houses 和供暖器 heaters 的位置，请你找出并返回可以覆盖所有房屋的最小加热半径。
-
-```java
-class Solution {
-    // 双指针
-    public int findRadius(int[] houses, int[] heaters) {
-        // 1. 排序
-        Arrays.sort(houses);
-        Arrays.sort(heaters);
-
-        // 2. 双指针计算最大半径
-        // 下面的代码最难懂的地方是 Math.abs(heaters[i] - house) >= Math.abs(heaters[i + 1] - house)
-        // 我们举一个例子来说明这行代码的意思：
-        // houses：1，2，3，4
-        // heaters：1，4
-        // 对于 house 1，heater 1 比 heater 4 更接近 house1，所以不将 i 移动到 i + 1
-        // 对于 house 2，heater 1 比 heater 4 更接近 house2，所以不将 i 移动到 i + 1
-        // 对于 house 3，heater 4 比 heater 1 更接近 house3，所以将 i 移动到 i + 1
-        // 对于 house 4，依次类推
-        int ans = 0, idx = 0;
-        for (int h : houses) {
-            while (idx < heaters.length - 1 && Math.abs(heaters[idx] - h) >= Math.abs(heaters[idx + 1] - h)) {
-                idx++;
-            }
-            ans = Math.max(ans, Math.abs(heaters[idx] - h));
-        }
-
-        return ans;
-    }
-}
-```
-
-## 翻转对（0493）
-
-> 给定一个数组 nums ，如果 i < j 且 nums[i] > 2*nums[j] 我们就将 (i, j) 称作一个重要翻转对。
->
-> 你需要返回给定数组中的重要翻转对的数量。
->
-> 示例 1:
->
-> 输入: [1,3,2,3,1]
-> 输出: 2
-> 示例 2:
->
-> 输入: [2,4,3,5,1]
-> 输出: 3
-
-```java
-class Solution {
-    public int reversePairs(int[] nums) {
-        if (nums.length == 0) {return 0;}
-        return myMethod(nums, 0, nums.length - 1);
-    }
-
-    private int myMethod(int[] nums, int left, int right) {
-        if (left == right) {return 0;}
-        else {
-            int mid = left + (right - left) / 2;
-            int countLeft = myMethod(nums, left, mid);
-            int countRight = myMethod(nums, mid + 1, right);
-            int ans = countLeft + countRight;
-
-            int i = left, j = mid + 1;
-            while (i <= mid) {
-                while (j <= right && (long)nums[i] > 2 * (long)nums[j]) {j++;}
-                ans += j - mid - 1;
-                i++;
-            }
-
-            int[] sorted = new int[right - left + 1];
-            int p1 = left, p2 = mid + 1;
-            int p = 0;
-            while (p1 <= mid || p2 <= right) {
-                if (p1 > mid) {
-                    sorted[p++] = nums[p2++];
-                }
-                else if (p2 > right) {
-                    sorted[p++] = nums[p1++];
-                }
-                else {
-                    if (nums[p1] < nums[p2]) {
-                        sorted[p++] = nums[p1++];
-                    }
-                    else {
-                        sorted[p++] = nums[p2++];
-                    }
-                }
-            }
-
-            for (int k = 0; k < sorted.length; k++) {
-                nums[left + k] = sorted[k];
-            }
-            return ans;
-        }
-    }
-}
-```
-
-## 对角线遍历（0498）
-
-> 给定一个含有 M x N 个元素的矩阵（M 行，N 列），请以对角线遍历的顺序返回这个矩阵中的所有元素，对角线遍历如下图所示。
-
-```java
-class Solution {
-    public int[] findDiagonalOrder(int[][] matrix) {
-        if (matrix == null || matrix.length == 0) {return new int[0];}
-
-        int m = matrix.length, n = matrix[0].length;
-        int[] ans = new int[m * n];
-
-        int idx = 0;
-        List<Integer> tmp = new ArrayList<>();
-
-        for (int i = 0; i < m + n - 1; i++) {
-            tmp.clear();
-
-            int row = i < n ? 0 : i - n + 1;
-            int col = i < n ? i : n - 1;
-
-            while (row < m && col > -1) {
-                tmp.add(matrix[row][col]);
-                row++;
-                col--;
-            }
-
-            if (i % 2 == 0) {
-                Collections.reverse(tmp);
-            }
-
-            for (int j = 0; j < tmp.size(); j++) {
-                ans[idx++] = tmp.get(j);
-            }
-        }
-
-        return ans;
-    }
-}
-```
-
-## 求解方程（0640）
-
 > *求解一个给定的方程，将x以字符串"x=#value"的形式返回。该方程仅包含'+'，' - '操作，变量 x 和其对应系数。*
 >
 > *如果方程没有解，请返回“No solution”。*
@@ -3387,8 +3534,10 @@ class Solution {
 }
 ```
 
-## Dota2 参议院（0649）
+## Dota2 参议院
 
+> 649
+>
 > *Dota2 的世界里有两个阵营：Radiant(天辉)和 Dire(夜魇)*
 >
 > *Dota2 参议院由来自两派的参议员组成。现在参议院希望对一个 Dota2 游戏里的改变作出决定。他们以一个基于轮为过程的投票进行。在每一轮中，每一位参议员都可以行使两项权利中的一项：*
@@ -3429,94 +3578,10 @@ class Solution {
 }
 ```
 
-## 只有两个键的键盘（0650）
+## 24点游戏
 
-> *最初在一个记事本上只有一个字符 'A'。你每次可以对这个记事本进行两种操作：*
+> 679
 >
-> *Copy All (复制全部) : 你可以复制这个记事本中的所有字符(部分的复制是不允许的)。*
->
-> *Paste (粘贴) : 你可以粘贴你上一次复制的字符。*
->
-> *给定一个数字 n 。你需要使用最少的操作次数，在记事本中打印出恰好 n 个 'A'。输出能够打印出 n 个 'A' 的最少操作次数。*
-
-```java
-class Solution {
-    public int minSteps(int n) {
-        int ans = 0, d = 2;
-        while (n > 1) {
-            while (n % d == 0) {
-                ans += d;
-                n /= d;
-            }
-            d++;
-        }
-        return ans;
-    }
-}
-```
-
-## 非递减数列（0665）
-
-> *给你一个长度为 n 的整数数组，请你判断在 最多 改变 1 个元素的情况下，该数组能否变成一个非递减数列。*
->
-> *我们是这样定义一个非递减数列的： 对于数组中任意的 i (0 <= i <= n-2)，总满足 nums[i] <= nums[i + 1]。*
-
-```java
-class Solution {
-    public boolean checkPossibility(int[] nums) {
-        int n = nums.length;
-        int count = 0;
-        for (int i = 0; i < n - 1; i++) {
-            int x = nums[i], y = nums[i + 1];
-            if (x > y) {
-                count++;
-                if (count > 1) {return false;}
-                if (i > 0 && y < nums[i - 1]) {nums[i + 1] = x;}
-            }
-        }
-        return true;
-    }
-}
-```
-
-## 最大交换（0670）
-
-> *给定一个非负整数，你至多可以交换一次数字中的任意两位。返回你能得到的最大值。*
-
-```java
-class Solution {
-    public int maximumSwap(int num) {
-        String s = String.valueOf(num);
-        int n = s.length();
-        char[] charArray = s.toCharArray();
-
-        int[] last = new int[10];
-        for (int i = 0; i < n; i++) {
-            last[charArray[i] - '0'] = i;
-        }
-
-        for (int i = 0; i < n - 1; i++) {
-            for (int d = 9; d > charArray[i] - '0'; d--) {
-                if (last[d] > i) {
-                    swap(charArray, i, last[d]);
-                    return Integer.parseInt(new String(charArray));
-                }
-            }
-        }
-        
-        return num;
-    }
-
-    private static void swap(char[] charArray, int index1, int index2) {
-        char tmp = charArray[index1];
-        charArray[index1] = charArray[index2];
-        charArray[index2] = tmp;
-    }
-}
-```
-
-## 24点游戏（0679）
-
 > *你有 4 张写有 1 到 9 数字的牌。你需要判断是否能通过 \*，/，+，-，(，) 的运算得到 24。*
 
 ```java
@@ -3572,103 +3637,10 @@ class Solution {
 }
 ```
 
-## 验证IP地址
+## 账户合并
 
-> 编写一个函数来验证输入的字符串是否是有效的 IPv4 或 IPv6 地址。
+> 721
 >
-> 如果是有效的 IPv4 地址，返回 "IPv4" ；
-> 如果是有效的 IPv6 地址，返回 "IPv6" ；
-> 如果不是上述类型的 IP 地址，返回 "Neither" 。
-> IPv4 地址由十进制数和点来表示，每个地址包含 4 个十进制数，其范围为 0 - 255， 用(".")分割。比如，172.16.254.1；
->
-> 同时，IPv4 地址内的数不会以 0 开头。比如，地址 172.16.254.01 是不合法的。
->
-> IPv6 地址由 8 组 16 进制的数字来表示，每组表示 16 比特。这些组数字通过 (":")分割。比如,  2001:0db8:85a3:0000:0000:8a2e:0370:7334 是一个有效的地址。而且，我们可以加入一些以 0 开头的数字，字母可以使用大写，也可以是小写。所以， 2001:db8:85a3:0:0:8A2E:0370:7334 也是一个有效的 IPv6 address地址 (即，忽略 0 开头，忽略大小写)。
-
-```java
-class Solution {
-    public String validIPAddress(String IP) {
-        if (IP.chars().filter(c -> c == '.').count() == 3) {
-            return validateIPv4(IP);
-        }
-        else if (IP.chars().filter(c -> c == ':').count() == 7) {
-            return validateIPv6(IP);
-        }
-        return "Neither";
-    }
-
-    private static String validateIPv4(String IP) {
-        String[] nums = IP.split("\\.", -1);
-        for (String s : nums) {
-            if (s.length() == 0 || s.length() > 3 || (s.charAt(0) == '0' && s.length() != 1)) {return "Neither";}
-            for (char c : s.toCharArray()) {
-                if (!Character.isDigit(c)) {return "Neither";}
-            }
-            if (Integer.parseInt(s) > 255) {return "Neither";}
-        }
-        return "IPv4";
-    }
-
-    private static String validateIPv6(String IP) {
-        String[] nums = IP.split(":", -1);
-        String hexDigits = "0123456789abcdefABCDEF";
-        for (String s : nums) {
-            if (s.length() == 0 || s.length() > 4) {return "Neither";}
-            for (char c : s.toCharArray()) {
-                if (hexDigits.indexOf(c) == -1) {return "Neither";}
-            }
-        }
-        return "IPv6";
-    }
-}
-```
-
-## 掉落的方块（0699）
-
-> *在无限长的数轴（即 x 轴）上，我们根据给定的顺序放置对应的正方形方块。*
->
-> *第 i 个掉落的方块（positions[i] = (left, side_length)）是正方形，其中 left 表示该方块最左边的点位置(positions[i][0])，side_length 表示该方块的边长(positions[i][1])。*
->
-> *每个方块的底部边缘平行于数轴（即 x 轴），并且从一个比目前所有的落地方块更高的高度掉落而下。在上一个方块结束掉落，并保持静止后，才开始掉落新方块。*
->
-> *方块的底边具有非常大的粘性，并将保持固定在它们所接触的任何长度表面上（无论是数轴还是其他方块）。邻接掉落的边不会过早地粘合在一起，因为只有底边才具有粘性。*
->
-> *返回一个堆叠高度列表 ans 。每一个堆叠高度 ans[i] 表示在通过 positions[0], positions[1], ..., positions[i] 表示的方块掉落结束后，目前所有已经落稳的方块堆叠的最高高度。*
-
-```java
-class Solution {
-    public List<Integer> fallingSquares(int[][] positions) {
-        int n = positions.length;
-        int[] heights = new int[n];
-        for (int i = 0; i < n; i++) {
-            int left = positions[i][0];
-            int size = positions[i][1];
-            int right = left + size;
-            heights[i] += size;
-
-            for (int j = i + 1; j < n; j++) {
-                int left2 = positions[j][0];
-                int size2 = positions[j][1];
-                int right2 = left2 + size2;
-                if (left2 < right && left < right2) {
-                    heights[j] = Math.max(heights[j], heights[i]);
-                }
-            }
-        }
-
-        List<Integer> ans = new ArrayList<>();
-        int cur = -1;
-        for (int x : heights) {
-            cur = Math.max(cur, x);
-            ans.add(cur);
-        }
-        return ans;
-    }
-}
-```
-
-## 账户合并（0721）
-
 > *给定一个列表 accounts，每个元素 accounts[i] 是一个字符串列表，其中第一个元素 accounts[i][0] 是 名称 (name)，其余元素是 emails 表示该账户的邮箱地址。*
 >
 > *现在，我们想合并这些账户。如果两个账户都有一些共同的邮箱地址，则两个账户必定属于同一个人。请注意，即使两个账户具有相同的名称，它们也可能属于不同的人，因为人们可能具有相同的名称。一个人最初可以拥有任意数量的账户，但其所有账户都具有相同的名称。*
@@ -3745,89 +3717,3 @@ class UnionFind {
     }
 }
 ```
-
-## 单调递增的数字（0738）
-
-> *给定一个非负整数 N，找出小于或等于 N 的最大的整数，同时这个整数需要满足其各个位数上的数字是单调递增。*
->
-> *（当且仅当每个相邻位数上的数字 x 和 y 满足 x <= y 时，我们称这个整数是单调递增的。）*
-
-```java
-class Solution {
-    public int monotoneIncreasingDigits(int n) {
-        char[] nums = Integer.toString(n).toCharArray();
-        int idx = 1;
-        while (idx < nums.length && nums[idx - 1] <= nums[idx]) {idx += 1;}
-
-        if (idx < nums.length) {
-            while (idx > 0 && nums[idx - 1] > nums[idx]) {
-                nums[idx - 1] -= 1;
-                idx -= 1;
-            }
-            idx += 1;
-            while (idx < nums.length) {
-                nums[idx] = '9';
-                idx++;
-            }
-        }
-
-        return Integer.parseInt(new String(nums));
-    }
-}
-```
-
-## 最多能完成排序的块
-
-> *数组arr是[0, 1, ..., arr.length - 1]的一种排列，我们将这个数组分割成几个“块”，并将这些块分别进行排序。之后再连接起来，使得连接的结果和按升序排序后的原数组相同。*
->
-> *我们最多能将数组分成多少块？*
-
-```java
-// 如果当前下标i(含)之前的最大值为i，则说明可以切一刀；否则前半部分有大于i的元素，后半部分有小于i的元素，必不满足题意
-class Solution {
-    public int maxChunksToSorted(int[] arr) {
-        int ans = 0, max = 0;
-        for (int i = 0; i < arr.length; ++i) {
-            max = Math.max(max, arr[i]);
-            if (max == i) {ans++;}
-        }
-        return ans;
-    }
-}
-```
-
-> *这个问题和“最多能完成排序的块”相似，但给定数组中的元素可以重复，输入数组最大长度为2000，其中的元素最大为10**8。*
->
-> *arr是一个可能包含重复元素的整数数组，我们将这个数组分割成几个“块”，并将这些块分别进行排序。之后再连接起来，使得连接的结果和按升序排序后的原数组相同。*
->
-> *我们最多能将数组分成多少块？*
-
-```java
-// 滑动窗口
-class Solution {
-    public int maxChunksToSorted(int[] arr) {
-        Map<Integer, Integer> count = new HashMap<>();
-        int ans = 0, nonzero = 0;
-
-        int[] arr2 = arr.clone();
-        Arrays.sort(arr2);
-
-        for (int i = 0; i < arr.length; i++) {
-            int x = arr[i], y = arr2[i];
-
-            count.put(x, count.getOrDefault(x, 0) + 1);
-            if (count.get(x) == 0) {nonzero--;}
-            if (count.get(x) == 1) {nonzero++;}
-
-            count.put(y, count.getOrDefault(y, 0) - 1);
-            if (count.get(y) == -1) {nonzero++;}
-            if (count.get(y) == 0) {nonzero--;}
-
-            if (nonzero == 0) {ans++;} 
-        }
-
-        return ans;
-    }
-}
-```
-
