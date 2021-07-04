@@ -766,6 +766,7 @@ class Solution {
         int m = s.length(), n = t.length();
         if (m < n) {return 0;}
 
+        // dp[i][j]表示在s[i:]的子序列中t[j:]出现的个数
         int[][] dp = new int[m + 1][n + 1];
         for (int i = 0; i <= m; i++) {dp[i][n] = 1;}
 
