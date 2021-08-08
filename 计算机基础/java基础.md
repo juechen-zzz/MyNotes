@@ -1410,13 +1410,15 @@ public int hashCode() {
 **创建方式**
 
 - 通过构造⽅法实现`ThreadPoolExecutor`
-- `ThreadPoolExecutor`实现的顶层接口是`Executor`，顶层接口`Executor`提供了一种思想：将任务提交和任务执行进行解耦。用户无需关注如何创建线程，如何调度线程来执行任务，用户只需提供Runnable对象，将任务的运行逻辑提交到执行器(Executor)中，由Executor框架完成线程的调配和任务的执行部分。
+- `ThreadPoolExecutor`实现的顶层接口是`Executor`，顶层接口`Executor`提供了一种思想：**将任务提交和任务执行进行解耦**。用户无需关注如何创建线程，如何调度线程来执行任务，用户只需提供Runnable对象，将任务的运行逻辑提交到执行器(Executor)中，由Executor框架完成线程的调配和任务的执行部分。
 - `ExecutorService`接口增加了一些能力：
 	- 扩充执行任务的能力，补充可以为一个或一批异步任务生成Future的方法；
 	- 提供了管控线程池的方法，比如停止线程池的运行。
 - `AbstractExecutorService`则是上层的抽象类，将执行任务的流程串联了起来，保证下层的实现只需关注一个执行任务的方法即可。
 - 最下层的实现类ThreadPoolExecutor实现最复杂的运行部分，ThreadPoolExecutor将会一方面维护自身的生命周期，另一方面同时管理线程和任务，使两者良好的结合从而执行并行任务。
-- 线程池在内部实际上构建了一个生产者消费者模型，将线程和任务两者解耦，并不直接关联，从而良好的缓冲任务，复用线程。线程池的运行主要分成两部分：任务管理、线程管理。任务管理部分充当生产者的角色，当任务提交后，线程池会判断该任务后续的流转：（1）直接申请线程执行该任务；（2）缓冲到队列中等待线程执行；（3）拒绝该任务。线程管理部分是消费者，它们被统一维护在线程池内，根据任务请求进行线程的分配，当线程执行完任务后则会继续获取新的任务去执行，最终当线程获取不到任务的时候，线程就会被回收。
+- 线程池在内部实际上构建了一个生产者消费者模型，将线程和任务两者解耦，并不直接关联，从而良好的缓冲任务，复用线程。
+	        线程池的运行主要分成两部分：任务管理、线程管理。
+	        任务管理部分充当生产者的角色，当任务提交后，线程池会判断该任务后续的流转：（1）直接申请线程执行该任务；（2）缓冲到队列中等待线程执行；（3）拒绝该任务。线程管理部分是消费者，它们被统一维护在线程池内，根据任务请求进行线程的分配，当线程执行完任务后则会继续获取新的任务去执行，最终当线程获取不到任务的时候，线程就会被回收。
 
 **创建线程池七大参数**
 
@@ -1526,7 +1528,7 @@ public int hashCode() {
 	    public static void main(String[] args) {
 	        testThread2 myRunnable = new testThread2();
 	        Thread t = new Thread(myRunnable);
-        t.start();
+          t.start();
 	        System.out.println("over");
 	    }
 	}
@@ -1541,13 +1543,13 @@ public int hashCode() {
 	
 	* 创建目标对象
 	
-	* 创建执行任务 ExecutorService ser = Executors.newFixedThreadPool(1);
+	* 创建执行任务 `ExecutorService ser = Executors.newFixedThreadPool(1)`
 	
-	* 提交执行：Future<Boolean> result1 = ser.submit(1);
+	* 提交执行：`Future<Boolean> result1 = ser.submit(1)`
 	
-	* 获取结果：boolean r1 = result1.get();
+	* 获取结果：`boolean r1 = result1.get()`
 	
-	* 关闭服务：ser.shutdownNow();
+	* 关闭服务：`ser.shutdownNow()`
 	
 	* ```java
 		public class testThread3 implements Callable<String> {
@@ -1595,7 +1597,9 @@ public int hashCode() {
 - 释放锁：sleep() 不释放锁；wait() 释放锁。
 - wait只能在同步（synchronize）环境中被调用，而sleep不需要
 - wait通常有条件地执行，线程会一直处于wait状态，直到某个条件变为真。但是sleep仅仅让你的线程进入睡眠状态。
-- 用法不同：wait() ⽅法被调⽤后，线程不会⾃动苏醒，需要别的线程调⽤同⼀个对象上的notify或者 notifyAll() ⽅法。 sleep() ⽅法执⾏完成后，线程会⾃动苏醒。或者可以使⽤ timeout) 超时后线程会⾃动苏醒。
+- 用法不同：
+	- wait() ⽅法被调⽤后，线程不会⾃动苏醒，需要别的线程调⽤同⼀个对象上的notify或者 notifyAll() ⽅法。 
+	- sleep() ⽅法执⾏完成后，线程会⾃动苏醒。或者可以使⽤ timeout) 超时后线程会⾃动苏醒。
 
 **notify()和 notifyAll()有什么区别？**
 
@@ -1631,7 +1635,7 @@ public int hashCode() {
 
 
 
-### 8.4 知道ThreadLocal嘛？谈谈你对它的理解？（基于jdk1.8）
+### 8.4 对于ThreadLocal的理解？（基于jdk1.8）
 
 **ThreadLocal是用在多线程的场景的！**
 
@@ -1695,7 +1699,7 @@ public int hashCode() {
 
 ### 9.4 AQS（抽象队列同步器）
 
->  Java中的大部分同步类（Lock、Semaphore、ReentrantLock等）都是基于AbstractQueuedSynchronizer（简称为AQS）实现的。
+>  Java中的大部分**同步类（Lock、Semaphore、ReentrantLock等）**都是基于AbstractQueuedSynchronizer（简称为AQS）实现的。
 >
 >  * AQS主要利用硬件原语指令(CAS compare-and-swap)，来实现**轻量级多线程同步机制**，并且不会引起CPU上文切换和调度，同时提供内存可见性和原子化更新保证(线程安全的三要素：原子性、可见性、顺序性)。
 >  * AQS**核心思想**：如果被请求的共享资源空闲，那么就将当前请求资源的线程设置为有效的工作线程，将共享资源设置为锁定状态；如果共享资源被占用，就需要一定的阻塞等待唤醒机制来保证锁分配。这个机制主要用的是CLH队列的变体实现的，将暂时获取不到锁的线程加入到队列中。
