@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @description: Stream流 测试Demo-01
+ * @description: Stream流 测试Demo-01 排序
  * @author: Komorebi
  * @time: 2021/8/31 16:47
  */
@@ -50,7 +50,7 @@ public class StreamDemo01 {
 
         // 排序
         // categoryList.stream().sorted(((o1, o2) -> o1.getSort() - o2.getSort())).collect(Collectors.toList());
-        List<Category> ans = categoryList.stream().sorted(new Comparator<Category>() {
+        categoryList = categoryList.stream().sorted(new Comparator<Category>() {
             @Override
             public int compare(Category o1, Category o2) {
                 return o1.getSort() - o2.getSort();
@@ -58,7 +58,7 @@ public class StreamDemo01 {
         }).collect(Collectors.toList());
 
         // 打印
-        ans.forEach(System.out::println);
+        categoryList.forEach(System.out::println);
     }
 }
 ```
@@ -89,10 +89,10 @@ public class StreamDemo02 {
         categoryList.add(new Category(6L, "Ruby", "Ruby", 0L, 4));
 
         // 过滤
-        List<Category> ans = categoryList.stream().filter(category -> category.getId().equals(2L)).collect(Collectors.toList());
+        categoryList = categoryList.stream().filter(category -> category.getId().equals(2L)).collect(Collectors.toList());
 
         // 打印
-        ans.forEach(System.out::println);
+        categoryList.forEach(System.out::println);
     }
 }
 ```
@@ -123,13 +123,50 @@ public class StreamDemo03 {
         categoryList.add(new Category(6L, "Ruby", "Ruby", 0L, 4));
 
         // Map改变集合中每个元素的信息
-        List<Category> ans = categoryList.stream().map(category -> {
+        categoryList = categoryList.stream().map(category -> {
             category.setSubTitle(category.getSubTitle().concat("_Test"));
             return category;
         }).collect(Collectors.toList());
 
         // 打印
-        ans.forEach(System.out::println);
+        categoryList.forEach(System.out::println);
+    }
+}
+```
+
+### 1.4 去重-distinct
+
+* **去重要求必须有hashCode相同，且equals返回true**
+
+### 1.5 极值-max
+
+```java
+package stream;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * @description: Stream流 测试Demo-04 Max、Min
+ * @author: Komorebi
+ * @time: 2021/9/10 09:54
+ */
+public class StreamDemo04 {
+    public static void main(String[] args) {
+        // 1 创建一个Category集合
+        List<Category> categoryList = new ArrayList<>();
+        categoryList.add(new Category(1L, "Java", "java", 0L, 1));
+        categoryList.add(new Category(2L, "PHP", "PHP", 0L, 2));
+        categoryList.add(new Category(3L, "JavaScript", "JavaScript", 0L, 3));
+        categoryList.add(new Category(4L, "Python", "Python", 0L, 10));
+        categoryList.add(new Category(5L, "Go", "Go", 0L, 8));
+        categoryList.add(new Category(6L, "Ruby", "Ruby", 0L, 4));
+
+        // max
+        Optional<Category> optionalCategory = categoryList.stream().max((Comparator.comparingInt(Category::getSort)));
+        optionalCategory.ifPresent(System.out::println);
     }
 }
 ```
