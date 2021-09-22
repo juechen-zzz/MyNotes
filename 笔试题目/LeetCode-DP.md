@@ -185,8 +185,8 @@ class Solution {
     public int findNumberOfLIS(int[] nums) {
         int n = nums.length;
         if (n <= 1) {return n;}
-        int[] length = new int[n];
-        int[] count = new int[n];
+        int[] length = new int[n];			// 记录当前数为结尾的最长子序列长度
+        int[] count = new int[n];			// 记录当前数为结尾的最长子序列个数
         Arrays.fill(count, 1);
 
         for (int j = 0; j < n; j++) {

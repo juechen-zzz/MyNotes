@@ -17,27 +17,22 @@
 ```java
 class Solution {
     public boolean isValidSudoku(char[][] board) {
-        Map<Integer, Integer>[] row = new HashMap[9];
-        Map<Integer, Integer>[] col = new HashMap[9];
-        Map<Integer, Integer>[] box = new HashMap[9];
-        for (int i = 0; i < 9; i++) {
-            row[i] = new HashMap<Integer, Integer>();
-            col[i] = new HashMap<Integer, Integer>();
-            box[i] = new HashMap<Integer, Integer>();
-        }
+        int[][] row = new int[9][9];
+        int[][] col = new int[9][9];
+        int[][] box = new int[9][9];
 
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
                 char num = board[i][j];
                 if (num != '.') {
-                    int n = (int)num;
+                    int n = num - '0' - 1;
                     int boxIndex = (i / 3) * 3 + j / 3;
 
-                    row[i].put(n, row[i].getOrDefault(n, 0) + 1);
-                    col[j].put(n, col[j].getOrDefault(n, 0) + 1);
-                    box[boxIndex].put(n, box[boxIndex].getOrDefault(n, 0) + 1);
+                    row[i][n]++;
+                    col[j][n]++;
+                    box[boxIndex][n]++;
 
-                    if (row[i].get(n) > 1 || col[j].get(n) > 1 || box[boxIndex].get(n) > 1) {return false;}
+                    if (row[i][n] > 1 || col[j][n] > 1 || box[boxIndex][n] > 1) {return false;}
                 }
             }
         }

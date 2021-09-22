@@ -1,3 +1,7 @@
+[TOC]
+
+
+
 # Stream
 
 > JDK1.8的新特性，结合Lambda表达式可以提高开发效率
@@ -169,5 +173,22 @@ public class StreamDemo04 {
         optionalCategory.ifPresent(System.out::println);
     }
 }
+```
+
+
+
+## 2 Arrays.stream
+
+> https://blog.csdn.net/mu_wind/article/details/109516995
+
+![image-20210912143931000](../images/image-20210912143931000.png)
+
+### 2.1 min、max、sum
+
+```java
+int[] nums = new int[]{1, 2, 3, 4, 5, 6, 7, 8};
+int min = Arrays.stream(nums).min().getAsInt();
+int max = Arrays.stream(nums).max().getAsInt();
+int sum = Arrays.stream(nums).sum();
 ```
 
