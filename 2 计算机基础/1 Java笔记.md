@@ -168,7 +168,7 @@ b = (a == 10) ? 20 : 30;
 
 		- 创建线程对象，调用**start()**方法启动线程
 
-		- ```
+		- ```java
 			 public class StartThread1 extends Thread {
 			     // 线程入口点
 			     @Override
@@ -189,7 +189,7 @@ b = (a == 10) ? 20 : 30;
 
 		- 创建线程对象，调用**start()**方法启动线程
 
-		- ```
+		- ```java
 			 public class StartThread3 implements Runnable{
 			     @Override
 			     public void run(){
@@ -226,7 +226,7 @@ b = (a == 10) ? 20 : 30;
 	- 任何接口，如果只包含唯一一个抽象方法，那就是一个**函数式接口**
 	- 对于函数式接口，可以通过lambda表达式来创建该接口的对象
 
-```
+```java
  /*
      推导lambda表达式
   */
@@ -333,13 +333,13 @@ b = (a == 10) ? 20 : 30;
 
 	- 优先级用数字表示，范围从**1~10**
 
-		- ```
+		- ```java
 			 Thread.MIN_PRIORITY = 1;
 			```
 
 	- 改变或者获取优先级
 
-		- ```
+		- ```java
 			 getPriority()       setPriority(int xxx)    
 			```
 
@@ -370,7 +370,7 @@ b = (a == 10) ? 20 : 30;
 
 	- 通过private关键字来保证数据对象只能被方法访问，所以只需要针对方法提出一套机制(**synchronized**)，它包括两种用法：synchronized方法和synchronized块
 
-	```
+	```java
 	 public synchronized void method(int args) {}
 	```
 
@@ -473,7 +473,7 @@ b = (a == 10) ? 20 : 30;
 	- 静态语言是运行时结构不可变的（Java、C、C++），Java具有一定的动态性，可以利用**反射机制**获得类似动态语言的特性
 - Reflection是Java被视为动态语言的关键，反射机制允许程序在执行期借助于Reflection API取得任何类的**内部信息**，并能**直接操作**任意对象的内部属性及方法
 
-```
+```java
  Class c = Class.forName("java.lang.String")
 ```
 
@@ -510,15 +510,15 @@ b = (a == 10) ? 20 : 30;
 
 	- **获取Class类实例**
 
-		- ```
+		- ```java
 			 Class c = Person.class  
 			```
 
-		- ```
+		- ```java
 			 Class c = person.getClass()
 			```
 
-		- ```
+		- ```java
 			 Class c = Class.forname("demo01.Person")
 			```
 
@@ -582,7 +582,7 @@ b = (a == 10) ? 20 : 30;
 
 			- 3）通过Constructor实例化对象
 
-			- ```
+			- ```java
 				 // 通过反射动态创建对象
 				 public class Test07 {
 				     public static void main(String[] args) throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException, NoSuchFieldException {
