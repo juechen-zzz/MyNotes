@@ -21,42 +21,22 @@ class Solution {
 
         for (int i = n - 1; i >= 0; i--) {
             for (int j = i; j < n; j++) {
-                if (i == j) {dp[i][j] = true;}
-                else if (j - i == 1) {dp[i][j] = (cur[i] == cur[j]);}
+                if (i == j) {
+                    dp[i][j] = true;
+                }
+                else if (j - i == 1) {
+                    dp[i][j] = (cur[i] == cur[j]);
+                }
                 else {
                     dp[i][j] = (dp[i + 1][j - 1] && (cur[i] == cur[j]));
                 }
 
-                if (dp[i][j] && (j - i + 1 >= ans.length())) {
+                if (dp[i][j] && j - i + 1 >= ans.length()) {
                     ans = s.substring(i, j + 1);
                 }
             }
         }
 
-        return ans;
-    }
-}
-
-// 中心扩散
-class Solution {
-    public String longestPalindrome(String s) {
-        String ans = "";
-        int idx = 0;
-        while (idx < s.length()) {
-            int left = idx, right = idx;
-            while (left - 1 >= 0 && s.charAt(left) == s.charAt(left - 1)){left--;}
-            while (right + 1 < s.length() && s.charAt(right) == s.charAt(right + 1)) {right++;}
-            
-            idx = right + 1;
-            while (left >= 0 && right < s.length() && s.charAt(left) == s.charAt(right)){
-                left--;
-                right++;
-            }
-
-            if (right - left - 1 > ans.length()) {
-                ans = s.substring(left + 1, right);
-            }
-        }
         return ans;
     }
 }
@@ -579,30 +559,33 @@ class Solution {
 ```java
 class Solution {
     public boolean isMatch(String s, String p) {
-        //初始化dp[0][0]=true,dp[0][1]和dp[1][0]~dp[s.length][0]默认值为false所以不需要显式初始化
-        //填写第一行dp[0][2]~dp[0][p.length]
         int m = s.length(), n = p.length();
         boolean[][] dp = new boolean[m + 1][n + 1];
         dp[0][0] = true;
-        for (int k = 2; k <= p.length(); k++){
-            dp[0][k] = (p.charAt(k - 1) == '*' && dp[0][k-2]);
+
+        // 当为*时，可以匹配*之前的字符0次，也就是每次多余两个字符
+        for (int k = 2; k <= n; k++) {
+            dp[0][k] = dp[0][k - 2] && (p.charAt(k - 1) == '*');
         }
 
-        for (int i = 0; i < m; i++){
-            for (int j = 0; j < n; j++){
-                if (p.charAt(j) == '*'){
-                    // 1.只匹配0次，s不变[i+1], p移除两个元素[j+1-2]。
-                    // 2.比较s的i元素和p的j-1(因为此时j元素为*)元素,相等则移除首元素[i+1-1],p不变。
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (p.charAt(j) == '*') {
+                  	// 1 匹配0次时，直接等于p删两个字符 dp[i + 1][j - 1]
+                    // 2 匹配多次时，等于在s的最后加上一个p中*前面的字符，所以比较s[i]和p[j-1]，同时dp[i][j + 1]
                     dp[i + 1][j + 1] = (dp[i + 1][j - 1] || (dp[i][j + 1] && headMatched(s, p, i, j - 1)));
-                }else {
-                    dp[i + 1][j + 1] =  (dp[i][j] && headMatched(s, p, i, j));
+                }
+                else {
+                    dp[i + 1][j + 1] = (dp[i][j] && headMatched(s, p, i, j));
                 }
             }
         }
+
         return dp[m][n];
     }
+
     //判断s第i个字符和p第j个字符是否匹配
-    public boolean headMatched(String s,String p,int i,int j){
+    private boolean headMatched(String s, String p, int i, int j){
         return (s.charAt(i) == p.charAt(j) || p.charAt(j) == '.');
     }
 }
