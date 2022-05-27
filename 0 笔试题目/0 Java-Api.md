@@ -129,6 +129,8 @@ private static void sortMap(Map<Integer, Integer> map) {
         System.out.println(curList.get(i).getKey() + "--" + curList.get(i).getValue());
     }
 }
+
+// map 也可以用equals
 ```
 
 # 4 ArrayList + LinkedList

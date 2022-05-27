@@ -31,7 +31,7 @@ class Solution {
                     dp[i][j] = (dp[i + 1][j - 1] && (cur[i] == cur[j]));
                 }
 
-                if (dp[i][j] && j - i + 1 >= ans.length()) {
+                if (dp[i][j] && j - i + 1 > ans.length()) {
                     ans = s.substring(i, j + 1);
                 }
             }
