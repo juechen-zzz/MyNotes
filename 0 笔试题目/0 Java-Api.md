@@ -95,7 +95,7 @@ return (nums1 & nums2) != 0;
 ```java
 // 遍历 1
 for (Map.Entry<Integer, Integer> entry : countMap.entrySet()) {
-	int num = entry.getKey();
+	  int num = entry.getKey();
     int count = entry.getValue();
 }
 
@@ -112,7 +112,7 @@ private static void sortMap(Map<Integer, Integer> map) {
     curList.sort((o1, o2) -> o2.getKey().compareTo(o1.getKey()));
     // 按value升序
     curList.sort(Map.Entry.comparingByValue());
-    // 按value升序
+    // 按value降序
     curList.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
 
     // 完整展开形式，value相同时，默认key升序
